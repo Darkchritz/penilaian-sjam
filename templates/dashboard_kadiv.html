@@ -3,39 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Kadiv | SJA</title>
+    <title>Dashboard Kadiv | SJAM</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap'); body { font-family: 'Poppins', sans-serif; }</style>
 </head>
 <body class="bg-gray-50 min-h-screen">
-    <nav class="bg-white shadow-sm border-b">
+    <nav class="bg-white shadow-sm border-b sticky top-0 z-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
-                <h1 class="text-xl font-bold text-indigo-600">SJA Penilaian</h1>
+                <h1 class="text-xl font-bold text-indigo-600">SJAM Penilaian</h1>
                 <div class="flex items-center gap-4">
-                    <span class="text-gray-700">Hi, {{ user.nama }}</span>
+                    <span class="text-gray-700">Kadiv {{ user.divisi }}</span>
                     <a href="/logout" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition">Logout</a>
                 </div>
             </div>
         </div>
     </nav>
 
-    <main class="max-w-7xl mx-auto p-6">
+    <main class="max-w-5xl mx-auto p-4 sm:p-6">
         <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-            <h2 class="text-2xl font-bold text-gray-800 mb-2">Dashboard Kepala Divisi</h2>
-            <p class="text-gray-500">Divisi: {{ user.divisi }}</p>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">Input Penilaian Karyawan</h2>
+            <p class="text-gray-500">Divisi: {{ user.divisi }} | {{ user.nama }}</p>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm p-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">Form Finalisasi Penilaian</h3>
-            <form action="/finalisasi" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input name="npk" placeholder="NPK Karyawan" class="px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500" required>
-                <input name="periode" placeholder="Periode: 2026-Q1" class="px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500" required>
-                <input name="nilai_akhir" type="number" step="0.01" placeholder="Nilai Akhir 0-100" class="px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500" required>
-                <input name="keterangan" placeholder="Keterangan" class="px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500">
-                <button type="submit" class="md:col-span-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition">Finalisasi Nilai</button>
-            </form>
-        </div>
+        <form action="/finalisasi" method="POST" class="bg-white rounded-xl shadow-sm p-6 space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Pilih Karyawan</label>
+                    <select name="npk_karyawan" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500">
+                        <option value="">-- Pilih Karyawan --</option>
+                        {% for k in karyawan %}
+                        <option value="{{ k[0] }}">{{ k[1] }} - {{ k[0] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Periode</label>
+                    <select name="periode" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500">
+                        <option value="2026-Q1">Q1 2026</option>
+                        <option value="2026-Q2">Q2 2026</option>
+                        <option value="2026-Q3">Q3 2026</option>
+                        <option value="2026-Q4">Q4 2026</option>
+                    </select>
+                </div>
+            </div>
+
+            {% for aspek, data in indikator.items() %}
+            <div class="border rounded-lg p-4">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-lg font-semibold text-gray-800">{{ aspek }}</h3>
+                    <span class="text-sm font-medium bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full">Bobot {{ data.bobot }}%</span>
+                </div>
+                <div class="space-y-3">
+                    {% for i in range(data['items']|length) %}
+                    <div class="flex items-center justify-between">
+                        <label class="text-sm text-gray-700">{{ loop.index }}. {{ data['items'][i] }}</label>
+                        <select name="{{ aspek }}_{{ i }}" class="px-3 py-2 rounded border border-gray-300 focus:ring-2 focus:ring-indigo-500" required>
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4" selected>4</option>
+                        </select>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+
+            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-4 rounded-lg transition text-lg shadow-md hover:shadow-lg">
+                Hitung & Finalisasi Nilai
+            </button>
+        </form>
     </main>
 </body>
 </html>
