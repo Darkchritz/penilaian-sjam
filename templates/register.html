@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | Penilaian Kinerja SJAM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap'); body { font-family: 'Poppins', sans-serif; }</style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">Registrasi Akun</h1>
+            <p class="text-gray-500 mt-2">Penilaian Kinerja SJAM</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="mb-4 p-3 rounded-lg text-sm {% if category == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form method="POST" class="space-y-4">
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">NPK</label>
+                <input name="npk" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500" placeholder="Masukkan NPK">
+            </div>
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                <input name="nama" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500" placeholder="Masukkan nama">
+            </div>
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                <input type="password" name="password" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500" placeholder="Buat password">
+            </div>
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">Divisi</label>
+                <input name="divisi" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500" placeholder="Contoh: IT, HRD, Finance">
+            </div>
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">Cabang</label>
+                <input name="cabang" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500" placeholder="Contoh: Makassar, Jakarta">
+            </div>
+            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition">Daftar</button>
+        </form>
+        <div class="text-center mt-6">
+            <p class="text-sm text-gray-600">Sudah punya akun? <a href="/" class="text-indigo-600 hover:text-indigo-800 font-semibold">Login disini</a></p>
+        </div>
+    </div>
+</body>
+</html>
