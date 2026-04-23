@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, session, send_file
 import sqlite3, pandas as pd
 from werkzeug.security import generate_password_hash, check_password_hash
 import gspread, os, json
-from oauth2client.service_account import ServiceAccountCredentials
+from google.oauth2.service_account import Credentials
 from io import BytesIO
 from datetime import datetime
 
@@ -24,7 +24,6 @@ def init_db():
     c.execute('''CREATE TABLE IF NOT EXISTS hasil_akhir 
                  (id INTEGER PRIMARY KEY, npk TEXT, periode TEXT, nilai_akhir REAL, 
                   grade TEXT, keterangan TEXT, status TEXT, tgl_finalisasi TEXT)''')
-    # User default
     users = [
         ('KD001', generate_password_hash('123'), 'Budi Kadiv', 'kadiv', 'Operasional'),
         ('K001', generate_password_hash('123'), 'Ani Staff', 'karyawan', 'Operasional'),
@@ -35,12 +34,12 @@ def init_db():
     conn.close()
 
 def get_gsheet():
-    scope = ['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive']
+    scopes = ['https://www.googleapis.com/auth/spreadsheets','https://www.googleapis.com/auth/drive']
     if 'CREDS_JSON' in os.environ:
         creds_dict = json.loads(os.environ['CREDS_JSON'])
-        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+        creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
     else:
-        creds = ServiceAccountCredentials.from_json_keyfile_name('creds.json', scope)
+        creds = Credentials.from_service_account_file('creds.json', scopes=scopes)
     client = gspread.authorize(creds)
     return client.open(SHEET_NAME).sheet1
 
@@ -84,11 +83,11 @@ def finalisasi():
                   'Final', datetime.now().strftime("%Y-%m-%d %H:%M")))
     conn.commit()
     conn.close()
-    # Push ke GSheet
     try:
         sheet = get_gsheet()
         sheet.append_row([data['npk'], data['periode'], nilai_akhir, grade, data['keterangan'], 'Final'])
-    except: pass
+    except Exception as e:
+        print("GSheet error:", e)
     return redirect('/dashboard_kadiv')
 
 @app.route('/dashboard_hrd')
