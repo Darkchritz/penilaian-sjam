@@ -123,10 +123,10 @@ def dashboard():
         return render_template('dashboard_kadiv.html', user=user, karyawan=karyawan, indikator=INDIKATOR)
 
     elif user['role'] == 'hrd':
-        c.execute("SELECT p.*, u.nama, u.divisi FROM penilaian p JOIN users u ON p.npk=u.npk ORDER BY p.tgl_finalisasi DESC")
-        data = [{'npk':r[1],'periode':r[2],'nilai_akhir':r[3],'grade':r[4],'tgl_finalisasi':r[6],'nama':r[7],'divisi':r[8]} for r in c.fetchall()]
-        conn.close()
-        return render_template('dashboard_hrd.html', data=data)
+    c.execute("SELECT p.*, u.nama, u.divisi FROM penilaian p JOIN users u ON p.npk=u.npk ORDER BY p.tgl_finalisasi DESC")
+    data = [{'npk':r[1],'periode':r[2],'nilai_akhir':r[3],'grade':r[4],'tgl_finalisasi':r[6],'nama':r[7],'divisi':r[8],'detail':json.loads(r[5])} for r in c.fetchall()]
+    conn.close()
+    return render_template('dashboard_hrd.html', data=data)
 
     else: # karyawan
         c.execute("SELECT * FROM penilaian WHERE npk=? ORDER BY periode DESC", (user['npk'],))
