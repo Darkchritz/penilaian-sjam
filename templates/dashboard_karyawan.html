@@ -1,26 +1,43 @@
 <!DOCTYPE html>
 <html lang="id">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard Karyawan | SJA</title><script src="https://cdn.tailwindcss.com"></script>
+<title>Dashboard Karyawan | SJAM</title><script src="https://cdn.tailwindcss.com"></script>
 <style>@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap'); body { font-family: 'Poppins', sans-serif; }</style>
 </head><body class="bg-gray-50 min-h-screen">
-<nav class="bg-white shadow-sm border-b"><div class="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
-<h1 class="text-xl font-bold text-indigo-600">SJA Penilaian</h1>
+<nav class="bg-white shadow-sm border-b sticky top-0"><div class="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
+<h1 class="text-xl font-bold text-indigo-600">SJAM Penilaian</h1>
 <div class="flex items-center gap-4"><span class="text-gray-700">{{ user.nama }}</span>
 <a href="/logout" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm">Logout</a></div></div></nav>
-<main class="max-w-4xl mx-auto p-6">
+<main class="max-w-4xl mx-auto p-4 sm:p-6">
 <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-<h2 class="text-2xl font-bold text-gray-800">Riwayat Penilaian</h2>
+<h2 class="text-2xl font-bold text-gray-800">Riwayat Penilaian Kinerja</h2>
 <p class="text-gray-500">NPK: {{ user.npk }} | Divisi: {{ user.divisi }}</p></div>
+
 <div class="space-y-4">
 {% for h in hasil %}
-<div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-indigo-500">
-<div class="flex justify-between items-start"><div>
-<h3 class="text-lg font-semibold text-gray-800">Periode {{ h.periode }}</h3>
-<p class="text-gray-500 text-sm">Finalisasi: {{ h.tgl_finalisasi }}</p></div>
+<div class="bg-white rounded-xl shadow-sm overflow-hidden">
+<div class="p-6 border-l-4 {% if h.grade in ['A+','A'] %}border-green-500{% elif h.grade in ['B+','B'] %}border-blue-500{% elif h.grade in ['C+','C'] %}border-yellow-500{% else %}border-red-500{% endif %}">
+<div class="flex justify-between items-start mb-4">
+<div><h3 class="text-lg font-semibold text-gray-800">Periode {{ h.periode }}</h3>
+<p class="text-gray-500 text-sm">Difinalisasi: {{ h.tgl_finalisasi }}</p></div>
 <div class="text-right"><div class="text-3xl font-bold text-indigo-600">{{ h.nilai_akhir }}</div>
-<span class="px-3 py-1 text-sm font-semibold rounded-full bg-indigo-100 text-indigo-800">Grade {{ h.grade }}</span></div></div>
-<p class="mt-4 text-gray-700">{{ h.keterangan }}</p></div>
+<span class="px-3 py-1 text-sm font-semibold rounded-full
+{% if h.grade in ['A+','A'] %}bg-green-100 text-green-800
+{% elif h.grade in ['B+','B'] %}bg-blue-100 text-blue-800
+{% elif h.grade in ['C+','C'] %}bg-yellow-100 text-yellow-800
+{% else %}bg-red-100 text-red-800{% endif %}">Grade {{ h.grade }}</span></div></div>
+
+<details class="group"><summary class="cursor-pointer text-indigo-600 hover:text-indigo-800 text-sm font-medium list-none">
+<span class="group-open:hidden">Lihat Rincian Aspek ▼</span>
+<span class="hidden group-open:inline">Sembunyikan ▲</span></summary>
+<div class="mt-4 space-y-2 pt-4 border-t">
+{% for aspek, skor in h.keterangan.items() %}
+<div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+<span class="text-sm text-gray-700">{{ aspek }}</span>
+<span class="font-semibold text-gray-900">{{ skor }}</span></div>
+{% endfor %}</div></details></div></div>
 {% else %}
-<div class="bg-white rounded-xl shadow-sm p-6 text-center text-gray-500">Belum ada data penilaian</div>
+<div class="bg-white rounded-xl shadow-sm p-8 text-center">
+<div class="text-gray-400 mb-2"><svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg></div>
+<p class="text-gray-500">Belum ada data penilaian</p></div>
 {% endfor %}</div></main></body></html>
