@@ -1,31 +1,67 @@
 <!DOCTYPE html>
 <html lang="id">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard HRD | SJA</title><script src="https://cdn.tailwindcss.com"></script>
+<title>Dashboard HRD | SJAM</title><script src="https://cdn.tailwindcss.com"></script>
 <style>@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap'); body { font-family: 'Poppins', sans-serif; }</style>
 </head><body class="bg-gray-50 min-h-screen">
-<nav class="bg-white shadow-sm border-b"><div class="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
-<h1 class="text-xl font-bold text-indigo-600">SJA Penilaian</h1>
+<nav class="bg-white shadow-sm border-b sticky top-0 z-10"><div class="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
+<h1 class="text-xl font-bold text-indigo-600">SJAM Penilaian</h1>
 <div class="flex items-center gap-4"><span class="text-gray-700">HRD Admin</span>
 <a href="/logout" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm">Logout</a></div></div></nav>
-<main class="max-w-7xl mx-auto p-6">
+<main class="max-w-7xl mx-auto p-4 sm:p-6">
 <div class="bg-white rounded-xl shadow-sm p-6 mb-6 flex justify-between items-center">
-<h2 class="text-2xl font-bold text-gray-800">Rekap Penilaian</h2>
+<div><h2 class="text-2xl font-bold text-gray-800">Rekap Penilaian Karyawan</h2>
+<p class="text-gray-500 text-sm mt-1">Klik Detail untuk melihat rincian per aspek</p></div>
 <a href="/export_excel" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium">Export Excel</a></div>
-<div class="bg-white rounded-xl shadow-sm overflow-hidden">
+
+<div class="bg-white rounded-xl shadow-sm overflow-x-auto">
 <table class="w-full"><thead class="bg-gray-50"><tr>
-<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">NPK</th>
-<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
-<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Divisi</th>
-<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Periode</th>
-<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nilai</th>
-<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Grade</th>
+<th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">NPK</th>
+<th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
+<th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Divisi</th>
+<th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Periode</th>
+<th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nilai</th>
+<th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Grade</th>
+<th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
 </tr></thead><tbody class="divide-y divide-gray-200">
 {% for row in data %}
-<tr class="hover:bg-gray-50"><td class="px-6 py-4 text-sm">{{ row.npk }}</td>
-<td class="px-6 py-4 text-sm font-medium">{{ row.nama }}</td>
-<td class="px-6 py-4 text-sm">{{ row.divisi }}</td>
-<td class="px-6 py-4 text-sm">{{ row.periode }}</td>
-<td class="px-6 py-4 text-sm font-semibold">{{ row.nilai_akhir }}</td>
-<td class="px-6 py-4"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800">{{ row.grade }}</span></td></tr>
-{% endfor %}</tbody></table></div></main></body></html>
+<tr class="hover:bg-gray-50"><td class="px-4 py-4 text-sm">{{ row.npk }}</td>
+<td class="px-4 py-4 text-sm font-medium">{{ row.nama }}</td>
+<td class="px-4 py-4 text-sm">{{ row.divisi }}</td>
+<td class="px-4 py-4 text-sm">{{ row.periode }}</td>
+<td class="px-4 py-4 text-sm font-bold text-indigo-600">{{ row.nilai_akhir }}</td>
+<td class="px-4 py-4"><span class="px-2 py-1 text-xs font-semibold rounded-full
+  {% if row.grade in ['A+','A'] %}bg-green-100 text-green-800
+  {% elif row.grade in ['B+','B'] %}bg-blue-100 text-blue-800
+  {% elif row.grade in ['C+','C'] %}bg-yellow-100 text-yellow-800
+  {% else %}bg-red-100 text-red-800{% endif %}">{{ row.grade }}</span></td>
+<td class="px-4 py-4"><button onclick="showDetail({{ loop.index0 }})" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">Detail</button></td></tr>
+{% endfor %}</tbody></table></div></main>
+
+<!-- Modal Detail -->
+<div id="detailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+<div class="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
+<div class="flex justify-between items-center mb-4">
+<h3 class="text-xl font-bold text-gray-800" id="modalTitle">Rincian Penilaian</h3>
+<button onclick="closeModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+</div><div id="modalContent" class="space-y-3"></div></div></div>
+
+<script>
+const penilaianData = {{ data|tojson }};
+function showDetail(index) {
+    const data = penilaianData[index];
+    document.getElementById('modalTitle').textContent = `Detail: ${data.nama} - ${data.periode}`;
+    let html = `<div class="grid grid-cols-2 gap-4 mb-4 p-4 bg-indigo-50 rounded-lg">
+        <div><p class="text-sm text-gray-600">Nilai Akhir</p><p class="text-2xl font-bold text-indigo-600">${data.nilai_akhir}</p></div>
+        <div><p class="text-sm text-gray-600">Grade</p><p class="text-2xl font-bold text-indigo-600">${data.grade}</p></div></div>`;
+    html += '<h4 class="font-semibold text-gray-800 mb-2">Skor Per Aspek:</h4>';
+    for (const [aspek, skor] of Object.entries(data.detail)) {
+        html += `<div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+            <span class="text-sm text-gray-700">${aspek}</span>
+            <span class="font-semibold text-gray-900">${skor}</span></div>`;
+    }
+    document.getElementById('modalContent').innerHTML = html;
+    document.getElementById('detailModal').classList.remove('hidden');
+}
+function closeModal() { document.getElementById('detailModal').classList.add('hidden'); }
+</script></body></html>
