@@ -48,11 +48,20 @@ def hitung_nilai(form_data):
 def init_db():
     conn = sqlite3.connect('penilaian.db')
     c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS users
-                 (npk TEXT PRIMARY KEY, nama TEXT, password TEXT, role TEXT, divisi TEXT, cabang TEXT)''')
+    # Cek kolom users dulu
+    c.execute("PRAGMA table_info(users)")
+    columns = [row[1] for row in c.fetchall()]
+
+    if 'users' not in [t[0] for t in c.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()]:
+        c.execute('''CREATE TABLE users
+                     (npk TEXT PRIMARY KEY, nama TEXT, password TEXT, role TEXT, divisi TEXT, cabang TEXT)''')
+    elif 'cabang' not in columns:
+        c.execute("ALTER TABLE users ADD COLUMN cabang TEXT DEFAULT 'Jakarta'")
+
     c.execute('''CREATE TABLE IF NOT EXISTS penilaian
                  (id INTEGER PRIMARY KEY AUTOINCREMENT, npk TEXT, periode TEXT,
                   nilai_akhir REAL, grade TEXT, detail_json TEXT, tgl_finalisasi TEXT, divisi TEXT)''')
+
     c.execute("INSERT OR IGNORE INTO users VALUES ('KD001','Kepala Divisi','123','kadiv','IT','Jakarta')")
     c.execute("INSERT OR IGNORE INTO users VALUES ('HRD01','Admin HRD','123','hrd','HRD','Jakarta')")
     c.execute("INSERT OR IGNORE INTO users VALUES ('K001','Budi','123','karyawan','IT','Jakarta')")
@@ -180,6 +189,13 @@ def upload_karyawan():
 def logout():
     session.clear()
     return redirect('/')
+
+@app.route('/reset-db-sjam')
+def reset_db():
+    if os.path.exists('penilaian.db'):
+        os.remove('penilaian.db')
+    init_db()
+    return "Database berhasil direset! <a href='/'>Login</a>"
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
