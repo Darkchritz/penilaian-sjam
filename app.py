@@ -5,7 +5,7 @@ import pandas as pd
 import gspread
 from google.oauth2.service_account import Credentials
 
-app = Flask(_name_)
+app = Flask(__name__)
 app.secret_key = 'ganti-ini-jadi-random-8w3h2k1j4h1k2j3h4k5j'
 
 # ===== CONFIG BOBOT & INDIKATOR =====
