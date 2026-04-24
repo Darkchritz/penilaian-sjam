@@ -118,7 +118,7 @@ def dashboard():
         return redirect(url_for('login'))
     
     user = session['user']
-    with get_db() as conn:
+    with get_conn() as conn:
         c = conn.cursor()
         
         if user['role'] == 'hrd':
