@@ -209,7 +209,7 @@ def submit_nilai():
     else: grade = 'D'
     
     status = 'final' if data['action'] == 'final' else 'draft'
-    tgl_final = datetime.now() if status == 'final' else None
+    tgl_final = datetime.now().strftime('%Y-%m-%d %H:%M:%S') if status == 'final' else None
     
     with get_conn() as conn:
         c = conn.cursor()
