@@ -402,9 +402,6 @@ def upload_karyawan():
 
     return redirect('/dashboard')
         
-        conn = sqlite3.connect('penilaian.db')
-        c = conn.cursor()
-        
         # Ambil NPK yang udah ada
         c.execute("SELECT npk FROM users")
         existing_npk = set([r[0] for r in c.fetchall()])
