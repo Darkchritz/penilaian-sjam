@@ -160,6 +160,29 @@ def dashboard():
                      (user['npk'],))
             hasil = c.fetchall()
             return render_template('dashboard_karyawan.html', user=user, hasil=hasil)
+            
+@app.route('/penilaian/<npk>')
+def penilaian(npk):
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    
+    user = session['user']
+    if user['role'] not in ['hrd', 'kadiv']:
+        return "Akses ditolak", 403
+    
+    with get_conn() as conn:
+        c = conn.cursor()
+        c.execute("SELECT * FROM users WHERE npk=%s", (npk,))
+        karyawan = c.fetchone()
+        
+        if not karyawan:
+            return "Karyawan tidak ditemukan", 404
+            
+        # Ambil draft kalo ada
+        c.execute("SELECT * FROM penilaian WHERE npk=%s AND penilai=%s AND status='draft'", (npk, user['npk']))
+        draft = c.fetchone()
+        
+    return render_template('form_penilaian.html', user=user, karyawan=karyawan, draft=draft)           
     
 @app.route('/finalisasi/<int:id>')
 def finalisasi(id):
