@@ -134,13 +134,19 @@ def dashboard():
                              belum_dinilai=belum_dinilai)
 
     elif user['role'] == 'hrd':
+        # Data penilaian final
         c.execute("""SELECT p.npk, u.nama, u.divisi, p.periode, p.nilai_akhir, p.grade, p.tgl_finalisasi, p.detail_json
                      FROM penilaian p JOIN users u ON p.npk=u.npk
                      WHERE p.is_final=1
                      ORDER BY p.tgl_finalisasi DESC""")
         data = [{'npk':r[0],'nama':r[1],'divisi':r[2],'periode':r[3],'nilai_akhir':r[4],'grade':r[5],'tgl_finalisasi':r[6],'detail':json.loads(r[7])} for r in c.fetchall()]
+
+        # Data karyawan
+        c.execute("SELECT npk, nama, divisi, role FROM users WHERE role IN ('karyawan','kadiv') ORDER BY divisi, nama")
+        karyawan = [{'npk':r[0],'nama':r[1],'divisi':r[2],'role':r[3]} for r in c.fetchall()]
+
         conn.close()
-        return render_template('dashboard_hrd.html', user=user, data=data)
+        return render_template('dashboard_hrd.html', user=user, data=data, karyawan=karyawan)
 
     else: # karyawan
         c.execute("SELECT * FROM penilaian WHERE npk=? AND is_final=1 ORDER BY periode DESC", (user['npk'],))
@@ -208,6 +214,94 @@ def finalisasi_divisi():
     flash('Semua penilaian divisi berhasil difinalisasi! Sekarang tidak bisa diedit lagi', 'success')
     return redirect('/dashboard')
 
+# ===== HRD: CRUD KARYAWAN =====
+@app.route('/hrd/tambah_karyawan', methods=['POST'])
+def tambah_karyawan():
+    if 'user' not in session or session['user']['role']!= 'hrd': return redirect('/')
+    npk = request.form['npk']
+    nama = request.form['nama']
+    password = request.form['password']
+    divisi = request.form['divisi']
+    role = request.form['role']
+    conn = sqlite3.connect('penilaian.db')
+    c = conn.cursor()
+    try:
+        c.execute("INSERT INTO users VALUES (?,?,?,?,?)", (npk, nama, password, role, divisi))
+        conn.commit()
+        flash(f'Karyawan {nama} berhasil ditambah', 'success')
+    except sqlite3.IntegrityError:
+        flash('NPK sudah terdaftar', 'error')
+    finally:
+        conn.close()
+    return redirect('/dashboard')
+
+@app.route('/hrd/edit_karyawan/<npk>', methods=['POST'])
+def edit_karyawan(npk):
+    if 'user' not in session or session['user']['role']!= 'hrd': return redirect('/')
+    nama = request.form['nama']
+    password = request.form['password']
+    divisi = request.form['divisi']
+    role = request.form['role']
+    conn = sqlite3.connect('penilaian.db')
+    c = conn.cursor()
+    if password:
+        c.execute("UPDATE users SET nama=?, password=?, divisi=?, role=? WHERE npk=?", (nama, password, divisi, role, npk))
+    else:
+        c.execute("UPDATE users SET nama=?, divisi=?, role=? WHERE npk=?", (nama, divisi, role, npk))
+    conn.commit()
+    conn.close()
+    flash(f'Data {nama} berhasil diupdate', 'success')
+    return redirect('/dashboard')
+
+@app.route('/hrd/hapus_karyawan/<npk>', methods=['POST'])
+def hapus_karyawan(npk):
+    if 'user' not in session or session['user']['role']!= 'hrd': return redirect('/')
+    conn = sqlite3.connect('penilaian.db')
+    c = conn.cursor()
+    c.execute("DELETE FROM users WHERE npk=?", (npk,))
+    c.execute("DELETE FROM penilaian WHERE npk=?", (npk,))
+    conn.commit()
+    conn.close()
+    flash(f'Karyawan NPK {npk} berhasil dihapus', 'success')
+    return redirect('/dashboard')
+
+@app.route('/hrd/download_karyawan')
+def download_karyawan():
+    if 'user' not in session or session['user']['role']!= 'hrd': return redirect('/')
+    conn = sqlite3.connect('penilaian.db')
+    df = pd.read_sql_query("SELECT npk, nama, password, divisi, role FROM users WHERE role IN ('karyawan','kadiv') ORDER BY divisi, nama", conn)
+    conn.close()
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Data Karyawan')
+    output.seek(0)
+    return send_file(output, download_name=f'data_karyawan_{datetime.now().strftime("%Y%m%d")}.xlsx', as_attachment=True)
+
+@app.route('/hrd/upload_karyawan', methods=['POST'])
+def upload_karyawan():
+    if 'user' not in session or session['user']['role']!= 'hrd': return redirect('/')
+    file = request.files['file']
+    if file.filename == '':
+        flash('Tidak ada file dipilih', 'error')
+        return redirect('/dashboard')
+    try:
+        df = pd.read_excel(file)
+        conn = sqlite3.connect('penilaian.db')
+        c = conn.cursor()
+        sukses = 0
+        for _, row in df.iterrows():
+            try:
+                c.execute("INSERT OR REPLACE INTO users VALUES (?,?,?,?,?)",
+                         (str(row['npk']), row['nama'], str(row['password']), row['role'], row['divisi']))
+                sukses += 1
+            except: pass
+        conn.commit()
+        conn.close()
+        flash(f'Berhasil upload {sukses} data karyawan', 'success')
+    except Exception as e:
+        flash(f'Error: {str(e)}', 'error')
+    return redirect('/dashboard')
+
 @app.route('/export_hrd')
 def export_hrd():
     if 'user' not in session or session['user']['role']!= 'hrd':
@@ -246,43 +340,6 @@ def export_hrd():
 
     filename = f'penilaian_hrd_{datetime.now().strftime("%Y%m%d")}.xlsx'
     return send_file(output, download_name=filename, as_attachment=True)
-
-@app.route('/download_template')
-def download_template():
-    if 'user' not in session or session['user']['role']!= 'hrd': return redirect('/')
-    df = pd.DataFrame(columns=['npk', 'nama', 'password', 'divisi'])
-    df.loc[0] = ['K002', 'Contoh Nama', '123', 'IT']
-    output = io.BytesIO()
-    with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        df.to_excel(writer, index=False, sheet_name='Template')
-    output.seek(0)
-    return send_file(output, download_name='template_karyawan.xlsx', as_attachment=True)
-
-@app.route('/upload_karyawan', methods=['POST'])
-def upload_karyawan():
-    if 'user' not in session or session['user']['role']!= 'hrd': return redirect('/')
-    file = request.files['file']
-    if file.filename == '':
-        flash('Tidak ada file dipilih', 'error')
-        return redirect('/dashboard')
-
-    try:
-        df = pd.read_excel(file)
-        conn = sqlite3.connect('penilaian.db')
-        c = conn.cursor()
-        sukses = 0
-        for _, row in df.iterrows():
-            try:
-                c.execute("INSERT OR REPLACE INTO users VALUES (?,?,?,?,?)",
-                         (str(row['npk']), row['nama'], str(row['password']), 'karyawan', row['divisi']))
-                sukses += 1
-            except: pass
-        conn.commit()
-        conn.close()
-        flash(f'Berhasil upload {sukses} data karyawan', 'success')
-    except Exception as e:
-        flash(f'Error: {str(e)}', 'error')
-    return redirect('/dashboard')
 
 @app.route('/logout')
 def logout():
