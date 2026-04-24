@@ -178,7 +178,6 @@ def penilaian(npk):
         if not karyawan:
             return "Karyawan tidak ditemukan", 404
             
-        # Ambil draft kalo ada
         c.execute("SELECT * FROM penilaian WHERE npk=%s AND penilai=%s AND status='draft'", (npk, user['npk']))
         draft = c.fetchone()
         
@@ -192,16 +191,10 @@ def submit_nilai():
     user = session['user']
     data = request.form
     
-    # Hitung nilai_akhir + grade otomatis
     nilai_list = [
-        int(data['tanggung_jawab']), 
-        int(data['inisiatif']), 
-        int(data['kerjasama']), 
-        int(data['kedisiplinan']), 
-        int(data['kemampuan']), 
-        int(data['target']), 
-        int(data['proses']), 
-        int(data['inovasi'])
+        int(data['tanggung_jawab']), int(data['inisiatif']), int(data['kerjasama']), 
+        int(data['kedisiplinan']), int(data['kemampuan']), int(data['target']), 
+        int(data['proses']), int(data['inovasi'])
     ]
     nilai_akhir = sum(nilai_list) / len(nilai_list)
     
@@ -215,12 +208,9 @@ def submit_nilai():
     
     with get_conn() as conn:
         c = conn.cursor()
-        
-        # Ambil data karyawan buat isi nama, divisi, cabang
         c.execute("SELECT nama, divisi, cabang FROM users WHERE npk=%s", (data['npk'],))
         karyawan = c.fetchone()
         
-        # Hapus draft lama kalo ada, biar ga dobel
         c.execute("DELETE FROM penilaian WHERE npk=%s AND penilai=%s AND status='draft'", (data['npk'], user['npk']))
         
         c.execute("""INSERT INTO penilaian 
