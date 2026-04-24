@@ -144,12 +144,17 @@ def dashboard():
         belum_dinilai = c.fetchall()
 
         conn.close()
+        # Tambahin ini biar HRD bisa liat list karyawan buat dinilai
+c.execute("SELECT npk, nama, divisi, role, cabang FROM users WHERE divisi=%s AND cabang=%s AND role IN ('karyawan','kadiv') AND npk!=%s ORDER BY role DESC, nama",
+         (user['divisi'], user['cabang'], user['npk']))
+karyawan_untuk_dinilai = c.fetchall()
         return render_template('dashboard_hrd.html',
-                             user=user,
-                             karyawan=karyawan,
-                             belum_dinilai=belum_dinilai,
-                             page=page,
-                             total_pages=total_pages)
+                     user=user,
+                     karyawan=karyawan,
+                     belum_dinilai=belum_dinilai,
+                     page=page,
+                     total_pages=total_pages,
+                     karyawan_untuk_dinilai=karyawan_untuk_dinilai)  # <-- tambah ini
 
     elif user['role'] == 'kadiv':
         c.execute("SELECT npk, nama, divisi, role, cabang FROM users WHERE divisi=%s AND cabang=%s AND role IN ('karyawan','kadiv') AND npk!=%s ORDER BY role DESC, nama",
@@ -170,8 +175,8 @@ def dashboard():
 
 @app.route('/nilai/<npk>', methods=['GET','POST'])
 def nilai(npk):
-    if 'user' not in session or session['user']['role']!= 'kadiv':
-        return redirect('/')
+    if 'user' not in session or session['user']['role'] not in ['kadiv', 'hrd']:
+    return redirect('/')
 
     user = session['user']
     conn = get_conn()
