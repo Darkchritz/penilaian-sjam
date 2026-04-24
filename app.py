@@ -26,47 +26,36 @@ def init_db():
         divisi TEXT,
         cabang TEXT
     )''')
-    
     c.execute('''CREATE TABLE IF NOT EXISTS penilaian (
-    id SERIAL PRIMARY KEY,
-    npk TEXT,
-    nama TEXT,
-    periode TEXT,
-    divisi TEXT,
-    cabang TEXT,
-    tanggung_jawab INTEGER,
-    inisiatif INTEGER,
-    kerjasama INTEGER,
-    kedisiplinan INTEGER,
-    kemampuan INTEGER,
-    target INTEGER,
-    proses INTEGER,
-    inovasi INTEGER,
-    nilai_akhir REAL,
-    grade TEXT,
-    penilai TEXT,
-    tgl_finalisasi TEXT,
-    status TEXT
-)''')
+        id SERIAL PRIMARY KEY,
+        npk TEXT,
+        nama TEXT,
+        periode TEXT,
+        divisi TEXT,
+        cabang TEXT,
+        tanggung_jawab INTEGER,
+        inisiatif INTEGER,
+        kerjasama INTEGER,
+        kedisiplinan INTEGER,
+        kemampuan INTEGER,
+        target INTEGER,
+        proses INTEGER,
+        inovasi INTEGER,
+        nilai_akhir REAL,
+        grade TEXT,
+        penilai TEXT,
+        tgl_finalisasi TEXT,
+        status TEXT
+    )''')
 
     c.execute("SELECT COUNT(*) as count FROM users WHERE role='hrd'")
     if c.fetchone()['count'] == 0:
-        c.execute("INSERT INTO users (npk, nama, password, role, divisi, cabang) VALUES (%s,%s,%s,%s,%s,%s)",
+        c.execute("INSERT INTO users (npk, nama, password, role, divisi, cabang) VALUES (%s,%s,%s,%s)",
                  ('HRD001','HRD Admin',generate_password_hash('admin123'),'hrd','HRD','PUSAT'))
     conn.commit()
     conn.close()
 
 init_db()
-
-def hitung_nilai(tanggung_jawab, inisiatif, kerjasama, kedisiplinan, kemampuan, target, proses, inovasi):
-    total = tanggung_jawab + inisiatif + kerjasama + kedisiplinan + kemampuan + target + proses + inovasi
-    rata = total / 8
-    if rata >= 90: grade = 'A'
-    elif rata >= 80: grade = 'B'
-    elif rata >= 70: grade = 'C'
-    elif rata >= 60: grade = 'D'
-    else: grade = 'E'
-    return round(rata, 2), grade
 
 @app.route('/')
 def home():
@@ -107,7 +96,7 @@ def register():
         conn = get_conn()
         c = conn.cursor()
         try:
-            c.execute("INSERT INTO users (npk, nama, password, role, divisi, cabang) VALUES (%s,%s,%s,%s,%s,%s)", (npk, nama, password, role, divisi, cabang))
+            c.execute("INSERT INTO users (npk, nama, password, role, divisi, cabang) VALUES (%s,%s,%s,%s)", (npk, nama, password, role, divisi, cabang))
             conn.commit()
             flash('Registrasi berhasil! Silakan login.', 'success')
             return redirect('/login')
@@ -129,7 +118,7 @@ def dashboard():
         if user['role'] == 'hrd':
             page = int(request.args.get('page', 1))
             per_page = 20
-            c.execute("SELECT COUNT(*) FROM users WHERE npk!=%s", (user['npk'],))
+            c.execute("SELECT COUNT(*) as count FROM users WHERE npk!=%s", (user['npk'],))
             total = c.fetchone()['count']
             total_pages = (total + per_page - 1) // per_page
             offset = (page - 1) * per_page
@@ -221,15 +210,16 @@ def submit_nilai():
         c.execute("""INSERT INTO penilaian 
             (npk, nama, periode, divisi, cabang, tanggung_jawab, inisiatif, kerjasama, kedisiplinan, 
              kemampuan, target, proses, inovasi, nilai_akhir, grade, penilai, status, tgl_finalisasi) 
-            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+            VALUES (%s,%s,%s,%s)""",
             (data['npk'], karyawan['nama'], '2026', karyawan['divisi'], karyawan['cabang'],
              data['tanggung_jawab'], data['inisiatif'], data['kerjasama'], data['kedisiplinan'], 
              data['kemampuan'], data['target'], data['proses'], data['inovasi'],
              nilai_akhir, grade, user['npk'], status, tgl_final))
         conn.commit()
     
+    flash('Data berhasil disimpan!', 'success')
     return redirect(url_for('dashboard'))
-    
+
 @app.route('/finalisasi/<int:id>')
 def finalisasi(id):
     if 'user' not in session or session['user']['role']!= 'kadiv':
@@ -289,7 +279,7 @@ def tambah_karyawan():
     conn = get_conn()
     c = conn.cursor()
     try:
-        c.execute("INSERT INTO users (npk, nama, password, role, divisi, cabang) VALUES (%s,%s,%s,%s,%s,%s)", (npk, nama, password, role, divisi, cabang))
+        c.execute("INSERT INTO users (npk, nama, password, role, divisi, cabang) VALUES (%s,%s,%s,%s)", (npk, nama, password, role, divisi, cabang))
         conn.commit()
         flash('Karyawan berhasil ditambahkan!', 'success')
     except psycopg2.IntegrityError:
@@ -418,7 +408,7 @@ def upload_karyawan():
             existing_npk.add(row['npk'])
 
         if data_batch:
-            c.executemany("INSERT INTO users (npk, nama, password, role, divisi, cabang) VALUES (%s,%s,%s,%s,%s,%s)", data_batch)
+            c.executemany("INSERT INTO users (npk, nama, password, role, divisi, cabang) VALUES (%s,%s,%s,%s)", data_batch)
 
         conn.commit()
         conn.close()
