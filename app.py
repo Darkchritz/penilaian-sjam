@@ -102,7 +102,7 @@ def register():
         conn = get_conn()
         c = conn.cursor()
         try:
-            c.execute("INSERT INTO users (npk, nama, password, role, divisi, cabang) VALUES (%s,%s,%s,%s)", (npk, nama, password, role, divisi, cabang))
+            c.execute("INSERT INTO users (npk, nama, password, role, divisi, cabang) VALUES (%s,%s,%s,%s,%s,%s)", (npk, nama, password, role, divisi, cabang))
             conn.commit()
             flash('Registrasi berhasil! Silakan login.', 'success')
             return redirect('/login')
@@ -200,7 +200,7 @@ def nilai(npk):
 
         c.execute("""INSERT INTO penilaian
             (npk,nama,periode,divisi,cabang,tanggung_jawab,inisiatif,kerjasama,kedisiplinan,kemampuan,target,proses,inovasi,nilai_akhir,grade,tgl_finalisasi,status)
-            VALUES (%s,%s,%s)""",
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
             (npk, karyawan['nama'], periode, karyawan['divisi'], karyawan['cabang'], tj, inis, kerja, disiplin, mampu, tgt, pros, inov, nilai_akhir, grade, tgl, 'draft'))
         conn.commit()
         conn.close()
@@ -269,7 +269,7 @@ def tambah_karyawan():
     conn = get_conn()
     c = conn.cursor()
     try:
-        c.execute("INSERT INTO users (npk, nama, password, role, divisi, cabang) VALUES (%s,%s,%s,%s)", (npk, nama, password, role, divisi, cabang))
+        c.execute("INSERT INTO users (npk, nama, password, role, divisi, cabang) VALUES (%s,%s,%s,%s,%s,%s)", (npk, nama, password, role, divisi, cabang))
         conn.commit()
         flash('Karyawan berhasil ditambahkan!', 'success')
     except psycopg2.IntegrityError:
@@ -398,7 +398,7 @@ def upload_karyawan():
             existing_npk.add(row['npk'])
 
         if data_batch:
-            c.executemany("INSERT INTO users (npk, nama, password, role, divisi, cabang) VALUES (%s,%s,%s,%s)", data_batch)
+            c.executemany("INSERT INTO users (npk, nama, password, role, divisi, cabang) VALUES (%s,%s,%s,%s,%s,%s)", data_batch)
 
         conn.commit()
         conn.close()
