@@ -212,6 +212,60 @@ def reset_db():
         os.remove('penilaian.db')
     init_db()
     return "Database berhasil direset! <a href='/'>Login</a>"
+@app.route('/nilai/<npk>', methods=['GET','POST'])
+def nilai(npk):
+    if 'user' not in session or session['user']['role']!= 'kadiv':
+        return redirect('/')
 
+    conn = sqlite3.connect('penilaian.db')
+    c = conn.cursor()
+
+    # NO 5: CEK UDAH FINAL ATAU BELUM
+    c.execute("SELECT is_final FROM penilaian WHERE npk=? ORDER BY id DESC LIMIT 1", (npk,))
+    row = c.fetchone()
+    if row and row[0] == 1:
+        conn.close()
+        flash('Nilai sudah difinalisasi dan tidak bisa diedit lagi', 'error')
+        return redirect('/dashboard')
+
+    # Ambil data karyawan
+    c.execute("SELECT nama, divisi FROM users WHERE npk=? AND divisi=?", (npk, session['user']['divisi']))
+    karyawan = c.fetchone()
+    if not karyawan:
+        conn.close()
+        flash('Karyawan tidak ditemukan atau bukan divisi Anda', 'error')
+        return redirect('/dashboard')
+
+    if request.method == 'POST':
+        periode = request.form['periode']
+        nilai_akhir, grade, detail = hitung_nilai(request.form)
+
+        # HAPUS DULU DATA LAMA KALO ADA & BELUM FINAL
+        c.execute("DELETE FROM penilaian WHERE npk=? AND is_final=0", (npk,))
+
+        # NO 4: INI LOKASI INSERT YANG KAMU CARI
+        c.execute("""INSERT INTO penilaian
+                     (npk, periode, nilai_akhir, grade, detail_json, tgl_finalisasi, divisi, is_final)
+                     VALUES (?,?,?,?,?,?,?,0)""",
+                 (npk, periode, nilai_akhir, grade, json.dumps(detail),
+                  datetime.now().strftime('%Y-%m-%d %H:%M'), session['user']['divisi']))
+
+        conn.commit()
+        conn.close()
+        flash('Penilaian berhasil disimpan', 'success')
+        return redirect('/dashboard')
+
+    # GET: tampilkan form penilaian
+    c.execute("SELECT detail_json FROM penilaian WHERE npk=? AND is_final=0", (npk,))
+    data_lama = c.fetchone()
+    detail_lama = json.loads(data_lama[0]) if data_lama else {}
+
+    conn.close()
+    return render_template('nilai_form.html',
+                         npk=npk,
+                         nama=karyawan[0],
+                         divisi=karyawan[1],
+                         indikator=INDIKATOR,
+                         detail=detail_lama)
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
