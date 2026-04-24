@@ -71,13 +71,11 @@
             <form action="/hrd/upload_karyawan" method="POST" enctype="multipart/form-data" class="inline">
                 <div>
     <form action="/hrd/upload_karyawan" method="POST" enctype="multipart/form-data" class="inline">
-        <label class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-5 py-3 rounded-xl font-semibold transition shadow-sm cursor-pointer inline-block">
-            <i class="bi bi-upload"></i> Upload Excel
-            <input type="file" name="file" accept=".xlsx" class="hidden" onchange="this.form.submit()">
-        </label>
-    </form>
-    <p class="text-xs text-gray-500 mt-1">Format: npk, nama, password, role, divisi, cabang. Password kosong = 123456</p>
-</div>
+    <label class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-5 py-3 rounded-xl font-semibold transition shadow-sm cursor-pointer inline-block">
+        <i class="bi bi-upload"></i> Upload Excel
+        <input type="file" name="file" accept=".xlsx" class="hidden" onchange="this.form.submit()">
+    </label>
+</form>
             </form>
             <a href="/export_hrd" class="bg-green-600 hover:bg-green-700 text-white px-5 py-3 rounded-xl font-semibold transition shadow-md ml-auto">
                 <i class="bi bi-file-earmark-excel"></i> Export Rekap Final
