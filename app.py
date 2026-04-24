@@ -335,12 +335,12 @@ def download_karyawan():
 def upload_karyawan():
     if 'user' not in session or session['user']['role']!= 'hrd':
         return redirect('/')
-    
+
     file = request.files['file']
     if file.filename == '':
         flash('Pilih file dulu', 'error')
         return redirect('/dashboard')
-    
+
     try:
         df = pd.read_excel(file)
         required_cols = ['npk', 'nama', 'role', 'divisi', 'cabang']
@@ -348,37 +348,37 @@ def upload_karyawan():
             if col not in df.columns:
                 flash(f'Kolom {col} tidak ditemukan. Header harus: npk, nama, password, role, divisi, cabang', 'error')
                 return redirect('/dashboard')
-        
+
         df = df.fillna('')
         df['npk'] = df['npk'].astype(str).str.strip()
         df['nama'] = df['nama'].astype(str).str.strip()
         df['role'] = df['role'].astype(str).str.strip()
         df['divisi'] = df['divisi'].astype(str).str.strip()
         df['cabang'] = df['cabang'].astype(str).str.strip()
-        
+
         df = df[(df['npk']!= '') & (df['nama']!= '') & (df['role']!= '') & (df['divisi']!= '') & (df['cabang']!= '')]
-        
+
         if df.empty:
             flash('Tidak ada data valid di Excel', 'error')
             return redirect('/dashboard')
-        
+
         if len(df) > 500:
             flash('Maksimal 500 baris per upload. Pecah file Excel jadi beberapa bagian', 'error')
             return redirect('/dashboard')
-        
+
         conn = sqlite3.connect('penilaian.db')
         c = conn.cursor()
-        
+
         c.execute("SELECT npk FROM users")
         existing_npk = set([r[0] for r in c.fetchall()])
-        
+
         data_batch = []
         skip = 0
         for _, row in df.iterrows():
             if row['npk'] in existing_npk:
                 skip += 1
                 continue
-                
+
             password = str(row['password']).strip() if 'password' in df.columns and str(row['password']).strip()!= '' else '123456'
             data_batch.append((
                 row['npk'],
@@ -389,22 +389,18 @@ def upload_karyawan():
                 row['cabang']
             ))
             existing_npk.add(row['npk'])
-        
+
         if data_batch:
             c.executemany("INSERT INTO users VALUES (?,?,?,?,?,?)", data_batch)
-        
+
         conn.commit()
         conn.close()
         flash(f'Upload selesai! Baru: {len(data_batch)}, Skip duplikat: {skip}', 'success')
-        
+
     except Exception as e:
         flash(f'Error: {str(e)}', 'error')
-    
+
     return redirect('/dashboard')
-        
-        if len(df) > 500:
-            flash('Maksimal 500 baris per upload. Pecah file Excel jadi beberapa bagian', 'error')
-            return redirect('/dashboard')
         
         conn = sqlite3.connect('penilaian.db')
         c = conn.cursor()
