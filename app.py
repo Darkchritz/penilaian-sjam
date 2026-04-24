@@ -134,7 +134,7 @@ def dashboard():
     c.execute("SELECT npk,nama,divisi,cabang FROM users WHERE npk NOT IN (SELECT npk FROM penilaian WHERE status='final') AND role='karyawan'")
     belum_dinilai = c.fetchall()
     
-    # TAMBAHIN INI: query buat tabel nilai
+    # Query buat tabel nilai
     c.execute("SELECT npk, nama, divisi, role, cabang FROM users WHERE divisi=%s AND cabang=%s AND role IN ('karyawan','kadiv') AND npk!=%s ORDER BY role DESC, nama",
              (user['divisi'], user['cabang'], user['npk']))
     karyawan_untuk_dinilai = c.fetchall()
