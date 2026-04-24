@@ -156,7 +156,7 @@ def dashboard():
             return render_template('dashboard_kadiv.html', user=user, karyawan=karyawan, draft=draft)
         
         else:
-            c.execute("SELECT p.*, u.nama as nama_penilai FROM penilaian p JOIN users u ON p.penilai=u.npk WHERE p.npk=%s AND p.status='final' ORDER BY p.updated_at DESC",
+            c.execute("SELECT p.*, u.nama as nama_penilai FROM penilaian p JOIN users u ON p.penilai=u.npk WHERE p.npk=%s AND p.status='final' ORDER BY p.tgl_finalisasi DESC",
                      (user['npk'],))
             hasil = c.fetchall()
             return render_template('dashboard_karyawan.html', user=user, hasil=hasil)
