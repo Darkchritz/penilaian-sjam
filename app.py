@@ -369,6 +369,10 @@ def download_karyawan():
     df = pd.read_sql_query("SELECT npk, nama, divisi, role, cabang FROM users WHERE role IN ('karyawan','kadiv')", conn)
     conn.close()
     
+    # Tambah kolom password kosong buat template
+    df['password'] = ''
+    df = df[['npk','nama','password','role','divisi','cabang']] # urutin kolomnya
+    
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
         df.to_excel(writer, index=False, sheet_name='Template Karyawan')
@@ -392,19 +396,33 @@ def upload_karyawan():
         conn = sqlite3.connect('penilaian.db')
         c = conn.cursor()
         sukses = 0
+        gagal = 0
+        
         for _, row in df.iterrows():
             try:
+                npk = str(row['npk']).strip()
+                nama = str(row['nama']).strip()
+                password = str(row['password']).strip() if pd.notna(row['password']) and str(row['password']).strip() != '' else '123456'
+                role = str(row['role']).strip()
+                divisi = str(row['divisi']).strip()
+                cabang = str(row['cabang']).strip()
+                
+                # Skip kalo NPK kosong
+                if not npk or npk == 'nan':
+                    continue
+                    
                 c.execute("INSERT OR REPLACE INTO users VALUES (?,?,?,?,?,?)",
-                         (str(row['npk']), str(row['nama']), generate_password_hash('123456'), 
-                          str(row['role']), str(row['divisi']), str(row['cabang'])))
+                         (npk, nama, generate_password_hash(password), role, divisi, cabang))
                 sukses += 1
-            except:
+            except Exception as e:
+                gagal += 1
                 continue
+                
         conn.commit()
         conn.close()
-        flash(f'Upload berhasil! {sukses} data diproses. Password default: 123456', 'success')
+        flash(f'Upload selesai! Berhasil: {sukses}, Gagal: {gagal}. Kosongkan password = default 123456', 'success')
     except Exception as e:
-        flash(f'Error: {str(e)}', 'error')
+        flash(f'Error baca file: {str(e)}', 'error')
     
     return redirect('/dashboard')
 
