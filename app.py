@@ -1,13 +1,19 @@
 from flask import Flask, render_template, request, redirect, session, send_file, flash
-import sqlite3, io, os, pandas as pd
+import io, os, pandas as pd
+import psycopg2
+from psycopg2.extras import RealDictCursor
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'sjam-penilaian-secret-2024')
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+def get_conn():
+    return psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
 
 def init_db():
-    conn = sqlite3.connect('penilaian.db')
+    conn = get_conn()
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS users (
         npk TEXT PRIMARY KEY,
@@ -18,7 +24,7 @@ def init_db():
         cabang TEXT
     )''')
     c.execute('''CREATE TABLE IF NOT EXISTS penilaian (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         npk TEXT,
         nama TEXT,
         periode TEXT,
@@ -38,9 +44,9 @@ def init_db():
         status TEXT
     )''')
 
-    c.execute("SELECT COUNT(*) FROM users WHERE role='hrd'")
-    if c.fetchone()[0] == 0:
-        c.execute("INSERT INTO users VALUES (?,?,?,?,?,?)",
+    c.execute("SELECT COUNT(*) as count FROM users WHERE role='hrd'")
+    if c.fetchone()['count'] == 0:
+        c.execute("INSERT INTO users VALUES (%s,%s,%s,%s)",
                  ('HRD001','HRD Admin',generate_password_hash('admin123'),'hrd','HRD','PUSAT'))
     conn.commit()
     conn.close()
@@ -66,18 +72,18 @@ def login():
     if request.method == 'POST':
         npk = request.form['npk']
         password = request.form['password']
-        conn = sqlite3.connect('penilaian.db')
+        conn = get_conn()
         c = conn.cursor()
-        c.execute("SELECT * FROM users WHERE npk=?", (npk,))
+        c.execute("SELECT * FROM users WHERE npk=%s", (npk,))
         user = c.fetchone()
         conn.close()
-        if user and check_password_hash(user[2], password):
+        if user and check_password_hash(user['password'], password):
             session['user'] = {
-                'npk': user[0],
-                'nama': user[1],
-                'role': user[3],
-                'divisi': user[4],
-                'cabang': user[5]
+                'npk': user['npk'],
+                'nama': user['nama'],
+                'role': user['role'],
+                'divisi': user['divisi'],
+                'cabang': user['cabang']
             }
             return redirect('/dashboard')
         flash('NPK atau Password salah!', 'error')
@@ -93,14 +99,14 @@ def register():
         divisi = request.form['divisi']
         cabang = request.form['cabang']
 
-        conn = sqlite3.connect('penilaian.db')
+        conn = get_conn()
         c = conn.cursor()
         try:
-            c.execute("INSERT INTO users VALUES (?,?,?,?,?,?)", (npk, nama, password, role, divisi, cabang))
+            c.execute("INSERT INTO users VALUES (%s,%s,%s,%s)", (npk, nama, password, role, divisi, cabang))
             conn.commit()
             flash('Registrasi berhasil! Silakan login.', 'success')
             return redirect('/login')
-        except sqlite3.IntegrityError:
+        except psycopg2.IntegrityError:
             flash('NPK sudah terdaftar!', 'error')
         finally:
             conn.close()
@@ -112,7 +118,7 @@ def dashboard():
         return redirect('/login')
 
     user = session['user']
-    conn = sqlite3.connect('penilaian.db')
+    conn = get_conn()
     c = conn.cursor()
 
     if user['role'] == 'hrd':
@@ -120,13 +126,13 @@ def dashboard():
         per_page = 20
         offset = (page - 1) * per_page
 
-        c.execute("SELECT COUNT(*) FROM users WHERE role IN ('karyawan','kadiv')")
-        total_karyawan = c.fetchone()[0]
+        c.execute("SELECT COUNT(*) as count FROM users WHERE role IN ('karyawan','kadiv')")
+        total_karyawan = c.fetchone()['count']
         total_pages = (total_karyawan + per_page - 1) // per_page
 
-        c.execute("SELECT npk, nama, divisi, role, cabang FROM users WHERE role IN ('karyawan','kadiv') ORDER BY cabang, divisi, nama LIMIT? OFFSET?",
+        c.execute("SELECT npk, nama, divisi, role, cabang FROM users WHERE role IN ('karyawan','kadiv') ORDER BY cabang, divisi, nama LIMIT %s OFFSET %s",
                  (per_page, offset))
-        karyawan = [{'npk':r[0],'nama':r[1],'divisi':r[2],'role':r[3],'cabang':r[4]} for r in c.fetchall()]
+        karyawan = c.fetchall()
 
         c.execute("""
             SELECT u.npk, u.nama, u.divisi, u.cabang
@@ -135,7 +141,7 @@ def dashboard():
             WHERE u.role IN ('karyawan','kadiv') AND p.id IS NULL
             ORDER BY u.cabang, u.divisi, u.nama
         """)
-        belum_dinilai = [{'npk':r[0],'nama':r[1],'divisi':r[2],'cabang':r[3]} for r in c.fetchall()]
+        belum_dinilai = c.fetchall()
 
         conn.close()
         return render_template('dashboard_hrd.html',
@@ -146,21 +152,19 @@ def dashboard():
                              total_pages=total_pages)
 
     elif user['role'] == 'kadiv':
-        c.execute("SELECT npk, nama, divisi, role, cabang FROM users WHERE divisi=? AND cabang=? AND role IN ('karyawan','kadiv') AND npk!=? ORDER BY role DESC, nama",
+        c.execute("SELECT npk, nama, divisi, role, cabang FROM users WHERE divisi=%s AND cabang=%s AND role IN ('karyawan','kadiv') AND npk!=%s ORDER BY role DESC, nama",
                  (user['divisi'], user['cabang'], user['npk']))
+        karyawan = c.fetchall()
 
-        karyawan = [{'npk':r[0],'nama':r[1],'divisi':r[2],'role':r[3],'cabang':r[4]} for r in c.fetchall()]
-
-        c.execute("SELECT * FROM penilaian WHERE status='draft' AND divisi=? AND cabang=? ORDER BY tgl_finalisasi DESC",
+        c.execute("SELECT * FROM penilaian WHERE status='draft' AND divisi=%s AND cabang=%s ORDER BY tgl_finalisasi DESC",
                  (user['divisi'], user['cabang']))
-
-        draft = [{'id':r[0],'npk':r[1],'nama':r[2],'periode':r[3],'divisi':r[4],'cabang':r[5]} for r in c.fetchall()]
+        draft = c.fetchall()
         conn.close()
         return render_template('dashboard_kadiv.html', user=user, karyawan=karyawan, draft=draft)
 
     else:
-        c.execute("SELECT * FROM penilaian WHERE npk=? AND status='final' ORDER BY tgl_finalisasi DESC", (user['npk'],))
-        data = [{'periode':r[3],'tanggung_jawab':r[6],'inisiatif':r[7],'kerjasama':r[8],'kedisiplinan':r[9],'kemampuan':r[10],'target':r[11],'proses':r[12],'inovasi':r[13],'nilai_akhir':r[14],'grade':r[15],'tgl_finalisasi':r[16]} for r in c.fetchall()]
+        c.execute("SELECT * FROM penilaian WHERE npk=%s AND status='final' ORDER BY tgl_finalisasi DESC", (user['npk'],))
+        data = c.fetchall()
         conn.close()
         return render_template('dashboard_karyawan.html', user=user, data=data)
 
@@ -170,10 +174,10 @@ def nilai(npk):
         return redirect('/')
 
     user = session['user']
-    conn = sqlite3.connect('penilaian.db')
+    conn = get_conn()
     c = conn.cursor()
 
-    c.execute("SELECT * FROM users WHERE npk=? AND divisi=? AND cabang=?", (npk, user['divisi'], user['cabang']))
+    c.execute("SELECT * FROM users WHERE npk=%s AND divisi=%s AND cabang=%s", (npk, user['divisi'], user['cabang']))
     karyawan = c.fetchone()
     if not karyawan:
         conn.close()
@@ -196,15 +200,15 @@ def nilai(npk):
 
         c.execute("""INSERT INTO penilaian
             (npk,nama,periode,divisi,cabang,tanggung_jawab,inisiatif,kerjasama,kedisiplinan,kemampuan,target,proses,inovasi,nilai_akhir,grade,tgl_finalisasi,status)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
-            (npk, karyawan[1], periode, karyawan[4], karyawan[5], tj, inis, kerja, disiplin, mampu, tgt, pros, inov, nilai_akhir, grade, tgl, 'draft'))
+            VALUES (%s,%s,%s)""",
+            (npk, karyawan['nama'], periode, karyawan['divisi'], karyawan['cabang'], tj, inis, kerja, disiplin, mampu, tgt, pros, inov, nilai_akhir, grade, tgl, 'draft'))
         conn.commit()
         conn.close()
         flash('Penilaian disimpan sebagai draft!', 'success')
         return redirect('/dashboard')
 
     conn.close()
-    return render_template('form_nilai.html', user=user, karyawan={'npk':karyawan[0],'nama':karyawan[1],'divisi':karyawan[4],'cabang':karyawan[5]})
+    return render_template('form_nilai.html', user=user, karyawan=karyawan)
 
 @app.route('/finalisasi/<int:id>')
 def finalisasi(id):
@@ -212,17 +216,17 @@ def finalisasi(id):
         return redirect('/')
 
     user = session['user']
-    conn = sqlite3.connect('penilaian.db')
+    conn = get_conn()
     c = conn.cursor()
 
-    c.execute("SELECT divisi, cabang FROM penilaian WHERE id=?", (id,))
+    c.execute("SELECT divisi, cabang FROM penilaian WHERE id=%s", (id,))
     data = c.fetchone()
-    if not data or data[0]!= user['divisi'] or data[1]!= user['cabang']:
+    if not data or data['divisi']!= user['divisi'] or data['cabang']!= user['cabang']:
         conn.close()
         flash('Tidak bisa finalisasi data divisi/cabang lain!', 'error')
         return redirect('/dashboard')
 
-    c.execute("UPDATE penilaian SET status='final' WHERE id=?", (id,))
+    c.execute("UPDATE penilaian SET status='final' WHERE id=%s", (id,))
     conn.commit()
     conn.close()
     flash('Penilaian berhasil difinalisasi!', 'success')
@@ -234,17 +238,17 @@ def hapus_draft(id):
         return redirect('/')
 
     user = session['user']
-    conn = sqlite3.connect('penilaian.db')
+    conn = get_conn()
     c = conn.cursor()
-    c.execute("SELECT divisi, cabang FROM penilaian WHERE id=? AND status='draft'", (id,))
+    c.execute("SELECT divisi, cabang FROM penilaian WHERE id=%s AND status='draft'", (id,))
     data = c.fetchone()
 
-    if not data or data[0]!= user['divisi'] or data[1]!= user['cabang']:
+    if not data or data['divisi']!= user['divisi'] or data['cabang']!= user['cabang']:
         conn.close()
         flash('Tidak bisa hapus data divisi/cabang lain!', 'error')
         return redirect('/dashboard')
 
-    c.execute("DELETE FROM penilaian WHERE id=?", (id,))
+    c.execute("DELETE FROM penilaian WHERE id=%s", (id,))
     conn.commit()
     conn.close()
     flash('Draft dihapus!', 'success')
@@ -262,13 +266,13 @@ def tambah_karyawan():
     divisi = request.form['divisi']
     cabang = request.form['cabang']
 
-    conn = sqlite3.connect('penilaian.db')
+    conn = get_conn()
     c = conn.cursor()
     try:
-        c.execute("INSERT INTO users VALUES (?,?,?,?,?,?)", (npk, nama, password, role, divisi, cabang))
+        c.execute("INSERT INTO users VALUES (%s,%s,%s,%s)", (npk, nama, password, role, divisi, cabang))
         conn.commit()
         flash('Karyawan berhasil ditambahkan!', 'success')
-    except sqlite3.IntegrityError:
+    except psycopg2.IntegrityError:
         flash('NPK sudah terdaftar!', 'error')
     finally:
         conn.close()
@@ -285,13 +289,13 @@ def edit_karyawan(npk):
     cabang = request.form['cabang']
     password = request.form.get('password', '')
 
-    conn = sqlite3.connect('penilaian.db')
+    conn = get_conn()
     c = conn.cursor()
     if password:
-        c.execute("UPDATE users SET nama=?, password=?, role=?, divisi=?, cabang=? WHERE npk=?",
+        c.execute("UPDATE users SET nama=%s, password=%s, role=%s, divisi=%s, cabang=%s WHERE npk=%s",
                  (nama, generate_password_hash(password), role, divisi, cabang, npk))
     else:
-        c.execute("UPDATE users SET nama=?, role=?, divisi=?, cabang=? WHERE npk=?",
+        c.execute("UPDATE users SET nama=%s, role=%s, divisi=%s, cabang=%s WHERE npk=%s",
                  (nama, role, divisi, cabang, npk))
     conn.commit()
     conn.close()
@@ -303,10 +307,10 @@ def hapus_karyawan(npk):
     if 'user' not in session or session['user']['role']!= 'hrd':
         return redirect('/')
 
-    conn = sqlite3.connect('penilaian.db')
+    conn = get_conn()
     c = conn.cursor()
-    c.execute("DELETE FROM users WHERE npk=?", (npk,))
-    c.execute("DELETE FROM penilaian WHERE npk=?", (npk,))
+    c.execute("DELETE FROM users WHERE npk=%s", (npk,))
+    c.execute("DELETE FROM penilaian WHERE npk=%s", (npk,))
     conn.commit()
     conn.close()
     flash('Karyawan & data penilaian dihapus!', 'success')
@@ -317,7 +321,7 @@ def download_karyawan():
     if 'user' not in session or session['user']['role']!= 'hrd':
         return redirect('/')
 
-    conn = sqlite3.connect('penilaian.db')
+    conn = get_conn()
     df = pd.read_sql_query("SELECT npk, nama, divisi, role, cabang FROM users WHERE role IN ('karyawan','kadiv')", conn)
     conn.close()
 
@@ -369,11 +373,11 @@ def upload_karyawan():
             flash('Maksimal 500 baris per upload. Pecah file Excel jadi beberapa bagian', 'error')
             return redirect('/dashboard')
 
-        conn = sqlite3.connect('penilaian.db')
+        conn = get_conn()
         c = conn.cursor()
 
         c.execute("SELECT npk FROM users")
-        existing_npk = set([r[0] for r in c.fetchall()])
+        existing_npk = set([r['npk'] for r in c.fetchall()])
 
         data_batch = []
         skip = 0
@@ -394,7 +398,7 @@ def upload_karyawan():
             existing_npk.add(row['npk'])
 
         if data_batch:
-            c.executemany("INSERT INTO users VALUES (?,?,?,?,?,?)", data_batch)
+            c.executemany("INSERT INTO users VALUES (%s,%s,%s,%s)", data_batch)
 
         conn.commit()
         conn.close()
@@ -410,7 +414,7 @@ def export_hrd():
     if 'user' not in session or session['user']['role']!= 'hrd':
         return redirect('/')
 
-    conn = sqlite3.connect('penilaian.db')
+    conn = get_conn()
     df = pd.read_sql_query("SELECT * FROM penilaian WHERE status='final'", conn)
     conn.close()
 
