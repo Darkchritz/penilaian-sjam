@@ -150,13 +150,13 @@ def dashboard():
             c.execute("SELECT npk, nama, divisi, role, cabang FROM users WHERE divisi=%s AND cabang=%s AND role IN ('karyawan','kadiv') AND npk!=%s ORDER BY role DESC, nama",
                      (user['divisi'], user['cabang'], user['npk']))
             karyawan = c.fetchall()
-            c.execute("SELECT p.*, u.nama FROM penilaian p JOIN users u ON p.npk=u.npk WHERE p.penilai_npk=%s AND p.status='draft'",
+            c.execute("SELECT p.*, u.nama FROM penilaian p JOIN users u ON p.npk=u.npk WHERE p.penilai=%s AND p.status='draft'",
                      (user['npk'],))
             draft = c.fetchall()
             return render_template('dashboard_kadiv.html', user=user, karyawan=karyawan, draft=draft)
         
         else:
-            c.execute("SELECT p.*, u.nama as nama_penilai FROM penilaian p JOIN users u ON p.penilai_npk=u.npk WHERE p.npk=%s AND p.status='final' ORDER BY p.updated_at DESC",
+            c.execute("SELECT p.*, u.nama as nama_penilai FROM penilaian p JOIN users u ON p.penilai=u.npk WHERE p.npk=%s AND p.status='final' ORDER BY p.updated_at DESC",
                      (user['npk'],))
             hasil = c.fetchall()
             return render_template('dashboard_karyawan.html', user=user, hasil=hasil)
