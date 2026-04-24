@@ -114,6 +114,18 @@ def register():
     return render_template('register.html')
 
 @app.route('/dashboard')
+@app.route('/finalisasi_divisi', methods=['POST'])
+def finalisasi_divisi():
+    if 'user' not in session or session['user']['role']!= 'kadiv': return redirect('/')
+    divisi = session['user']['divisi']
+    conn = sqlite3.connect('penilaian.db')
+    c = conn.cursor()
+    c.execute("UPDATE penilaian SET is_final=1, tgl_finalisasi=? WHERE divisi=? AND is_final=0",
+             (datetime.now().strftime('%Y-%m-%d'), divisi))
+    conn.commit()
+    conn.close()
+    flash('Semua penilaian divisi berhasil difinalisasi! Sekarang tidak bisa diedit lagi', 'success')
+    return redirect('/dashboard')
 def dashboard():
     if 'user' not in session: return redirect('/')
     user = session['user']
