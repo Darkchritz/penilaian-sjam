@@ -392,23 +392,34 @@ def upload_karyawan():
         return redirect('/dashboard')
     
     try:
+        # Coba baca Excel
         df = pd.read_excel(file)
+        
+        # Cek kolom wajib ada
+        required_cols = ['npk', 'nama', 'role', 'divisi', 'cabang']
+        for col in required_cols:
+            if col not in df.columns:
+                flash(f'Kolom {col} tidak ditemukan di Excel. Pastikan ada: npk, nama, password, role, divisi, cabang', 'error')
+                return redirect('/dashboard')
+        
         conn = sqlite3.connect('penilaian.db')
         c = conn.cursor()
         sukses = 0
         gagal = 0
         
-        for _, row in df.iterrows():
+        for idx, row in df.iterrows():
             try:
-                npk = str(row['npk']).strip()
-                nama = str(row['nama']).strip()
-                password = str(row['password']).strip() if pd.notna(row['password']) and str(row['password']).strip() != '' else '123456'
-                role = str(row['role']).strip()
-                divisi = str(row['divisi']).strip()
-                cabang = str(row['cabang']).strip()
+                # Bersihin data + handle NaN
+                npk = str(row['npk']).strip() if pd.notna(row['npk']) else ''
+                nama = str(row['nama']).strip() if pd.notna(row['nama']) else ''
+                password = str(row['password']).strip() if 'password' in df.columns and pd.notna(row['password']) and str(row['password']).strip() != '' else '123456'
+                role = str(row['role']).strip() if pd.notna(row['role']) else ''
+                divisi = str(row['divisi']).strip() if pd.notna(row['divisi']) else ''
+                cabang = str(row['cabang']).strip() if pd.notna(row['cabang']) else ''
                 
-                # Skip kalo NPK kosong
-                if not npk or npk == 'nan':
+                # Skip kalo data wajib kosong
+                if not npk or not nama or not role or not divisi or not cabang:
+                    gagal += 1
                     continue
                     
                 c.execute("INSERT OR REPLACE INTO users VALUES (?,?,?,?,?,?)",
@@ -420,9 +431,10 @@ def upload_karyawan():
                 
         conn.commit()
         conn.close()
-        flash(f'Upload selesai! Berhasil: {sukses}, Gagal: {gagal}. Kosongkan password = default 123456', 'success')
+        flash(f'Upload selesai! Berhasil: {sukses}, Gagal: {gagal}', 'success')
+        
     except Exception as e:
-        flash(f'Error baca file: {str(e)}', 'error')
+        flash(f'Error baca file Excel: {str(e)}', 'error')
     
     return redirect('/dashboard')
 
