@@ -244,11 +244,11 @@ def tambah_karyawan():
 @app.route('/hrd/edit_karyawan/<npk_lama>', methods=['POST'])
 def edit_karyawan(npk_lama):
     if 'user' not in session or session['user']['role']!= 'hrd': return redirect('/')
-    npk_baru = request.form['npk']
-    nama = request.form['nama']
-    password = request.form['password']
-    divisi = request.form['divisi']
-    role = request.form['role']
+    npk_baru = request.form['npk'].strip()
+    nama = request.form['nama'].strip()
+    password = request.form['password'].strip()
+    divisi = request.form['divisi'].strip()
+    role = request.form['role'].strip()
 
     conn = sqlite3.connect('penilaian.db')
     c = conn.cursor()
