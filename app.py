@@ -369,6 +369,46 @@ def upload_karyawan():
         conn = sqlite3.connect('penilaian.db')
         c = conn.cursor()
         
+        c.execute("SELECT npk FROM users")
+        existing_npk = set([r[0] for r in c.fetchall()])
+        
+        data_batch = []
+        skip = 0
+        for _, row in df.iterrows():
+            if row['npk'] in existing_npk:
+                skip += 1
+                continue
+                
+            password = str(row['password']).strip() if 'password' in df.columns and str(row['password']).strip()!= '' else '123456'
+            data_batch.append((
+                row['npk'],
+                row['nama'],
+                generate_password_hash(password),
+                row['role'],
+                row['divisi'],
+                row['cabang']
+            ))
+            existing_npk.add(row['npk'])
+        
+        if data_batch:
+            c.executemany("INSERT INTO users VALUES (?,?,?,?,?,?)", data_batch)
+        
+        conn.commit()
+        conn.close()
+        flash(f'Upload selesai! Baru: {len(data_batch)}, Skip duplikat: {skip}', 'success')
+        
+    except Exception as e:
+        flash(f'Error: {str(e)}', 'error')
+    
+    return redirect('/dashboard')
+        
+        if len(df) > 500:
+            flash('Maksimal 500 baris per upload. Pecah file Excel jadi beberapa bagian', 'error')
+            return redirect('/dashboard')
+        
+        conn = sqlite3.connect('penilaian.db')
+        c = conn.cursor()
+        
         # Ambil NPK yang udah ada
         c.execute("SELECT npk FROM users")
         existing_npk = set([r[0] for r in c.fetchall()])
