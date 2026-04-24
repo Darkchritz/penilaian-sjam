@@ -46,7 +46,7 @@ def init_db():
 
     c.execute("SELECT COUNT(*) as count FROM users WHERE role='hrd'")
     if c.fetchone()['count'] == 0:
-        c.execute("INSERT INTO users VALUES (%s,%s,%s,%s)",
+        c.execute("INSERT INTO users (npk, nama, password, role, divisi, cabang) VALUES (%s,%s,%s,%s)",
                  ('HRD001','HRD Admin',generate_password_hash('admin123'),'hrd','HRD','PUSAT'))
     conn.commit()
     conn.close()
@@ -102,7 +102,7 @@ def register():
         conn = get_conn()
         c = conn.cursor()
         try:
-            c.execute("INSERT INTO users VALUES (%s,%s,%s,%s)", (npk, nama, password, role, divisi, cabang))
+            c.execute("INSERT INTO users (npk, nama, password, role, divisi, cabang) VALUES (%s,%s,%s,%s)", (npk, nama, password, role, divisi, cabang))
             conn.commit()
             flash('Registrasi berhasil! Silakan login.', 'success')
             return redirect('/login')
@@ -269,7 +269,7 @@ def tambah_karyawan():
     conn = get_conn()
     c = conn.cursor()
     try:
-        c.execute("INSERT INTO users VALUES (%s,%s,%s,%s)", (npk, nama, password, role, divisi, cabang))
+        c.execute("INSERT INTO users (npk, nama, password, role, divisi, cabang) VALUES (%s,%s,%s,%s)", (npk, nama, password, role, divisi, cabang))
         conn.commit()
         flash('Karyawan berhasil ditambahkan!', 'success')
     except psycopg2.IntegrityError:
@@ -398,7 +398,7 @@ def upload_karyawan():
             existing_npk.add(row['npk'])
 
         if data_batch:
-            c.executemany("INSERT INTO users VALUES (%s,%s,%s,%s)", data_batch)
+            c.executemany("INSERT INTO users (npk, nama, password, role, divisi, cabang) VALUES (%s,%s,%s,%s)", data_batch)
 
         conn.commit()
         conn.close()
