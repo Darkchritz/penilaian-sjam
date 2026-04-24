@@ -1,7 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, session
-from datetime import datetime  # <-- TAMBAH BARIS INI
+from datetime import datetime
 import psycopg2
 import psycopg2.extras
+from psycopg2.extras import RealDictCursor  # <-- TAMBAHIN BARIS INI
 import os
 
 app = Flask(__name__)
