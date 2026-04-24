@@ -1,43 +1,121 @@
 <!DOCTYPE html>
 <html lang="id">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard Karyawan | SJAM</title><script src="https://cdn.tailwindcss.com"></script>
-<style>@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap'); body { font-family: 'Poppins', sans-serif; }</style>
-</head><body class="bg-gray-50 min-h-screen">
-<nav class="bg-white shadow-sm border-b sticky top-0"><div class="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
-<h1 class="text-xl font-bold text-indigo-600">SJAM Penilaian</h1>
-<div class="flex items-center gap-4"><span class="text-gray-700">{{ user.nama }}</span>
-<a href="/logout" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm">Logout</a></div></div></nav>
-<main class="max-w-4xl mx-auto p-4 sm:p-6">
-<div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-<h2 class="text-2xl font-bold text-gray-800">Riwayat Penilaian Kinerja</h2>
-<p class="text-gray-500">NPK: {{ user.npk }} | Divisi: {{ user.divisi }}</p></div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Karyawan | SJAM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap'); body { font-family: 'Poppins', sans-serif; }</style>
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="SJAM">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/static/sw.js').catch(err => console.log('SW error', err));
+        });
+      }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+    <nav class="bg-white/80 backdrop-blur-md shadow-sm border-b sticky top-0 z-10">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-2">
+                    <i class="bi bi-person-circle text-2xl text-indigo-600"></i>
+                    <h1 class="text-xl font-bold text-indigo-600">SJAM Karyawan</h1>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="text-right hidden sm:block">
+                        <p class="text-sm font-medium text-gray-700">{{ user.nama }}</p>
+                        <p class="text-xs text-gray-500">{{ user.divisi }} | {{ user.cabang }}</p>
+                    </div>
+                    <a href="/logout" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
 
-<div class="space-y-4">
-{% for h in hasil %}
-<div class="bg-white rounded-xl shadow-sm overflow-hidden">
-<div class="p-6 border-l-4 {% if h.grade in ['A+','A'] %}border-green-500{% elif h.grade in ['B+','B'] %}border-blue-500{% elif h.grade in ['C+','C'] %}border-yellow-500{% else %}border-red-500{% endif %}">
-<div class="flex justify-between items-start mb-4">
-<div><h3 class="text-lg font-semibold text-gray-800">Periode {{ h.periode }}</h3>
-<p class="text-gray-500 text-sm">Difinalisasi: {{ h.tgl_finalisasi }}</p></div>
-<div class="text-right"><div class="text-3xl font-bold text-indigo-600">{{ h.nilai_akhir }}</div>
-<span class="px-3 py-1 text-sm font-semibold rounded-full
-{% if h.grade in ['A+','A'] %}bg-green-100 text-green-800
-{% elif h.grade in ['B+','B'] %}bg-blue-100 text-blue-800
-{% elif h.grade in ['C+','C'] %}bg-yellow-100 text-yellow-800
-{% else %}bg-red-100 text-red-800{% endif %}">Grade {{ h.grade }}</span></div></div>
+    <main class="max-w-4xl mx-auto p-4 sm:p-6">
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">Riwayat Penilaian</h2>
+            <p class="text-gray-500">{{ user.nama }} - {{ user.npk }}</p>
+            <p class="text-sm text-gray-400">{{ user.divisi }} | {{ user.cabang }}</p>
+        </div>
 
-<details class="group"><summary class="cursor-pointer text-indigo-600 hover:text-indigo-800 text-sm font-medium list-none">
-<span class="group-open:hidden">Lihat Rincian Aspek ▼</span>
-<span class="hidden group-open:inline">Sembunyikan ▲</span></summary>
-<div class="mt-4 space-y-2 pt-4 border-t">
-{% for aspek, skor in h.keterangan.items() %}
-<div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-<span class="text-sm text-gray-700">{{ aspek }}</span>
-<span class="font-semibold text-gray-900">{{ skor }}</span></div>
-{% endfor %}</div></details></div></div>
-{% else %}
-<div class="bg-white rounded-xl shadow-sm p-8 text-center">
-<div class="text-gray-400 mb-2"><svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg></div>
-<p class="text-gray-500">Belum ada data penilaian</p></div>
-{% endfor %}</div></main></body></html>
+        {% if data %}
+        <div class="space-y-4">
+            {% for d in data %}
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 border-b">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600">Periode</p>
+                            <p class="text-lg font-bold text-gray-800">{{ d.periode }}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-3xl font-bold text-indigo-600">{{ "%.2f"|format(d.nilai_akhir) }}</p>
+                            <p class="text-sm text-gray-500">Grade {{ d.grade }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+                        <div class="bg-gray-50 rounded-lg p-3">
+                            <p class="text-gray-500 text-xs">Tanggung Jawab</p>
+                            <p class="font-bold text-gray-800">{{ d.tanggung_jawab }}</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-3">
+                            <p class="text-gray-500 text-xs">Inisiatif</p>
+                            <p class="font-bold text-gray-800">{{ d.inisiatif }}</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-3">
+                            <p class="text-gray-500 text-xs">Kerjasama</p>
+                            <p class="font-bold text-gray-800">{{ d.kerjasama }}</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-3">
+                            <p class="text-gray-500 text-xs">Kedisiplinan</p>
+                            <p class="font-bold text-gray-800">{{ d.kedisiplinan }}</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-3">
+                            <p class="text-gray-500 text-xs">Kemampuan</p>
+                            <p class="font-bold text-gray-800">{{ d.kemampuan }}</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-3">
+                            <p class="text-gray-500 text-xs">Target</p>
+                            <p class="font-bold text-gray-800">{{ d.target }}</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-3">
+                            <p class="text-gray-500 text-xs">Proses</p>
+                            <p class="font-bold text-gray-800">{{ d.proses }}</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-3">
+                            <p class="text-gray-500 text-xs">Inovasi</p>
+                            <p class="font-bold text-gray-800">{{ d.inovasi }}</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t text-xs text-gray-500">
+                        <i class="bi bi-calendar-check"></i> Difinalisasi: {{ d.tgl_finalisasi }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
+            <i class="bi bi-inbox text-5xl text-gray-300 mb-4"></i>
+            <p class="text-gray-500 font-medium">Belum ada data penilaian</p>
+            <p class="text-sm text-gray-400 mt-2">Hubungi Kepala Divisi untuk info lebih lanjut</p>
+        </div>
+        {% endif %}
+    </main>
+</body>
+</html>
