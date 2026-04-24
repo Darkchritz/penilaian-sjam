@@ -160,23 +160,30 @@ def dashboard():
                      (user['npk'],))
             hasil = c.fetchall()
             return render_template('dashboard_karyawan.html', user=user, hasil=hasil)
-
+            
 @app.route('/nilai/<npk>', methods=['GET','POST'])
 def nilai(npk):
     if 'user' not in session or session['user']['role'] not in ['kadiv', 'hrd']:
-    return redirect('/')
-
+        flash('Akses ditolak', 'error')
+        return redirect('/')
+    
     user = session['user']
     conn = get_conn()
     c = conn.cursor()
-
-    c.execute("SELECT * FROM users WHERE npk=%s AND divisi=%s AND cabang=%s", (npk, user['divisi'], user['cabang']))
+    
+    c.execute("SELECT * FROM users WHERE npk=%s", (npk,))
     karyawan = c.fetchone()
+    
     if not karyawan:
         conn.close()
-        flash('Karyawan tidak ditemukan atau beda divisi/cabang!', 'error')
+        flash('Karyawan tidak ditemukan', 'error')
         return redirect('/dashboard')
-
+    
+    if karyawan['divisi'] != user['divisi'] or karyawan['cabang'] != user['cabang']:
+        conn.close()
+        flash('Anda hanya bisa menilai karyawan di divisi dan cabang yang sama', 'error')
+        return redirect('/dashboard')
+    
     if request.method == 'POST':
         periode = request.form['periode']
         tj = int(request.form['tanggung_jawab'])
@@ -187,22 +194,30 @@ def nilai(npk):
         tgt = int(request.form['target'])
         pros = int(request.form['proses'])
         inov = int(request.form['inovasi'])
-
+        
         nilai_akhir, grade = hitung_nilai(tj, inis, kerja, disiplin, mampu, tgt, pros, inov)
         tgl = datetime.now().strftime('%Y-%m-%d %H:%M')
-
-        c.execute("""INSERT INTO penilaian
-            (npk,nama,periode,divisi,cabang,tanggung_jawab,inisiatif,kerjasama,kedisiplinan,kemampuan,target,proses,inovasi,nilai_akhir,grade,tgl_finalisasi,status)
-            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
-            (npk, karyawan['nama'], periode, karyawan['divisi'], karyawan['cabang'], tj, inis, kerja, disiplin, mampu, tgt, pros, inov, nilai_akhir, grade, tgl, 'draft'))
+        
+        c.execute("""INSERT INTO penilaian 
+            (npk,nama,periode,divisi,cabang,tanggung_jawab,inisiatif,kerjasama,kedisiplinan,kemampuan,target,proses,inovasi,nilai_akhir,grade,penilai,status,updated_at) 
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) 
+            ON CONFLICT (npk, penilai) DO UPDATE SET 
+            periode=EXCLUDED.periode, tanggung_jawab=EXCLUDED.tanggung_jawab, inisiatif=EXCLUDED.inisiatif, 
+            kerjasama=EXCLUDED.kerjasama, kedisiplinan=EXCLUDED.kedisiplinan, kemampuan=EXCLUDED.kemampuan, 
+            target=EXCLUDED.target, proses=EXCLUDED.proses, inovasi=EXCLUDED.inovasi, 
+            nilai_akhir=EXCLUDED.nilai_akhir, grade=EXCLUDED.grade, status='draft', updated_at=EXCLUDED.updated_at""",
+            (npk, karyawan['nama'], periode, karyawan['divisi'], karyawan['cabang'], tj, inis, kerja, disiplin, mampu, tgt, pros, inov, nilai_akhir, grade, user['npk'], 'draft', tgl))
         conn.commit()
         conn.close()
         flash('Penilaian disimpan sebagai draft!', 'success')
         return redirect('/dashboard')
-
+    
+    c.execute("SELECT * FROM penilaian WHERE npk=%s AND penilai=%s AND status='draft'", (npk, user['npk']))
+    draft = c.fetchone()
     conn.close()
-    return render_template('form_nilai.html', user=user, karyawan=karyawan)
-
+    
+    return render_template('nilai.html', user=user, karyawan=karyawan, draft=draft)
+    
 @app.route('/finalisasi/<int:id>')
 def finalisasi(id):
     if 'user' not in session or session['user']['role']!= 'kadiv':
@@ -307,7 +322,7 @@ def hapus_karyawan(npk):
     conn.commit()
     conn.close()
     flash('Karyawan & data penilaian dihapus!', 'success')
-    return redirect('/dashboard')
+    return redirect('/dashboard')7
 
 @app.route('/hrd/download_karyawan')
 def download_karyawan():
