@@ -134,14 +134,12 @@ def dashboard():
                              belum_dinilai=belum_dinilai)
 
     elif user['role'] == 'hrd':
-        # Data penilaian final
         c.execute("""SELECT p.npk, u.nama, u.divisi, p.periode, p.nilai_akhir, p.grade, p.tgl_finalisasi, p.detail_json
                      FROM penilaian p JOIN users u ON p.npk=u.npk
                      WHERE p.is_final=1
                      ORDER BY p.tgl_finalisasi DESC""")
         data = [{'npk':r[0],'nama':r[1],'divisi':r[2],'periode':r[3],'nilai_akhir':r[4],'grade':r[5],'tgl_finalisasi':r[6],'detail':json.loads(r[7])} for r in c.fetchall()]
 
-        # Data karyawan
         c.execute("SELECT npk, nama, divisi, role FROM users WHERE role IN ('karyawan','kadiv') ORDER BY divisi, nama")
         karyawan = [{'npk':r[0],'nama':r[1],'divisi':r[2],'role':r[3]} for r in c.fetchall()]
 
@@ -235,22 +233,45 @@ def tambah_karyawan():
         conn.close()
     return redirect('/dashboard')
 
-@app.route('/hrd/edit_karyawan/<npk>', methods=['POST'])
-def edit_karyawan(npk):
+@app.route('/hrd/edit_karyawan/<npk_lama>', methods=['POST'])
+def edit_karyawan(npk_lama):
     if 'user' not in session or session['user']['role']!= 'hrd': return redirect('/')
+    npk_baru = request.form['npk']
     nama = request.form['nama']
     password = request.form['password']
     divisi = request.form['divisi']
     role = request.form['role']
+
     conn = sqlite3.connect('penilaian.db')
     c = conn.cursor()
-    if password:
-        c.execute("UPDATE users SET nama=?, password=?, divisi=?, role=? WHERE npk=?", (nama, password, divisi, role, npk))
-    else:
-        c.execute("UPDATE users SET nama=?, divisi=?, role=? WHERE npk=?", (nama, divisi, role, npk))
-    conn.commit()
-    conn.close()
-    flash(f'Data {nama} berhasil diupdate', 'success')
+
+    try:
+        # Cek NPK baru udah dipake orang lain belum
+        if npk_baru!= npk_lama:
+            c.execute("SELECT npk FROM users WHERE npk=?", (npk_baru,))
+            if c.fetchone():
+                flash(f'NPK {npk_baru} sudah terdaftar', 'error')
+                conn.close()
+                return redirect('/dashboard')
+
+        # Update tabel users
+        if password:
+            c.execute("UPDATE users SET npk=?, nama=?, password=?, divisi=?, role=? WHERE npk=?",
+                     (npk_baru, nama, password, divisi, role, npk_lama))
+        else:
+            c.execute("UPDATE users SET npk=?, nama=?, divisi=?, role=? WHERE npk=?",
+                     (npk_baru, nama, divisi, role, npk_lama))
+
+        # Update semua data penilaian yang pake NPK lama
+        if npk_baru!= npk_lama:
+            c.execute("UPDATE penilaian SET npk=? WHERE npk=?", (npk_baru, npk_lama))
+
+        conn.commit()
+        flash(f'Data {nama} berhasil diupdate', 'success')
+    except Exception as e:
+        flash(f'Gagal update: {str(e)}', 'error')
+    finally:
+        conn.close()
     return redirect('/dashboard')
 
 @app.route('/hrd/hapus_karyawan/<npk>', methods=['POST'])
