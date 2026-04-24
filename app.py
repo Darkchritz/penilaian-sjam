@@ -46,7 +46,7 @@ def init_db():
 
     c.execute("SELECT COUNT(*) as count FROM users WHERE role='hrd'")
     if c.fetchone()['count'] == 0:
-        c.execute("INSERT INTO users (npk, nama, password, role, divisi, cabang) VALUES (%s,%s,%s,%s)",
+        c.execute("INSERT INTO users (npk, nama, password, role, divisi, cabang) VALUES (%s,%s,%s,%s,%s,%s)",
                  ('HRD001','HRD Admin',generate_password_hash('admin123'),'hrd','HRD','PUSAT'))
     conn.commit()
     conn.close()
