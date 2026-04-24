@@ -1,67 +1,81 @@
 <!DOCTYPE html>
 <html lang="id">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard HRD | SJAM</title><script src="https://cdn.tailwindcss.com"></script>
-<style>@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap'); body { font-family: 'Poppins', sans-serif; }</style>
-</head><body class="bg-gray-50 min-h-screen">
-<nav class="bg-white shadow-sm border-b sticky top-0 z-10"><div class="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
-<h1 class="text-xl font-bold text-indigo-600">SJAM Penilaian</h1>
-<div class="flex items-center gap-4"><span class="text-gray-700">HRD Admin</span>
-<a href="/logout" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm">Logout</a></div></div></nav>
-<main class="max-w-7xl mx-auto p-4 sm:p-6">
-<div class="bg-white rounded-xl shadow-sm p-6 mb-6 flex justify-between items-center">
-<div><h2 class="text-2xl font-bold text-gray-800">Rekap Penilaian Karyawan</h2>
-<p class="text-gray-500 text-sm mt-1">Klik Detail untuk melihat rincian per aspek</p></div>
-<a href="/export_excel" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium">Export Excel</a></div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard HRD | SJAM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap'); body { font-family: 'Poppins', sans-serif; }</style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+    <nav class="bg-white/80 backdrop-blur-md shadow-sm border-b sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-2">
+                    <i class="bi bi-building text-2xl text-indigo-600"></i>
+                    <h1 class="text-xl font-bold text-indigo-600">SJAM HRD</h1>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span class="text-gray-700">{{ user.nama }}</span>
+                    <a href="/logout" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm"><i class="bi bi-box-arrow-right"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
 
-<div class="bg-white rounded-xl shadow-sm overflow-x-auto">
-<table class="w-full"><thead class="bg-gray-50"><tr>
-<th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">NPK</th>
-<th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
-<th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Divisi</th>
-<th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Periode</th>
-<th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nilai</th>
-<th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Grade</th>
-<th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
-</tr></thead><tbody class="divide-y divide-gray-200">
-{% for row in data %}
-<tr class="hover:bg-gray-50"><td class="px-4 py-4 text-sm">{{ row.npk }}</td>
-<td class="px-4 py-4 text-sm font-medium">{{ row.nama }}</td>
-<td class="px-4 py-4 text-sm">{{ row.divisi }}</td>
-<td class="px-4 py-4 text-sm">{{ row.periode }}</td>
-<td class="px-4 py-4 text-sm font-bold text-indigo-600">{{ row.nilai_akhir }}</td>
-<td class="px-4 py-4"><span class="px-2 py-1 text-xs font-semibold rounded-full
-  {% if row.grade in ['A+','A'] %}bg-green-100 text-green-800
-  {% elif row.grade in ['B+','B'] %}bg-blue-100 text-blue-800
-  {% elif row.grade in ['C+','C'] %}bg-yellow-100 text-yellow-800
-  {% else %}bg-red-100 text-red-800{% endif %}">{{ row.grade }}</span></td>
-<td class="px-4 py-4"><button onclick="showDetail({{ loop.index0 }})" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">Detail</button></td></tr>
-{% endfor %}</tbody></table></div></main>
+    <main class="max-w-7xl mx-auto p-4 sm:p-6">
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">Dashboard HRD</h2>
+            <p class="text-gray-500">Rekap semua penilaian yang sudah difinalisasi</p>
+        </div>
 
-<!-- Modal Detail -->
-<div id="detailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-<div class="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
-<div class="flex justify-between items-center mb-4">
-<h3 class="text-xl font-bold text-gray-800" id="modalTitle">Rincian Penilaian</h3>
-<button onclick="closeModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
-</div><div id="modalContent" class="space-y-3"></div></div></div>
-
-<script>
-const penilaianData = {{ data|tojson }};
-function showDetail(index) {
-    const data = penilaianData[index];
-    document.getElementById('modalTitle').textContent = `Detail: ${data.nama} - ${data.periode}`;
-    let html = `<div class="grid grid-cols-2 gap-4 mb-4 p-4 bg-indigo-50 rounded-lg">
-        <div><p class="text-sm text-gray-600">Nilai Akhir</p><p class="text-2xl font-bold text-indigo-600">${data.nilai_akhir}</p></div>
-        <div><p class="text-sm text-gray-600">Grade</p><p class="text-2xl font-bold text-indigo-600">${data.grade}</p></div></div>`;
-    html += '<h4 class="font-semibold text-gray-800 mb-2">Skor Per Aspek:</h4>';
-    for (const [aspek, skor] of Object.entries(data.detail)) {
-        html += `<div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-            <span class="text-sm text-gray-700">${aspek}</span>
-            <span class="font-semibold text-gray-900">${skor}</span></div>`;
-    }
-    document.getElementById('modalContent').innerHTML = html;
-    document.getElementById('detailModal').classList.remove('hidden');
-}
-function closeModal() { document.getElementById('detailModal').classList.add('hidden'); }
-</script></body></html>
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="p-6 border-b bg-gradient-to-r from-indigo-50 to-blue-50 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="bg-indigo-100 p-2 rounded-lg"><i class="bi bi-table text-xl text-indigo-600"></i></div>
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-800">Data Penilaian Final</h2>
+                        <p class="text-sm text-gray-500">Total: {{ data|length }} data</p>
+                    </div>
+                </div>
+                <a href="/export_hrd" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm flex items-center gap-2">
+                    <i class="bi bi-file-earmark-excel"></i> Export Excel
+                </a>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">NPK</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Nama</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Divisi</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Periode</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Nilai</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Grade</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Tgl Final</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        {% for d in data %}
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="px-6 py-4 text-sm font-medium text-gray-800">{{ d.npk }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-700">{{ d.nama }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-700">{{ d.divisi }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-700">{{ d.periode }}</td>
+                            <td class="px-6 py-4 text-sm font-bold text-indigo-600">{{ "%.2f"|format(d.nilai_akhir) }}</td>
+                            <td class="px-6 py-4 text-sm">
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold {% if d.grade=='A' or d.grade=='A+' %}bg-green-100 text-green-700{% elif d.grade=='B' or d.grade=='B+' %}bg-blue-100 text-blue-700{% elif d.grade=='C' or d.grade=='C+' %}bg-yellow-100 text-yellow-700{% else %}bg-red-100 text-red-700{% endif %}">{{ d.grade }}</span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-700">{{ d.tgl_finalisasi }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="7" class="px-6 py-12 text-center text-gray-500">Belum ada data yang difinalisasi</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
