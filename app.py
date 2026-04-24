@@ -429,14 +429,6 @@ def logout():
     session.clear()
     return redirect('/login')
 
-@app.route('/static/manifest.json')
-def manifest():
-    return send_file('static/manifest.json', mimetype='application/manifest+json')
-
-@app.route('/static/sw.js')
-def sw():
-    return send_file('static/sw.js', mimetype='application/javascript')
-
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
