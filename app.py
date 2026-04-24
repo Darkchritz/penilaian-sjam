@@ -182,7 +182,58 @@ def penilaian(npk):
         c.execute("SELECT * FROM penilaian WHERE npk=%s AND penilai=%s AND status='draft'", (npk, user['npk']))
         draft = c.fetchone()
         
-    return render_template('form_penilaian.html', user=user, karyawan=karyawan, draft=draft)           
+    return render_template('form_penilaian.html', user=user, karyawan=karyawan, draft=draft)
+
+@app.route('/submit_nilai', methods=['POST'])
+def submit_nilai():
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    
+    user = session['user']
+    data = request.form
+    
+    # Hitung nilai_akhir + grade otomatis
+    nilai_list = [
+        int(data['tanggung_jawab']), 
+        int(data['inisiatif']), 
+        int(data['kerjasama']), 
+        int(data['kedisiplinan']), 
+        int(data['kemampuan']), 
+        int(data['target']), 
+        int(data['proses']), 
+        int(data['inovasi'])
+    ]
+    nilai_akhir = sum(nilai_list) / len(nilai_list)
+    
+    if nilai_akhir >= 4.5: grade = 'A'
+    elif nilai_akhir >= 3.5: grade = 'B' 
+    elif nilai_akhir >= 2.5: grade = 'C'
+    else: grade = 'D'
+    
+    status = 'final' if data['action'] == 'final' else 'draft'
+    tgl_final = datetime.now() if status == 'final' else None
+    
+    with get_conn() as conn:
+        c = conn.cursor()
+        
+        # Ambil data karyawan buat isi nama, divisi, cabang
+        c.execute("SELECT nama, divisi, cabang FROM users WHERE npk=%s", (data['npk'],))
+        karyawan = c.fetchone()
+        
+        # Hapus draft lama kalo ada, biar ga dobel
+        c.execute("DELETE FROM penilaian WHERE npk=%s AND penilai=%s AND status='draft'", (data['npk'], user['npk']))
+        
+        c.execute("""INSERT INTO penilaian 
+            (npk, nama, periode, divisi, cabang, tanggung_jawab, inisiatif, kerjasama, kedisiplinan, 
+             kemampuan, target, proses, inovasi, nilai_akhir, grade, penilai, status, tgl_finalisasi) 
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+            (data['npk'], karyawan['nama'], '2026', karyawan['divisi'], karyawan['cabang'],
+             data['tanggung_jawab'], data['inisiatif'], data['kerjasama'], data['kedisiplinan'], 
+             data['kemampuan'], data['target'], data['proses'], data['inovasi'],
+             nilai_akhir, grade, user['npk'], status, tgl_final))
+        conn.commit()
+    
+    return redirect(url_for('dashboard'))
     
 @app.route('/finalisasi/<int:id>')
 def finalisasi(id):
