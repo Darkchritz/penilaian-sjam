@@ -96,7 +96,7 @@ def register():
         conn = get_conn()
         c = conn.cursor()
         try:
-            c.execute("INSERT INTO users (npk, nama, password, role, divisi, cabang) VALUES (%s,%s,%s,%s)", (npk, nama, password, role, divisi, cabang))
+            c.execute("INSERT INTO users (npk, nama, password, role, divisi, cabang) VALUES (%s,%s,%s,%s,%s,%s)", (npk, nama, password, role, divisi, cabang))
             conn.commit()
             flash('Registrasi berhasil! Silakan login.', 'success')
             return redirect('/login')
@@ -210,7 +210,7 @@ def submit_nilai():
         c.execute("""INSERT INTO penilaian 
             (npk, nama, periode, divisi, cabang, tanggung_jawab, inisiatif, kerjasama, kedisiplinan, 
              kemampuan, target, proses, inovasi, nilai_akhir, grade, penilai, status, tgl_finalisasi) 
-            VALUES (%s,%s,%s,%s)""",
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
             (data['npk'], karyawan['nama'], '2026', karyawan['divisi'], karyawan['cabang'],
              data['tanggung_jawab'], data['inisiatif'], data['kerjasama'], data['kedisiplinan'], 
              data['kemampuan'], data['target'], data['proses'], data['inovasi'],
@@ -279,7 +279,7 @@ def tambah_karyawan():
     conn = get_conn()
     c = conn.cursor()
     try:
-        c.execute("INSERT INTO users (npk, nama, password, role, divisi, cabang) VALUES (%s,%s,%s,%s)", (npk, nama, password, role, divisi, cabang))
+        c.execute("INSERT INTO users (npk, nama, password, role, divisi, cabang) VALUES (%s,%s,%s,%s,%s,%s)", (npk, nama, password, role, divisi, cabang))
         conn.commit()
         flash('Karyawan berhasil ditambahkan!', 'success')
     except psycopg2.IntegrityError:
@@ -408,7 +408,7 @@ def upload_karyawan():
             existing_npk.add(row['npk'])
 
         if data_batch:
-            c.executemany("INSERT INTO users (npk, nama, password, role, divisi, cabang) VALUES (%s,%s,%s,%s)", data_batch)
+            c.executemany("INSERT INTO users (npk, nama, password, role, divisi, cabang) VALUES (%s,%s,%s,%s,%s,%s)", data_batch)
 
         conn.commit()
         conn.close()
