@@ -322,7 +322,7 @@ def hapus_karyawan(npk):
     conn.commit()
     conn.close()
     flash('Karyawan & data penilaian dihapus!', 'success')
-    return redirect('/dashboard')7
+    return redirect('/dashboard')
 
 @app.route('/hrd/download_karyawan')
 def download_karyawan():
