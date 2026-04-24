@@ -369,6 +369,113 @@ def upload_karyawan():
         conn = sqlite3.connect('penilaian.db')
         c = conn.cursor()
         
+        # Ambil NPK yang udah ada
+        c.execute("SELECT npk FROM users")
+        existing_npk = set([r[0] for r in c.fetchall()])
+        
+        data_batch = []
+        skip = 0
+        for _, row in df.iterrows():
+            if row['npk'] in existing_npk:
+                skip += 1
+                continue # Skip kalo NPK udah ada
+                
+            password = str(row['password']).strip() if 'password' in df.columns and str(row['password']).strip()!= '' else '123456'
+            data_batch.append((
+                row['npk'],
+                row['nama'],
+                generate_password_hash(password),
+                row['role'],
+                row['divisi'],
+                row['cabang']
+            ))
+            existing_npk.add(row['npk']) # tambah ke set biar ga double di file yang sama
+        
+        if data_batch:
+            c.executemany("INSERT INTO users VALUES (?,?,?,?,?,?)", data_batch)
+        
+        conn.commit()
+        conn.close()
+        flash(f'Upload selesai! Baru: {len(data_batch)}, Skip duplikat: {skip}', 'success')
+        
+    except Exception as e:
+        flash(f'Error: {str(e)}', 'error')
+    
+    return redirect('/dashboard')
+
+@app.route('/dashboard')
+def dashboard():
+    if 'user' not in session: 
+        return redirect('/login')
+    
+    user = session['user']
+    conn = sqlite3.connect('penilaian.db')
+    c = conn.cursor()
+    
+    if user['role'] == 'hrd':
+        # Pagination untuk master karyawan
+        page = request.args.get('page', 1, type=int)
+        per_page = 20
+        offset = (page - 1) * per_page
+        
+        c.execute("SELECT COUNT(*) FROM users WHERE role IN ('karyawan','kadiv')")
+        total_karyawan = c.fetchone()[0]
+        total_pages = (total_karyawan + per_page - 1) // per_page
+        
+        c.execute("SELECT npk, nama, divisi, role, cabang FROM users WHERE role IN ('karyawan','kadiv') ORDER BY cabang, divisi, nama LIMIT? OFFSET?", 
+                 (per_page, offset))
+        karyawan = [{'npk':r[0],'nama':r[1],'divisi':r[2],'role':r[3],'cabang':r[4]} for r in c.fetchall()]
+        
+        # Rekap final: cuma yang belum dinilai final
+        c.execute("""
+            SELECT u.npk, u.nama, u.divisi, u.cabang 
+            FROM users u 
+            LEFT JOIN penilaian p ON u.npk = p.npk AND p.status = 'final'
+            WHERE u.role IN ('karyawan','kadiv') AND p.id IS NULL
+            ORDER BY u.cabang, u.divisi, u.nama
+        """)
+        belum_dinilai = [{'npk':r[0],'nama':r[1],'divisi':r[2],'cabang':r[3]} for r in c.fetchall()]
+        
+        conn.close()
+        return render_template('dashboard_hrd.html', 
+                             user=user, 
+                             karyawan=karyawan, 
+                             belum_dinilai=belum_dinilai,
+                             page=page,
+                             total_pages=total_pages)
+    
+    elif user['role'] == 'kadiv':
+        #... kode kadiv tetap sama...
+        is_sjam = user['cabang'].upper().startswith('SJAM')
+        if is_sjam:
+            c.execute("SELECT npk, nama, divisi, role, cabang FROM users WHERE divisi=? AND cabang=? AND role IN ('karyawan','kadiv') AND npk!=? ORDER BY role DESC, nama", 
+                     (user['divisi'], user['cabang'], user['npk']))
+        else:
+            c.execute("SELECT npk, nama, divisi, role, cabang FROM users WHERE divisi=? AND cabang=? AND role IN ('karyawan','kadiv') AND npk!=? ORDER BY role DESC, nama", 
+                     (user['divisi'], user['cabang'], user['npk']))
+        
+        karyawan = [{'npk':r[0],'nama':r[1],'divisi':r[2],'role':r[3],'cabang':r[4]} for r in c.fetchall()]
+        
+        c.execute("SELECT * FROM penilaian WHERE status='draft' AND divisi=? AND cabang=? ORDER BY tgl_finalisasi DESC", 
+                 (user['divisi'], user['cabang']))
+        
+        draft = [{'id':r[0],'npk':r[1],'nama':r[2],'periode':r[3],'divisi':r[4],'cabang':r[5]} for r in c.fetchall()]
+        conn.close()
+        return render_template('dashboard_kadiv.html', user=user, karyawan=karyawan, draft=draft)
+    
+    else:
+        c.execute("SELECT * FROM penilaian WHERE npk=? AND status='final' ORDER BY tgl_finalisasi DESC", (user['npk'],))
+        data = [{'periode':r[3],'tanggung_jawab':r[6],'inisiatif':r[7],'kerjasama':r[8],'kedisiplinan':r[9],'kemampuan':r[10],'target':r[11],'proses':r[12],'inovasi':r[13],'nilai_akhir':r[14],'grade':r[15],'tgl_finalisasi':r[16]} for r in c.fetchall()]
+        conn.close()
+        return render_template('dashboard_karyawan.html', user=user, data=data)
+        
+        if len(df) > 500:
+            flash('Maksimal 500 baris per upload. Pecah file Excel jadi beberapa bagian', 'error')
+            return redirect('/dashboard')
+        
+        conn = sqlite3.connect('penilaian.db')
+        c = conn.cursor()
+        
         data_batch = []
         for _, row in df.iterrows():
             password = str(row['password']).strip() if 'password' in df.columns and str(row['password']).strip()!= '' else '123456'
