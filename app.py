@@ -392,15 +392,58 @@ def upload_karyawan():
         return redirect('/dashboard')
     
     try:
-        # Coba baca Excel
         df = pd.read_excel(file)
-        
-        # Cek kolom wajib ada
         required_cols = ['npk', 'nama', 'role', 'divisi', 'cabang']
         for col in required_cols:
             if col not in df.columns:
-                flash(f'Kolom {col} tidak ditemukan di Excel. Pastikan ada: npk, nama, password, role, divisi, cabang', 'error')
+                flash(f'Kolom {col} tidak ditemukan. Header harus: npk, nama, password, role, divisi, cabang', 'error')
                 return redirect('/dashboard')
+        
+        # Bersihin data dulu
+        df = df.fillna('') # ganti NaN jadi string kosong
+        df['npk'] = df['npk'].astype(str).str.strip()
+        df['nama'] = df['nama'].astype(str).str.strip()
+        df['role'] = df['role'].astype(str).str.strip()
+        df['divisi'] = df['divisi'].astype(str).str.strip()
+        df['cabang'] = df['cabang'].astype(str).str.strip()
+        
+        # Hapus baris yang NPK/Nama kosong
+        df = df[(df['npk'] != '') & (df['nama'] != '') & (df['role'] != '') & (df['divisi'] != '') & (df['cabang'] != '')]
+        
+        if df.empty:
+            flash('Tidak ada data valid di Excel', 'error')
+            return redirect('/dashboard')
+        
+        # Limit 500 baris sekali upload biar ga timeout
+        if len(df) > 500:
+            flash('Maksimal 500 baris per upload. Pecah file Excel jadi beberapa bagian', 'error')
+            return redirect('/dashboard')
+        
+        conn = sqlite3.connect('penilaian.db')
+        c = conn.cursor()
+        
+        # Batch insert pake executemany - jauh lebih cepet
+        data_batch = []
+        for _, row in df.iterrows():
+            password = str(row['password']).strip() if 'password' in df.columns and str(row['password']).strip() != '' else '123456'
+            data_batch.append((
+                row['npk'], 
+                row['nama'], 
+                generate_password_hash(password), 
+                row['role'], 
+                row['divisi'], 
+                row['cabang']
+            ))
+        
+        c.executemany("INSERT OR REPLACE INTO users VALUES (?,?,?,?,?,?)", data_batch)
+        conn.commit()
+        conn.close()
+        flash(f'Upload berhasil! {len(data_batch)} data karyawan diproses', 'success')
+        
+    except Exception as e:
+        flash(f'Error: {str(e)}', 'error')
+    
+    return redirect('/dashboard')
         
         conn = sqlite3.connect('penilaian.db')
         c = conn.cursor()
