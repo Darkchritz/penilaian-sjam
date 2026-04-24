@@ -48,23 +48,27 @@ def hitung_nilai(form_data):
 def init_db():
     conn = sqlite3.connect('penilaian.db')
     c = conn.cursor()
-    # Cek kolom users dulu
-    c.execute("PRAGMA table_info(users)")
-    columns = [row[1] for row in c.fetchall()]
-
-    if 'users' not in [t[0] for t in c.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()]:
-        c.execute('''CREATE TABLE users
-                     (npk TEXT PRIMARY KEY, nama TEXT, password TEXT, role TEXT, divisi TEXT, cabang TEXT)''')
-    elif 'cabang' not in columns:
-        c.execute("ALTER TABLE users ADD COLUMN cabang TEXT DEFAULT 'Jakarta'")
-
+    
+    # Tabel users - 5 kolom aja
+    c.execute('''CREATE TABLE IF NOT EXISTS users
+                 (npk TEXT PRIMARY KEY, nama TEXT, password TEXT, role TEXT, divisi TEXT)''')
+    
+    # Tabel penilaian - TAMBAH is_final di paling belakang
     c.execute('''CREATE TABLE IF NOT EXISTS penilaian
-                 (id INTEGER PRIMARY KEY AUTOINCREMENT, npk TEXT, periode TEXT,
-                  nilai_akhir REAL, grade TEXT, detail_json TEXT, tgl_finalisasi TEXT, divisi TEXT)''')
+                 (id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                  npk TEXT, 
+                  periode TEXT,
+                  nilai_akhir REAL, 
+                  grade TEXT, 
+                  detail_json TEXT, 
+                  tgl_finalisasi TEXT, 
+                  divisi TEXT, 
+                  is_final INTEGER DEFAULT 0)''')  # <-- Ini yang baru
 
-    c.execute("INSERT OR IGNORE INTO users VALUES ('KD001','Kepala Divisi','123','kadiv','IT','Jakarta')")
-    c.execute("INSERT OR IGNORE INTO users VALUES ('HRD01','Admin HRD','123','hrd','HRD','Jakarta')")
-    c.execute("INSERT OR IGNORE INTO users VALUES ('K001','Budi','123','karyawan','IT','Jakarta')")
+    # Data default
+    c.execute("INSERT OR IGNORE INTO users VALUES ('KD001','Kepala Divisi','123','kadiv','IT')")
+    c.execute("INSERT OR IGNORE INTO users VALUES ('HRD01','Admin HRD','123','hrd','HRD')")
+    c.execute("INSERT OR IGNORE INTO users VALUES ('K001','Budi','123','karyawan','IT')")
     conn.commit()
     conn.close()
 
