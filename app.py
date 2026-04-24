@@ -48,22 +48,22 @@ def hitung_nilai(form_data):
 def init_db():
     conn = sqlite3.connect('penilaian.db')
     c = conn.cursor()
-    
-    # Tabel users - 5 kolom aja
+
+    # Tabel users - 5 kolom aja, HAPUS CABANG
     c.execute('''CREATE TABLE IF NOT EXISTS users
                  (npk TEXT PRIMARY KEY, nama TEXT, password TEXT, role TEXT, divisi TEXT)''')
-    
-    # Tabel penilaian - TAMBAH is_final di paling belakang
+
+    # Tabel penilaian
     c.execute('''CREATE TABLE IF NOT EXISTS penilaian
-                 (id INTEGER PRIMARY KEY AUTOINCREMENT, 
-                  npk TEXT, 
+                 (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  npk TEXT,
                   periode TEXT,
-                  nilai_akhir REAL, 
-                  grade TEXT, 
-                  detail_json TEXT, 
-                  tgl_finalisasi TEXT, 
-                  divisi TEXT, 
-                  is_final INTEGER DEFAULT 0)''')  # <-- Ini yang baru
+                  nilai_akhir REAL,
+                  grade TEXT,
+                  detail_json TEXT,
+                  tgl_finalisasi TEXT,
+                  divisi TEXT,
+                  is_final INTEGER DEFAULT 0)''')
 
     # Data default
     c.execute("INSERT OR IGNORE INTO users VALUES ('KD001','Kepala Divisi','123','kadiv','IT')")
@@ -85,7 +85,8 @@ def login():
         user = c.fetchone()
         conn.close()
         if user:
-            session['user'] = {'npk': user[0], 'nama': user[1], 'role': user[3], 'divisi': user[4], 'cabang': user[5]}
+            # FIX: HAPUS user[5] KARENA GA ADA CABANG
+            session['user'] = {'npk': user[0], 'nama': user[1], 'role': user[3], 'divisi': user[4]}
             return redirect('/dashboard')
         else:
             flash('NPK atau Password salah', 'error')
@@ -98,12 +99,13 @@ def register():
         nama = request.form['nama']
         password = request.form['password']
         divisi = request.form['divisi']
-        cabang = request.form['cabang']
+        # HAPUS CABANG DARI FORM
 
         conn = sqlite3.connect('penilaian.db')
         c = conn.cursor()
         try:
-            c.execute("INSERT INTO users VALUES (?,?,?,?,?,?)", (npk, nama, password, 'karyawan', divisi, cabang))
+            # FIX: 5 VALUES AJA
+            c.execute("INSERT INTO users VALUES (?,?,?,?,?)", (npk, nama, password, 'karyawan', divisi))
             conn.commit()
             flash('Registrasi berhasil! Silakan login', 'success')
             return redirect('/')
@@ -113,7 +115,6 @@ def register():
             conn.close()
     return render_template('register.html')
 
-@app.route('/dashboard')
 @app.route('/finalisasi_divisi', methods=['POST'])
 def finalisasi_divisi():
     if 'user' not in session or session['user']['role']!= 'kadiv': return redirect('/')
@@ -126,6 +127,8 @@ def finalisasi_divisi():
     conn.close()
     flash('Semua penilaian divisi berhasil difinalisasi! Sekarang tidak bisa diedit lagi', 'success')
     return redirect('/dashboard')
+
+@app.route('/dashboard')
 def dashboard():
     if 'user' not in session: return redirect('/')
     user = session['user']
@@ -133,14 +136,29 @@ def dashboard():
     c = conn.cursor()
 
     if user['role'] == 'kadiv':
-        c.execute("SELECT npk, nama FROM users WHERE role='karyawan' AND divisi=?", (user['divisi'],))
-        karyawan = c.fetchall()
+        divisi = user['divisi']
+        c.execute("SELECT npk, nama FROM users WHERE role='karyawan' AND divisi=?", (divisi,))
+        karyawan_divisi = [{'npk': r[0], 'nama': r[1]} for r in c.fetchall()]
+
+        c.execute("SELECT npk, nilai_akhir, grade FROM penilaian WHERE divisi=? AND is_final=0", (divisi,))
+        sudah_dinilai = []
+        for r in c.fetchall():
+            nama = next((k['nama'] for k in karyawan_divisi if k['npk']==r[0]), 'Unknown')
+            sudah_dinilai.append({'npk': r[0], 'nilai_akhir': r[1], 'grade': r[2], 'nama': nama})
+
+        npk_sudah = [k['npk'] for k in sudah_dinilai]
+        belum_dinilai = [k for k in karyawan_divisi if k['npk'] not in npk_sudah]
+
         conn.close()
-        return render_template('dashboard_kadiv.html', user=user, karyawan=karyawan, indikator=INDIKATOR)
+        return render_template('dashboard_kadiv.html',
+                             user=user,
+                             karyawan=karyawan_divisi,
+                             sudah_dinilai=sudah_dinilai,
+                             belum_dinilai=belum_dinilai)
 
     elif user['role'] == 'hrd':
         c.execute("SELECT p.*, u.nama, u.divisi FROM penilaian p JOIN users u ON p.npk=u.npk ORDER BY p.tgl_finalisasi DESC")
-        data = [{'npk':r[1],'periode':r[2],'nilai_akhir':r[3],'grade':r[4],'tgl_finalisasi':r[6],'nama':r[7],'divisi':r[8],'detail':json.loads(r[5])} for r in c.fetchall()]
+        data = [{'npk':r[1],'periode':r[2],'nilai_akhir':r[3],'grade':r[4],'tgl_finalisasi':r[6],'nama':r[9],'divisi':r[10],'detail':json.loads(r[5])} for r in c.fetchall()]
         conn.close()
         return render_template('dashboard_hrd.html', data=data)
 
@@ -150,68 +168,6 @@ def dashboard():
         conn.close()
         return render_template('dashboard_karyawan.html', user=user, hasil=hasil)
 
-@app.route('/finalisasi', methods=['POST'])
-def finalisasi():
-    if 'user' not in session or session['user']['role']!= 'kadiv': return redirect('/')
-    npk_karyawan = request.form['npk_karyawan']
-    periode = request.form['periode']
-    nilai_akhir, grade, detail = hitung_nilai(request.form)
-    conn = sqlite3.connect('penilaian.db')
-    c = conn.cursor()
-    c.execute("INSERT INTO penilaian (npk, periode, nilai_akhir, grade, detail_json, tgl_finalisasi, divisi) VALUES (?,?,?,?,?,?,?)",
-              (npk_karyawan, periode, nilai_akhir, grade, json.dumps(detail), datetime.now().strftime('%Y-%m-%d %H:%M'), session['user']['divisi']))
-    conn.commit()
-    conn.close()
-    return redirect('/dashboard')
-
-@app.route('/download_template')
-def download_template():
-    if 'user' not in session or session['user']['role']!= 'hrd': return redirect('/')
-    df = pd.DataFrame(columns=['npk', 'nama', 'password', 'divisi', 'cabang'])
-    df.loc[0] = ['K002', 'Contoh Nama', '123', 'IT', 'Makassar']
-    output = io.BytesIO()
-    with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        df.to_excel(writer, index=False, sheet_name='Template')
-    output.seek(0)
-    return send_file(output, download_name='template_karyawan.xlsx', as_attachment=True)
-
-@app.route('/upload_karyawan', methods=['POST'])
-def upload_karyawan():
-    if 'user' not in session or session['user']['role']!= 'hrd': return redirect('/')
-    file = request.files['file']
-    if file.filename == '':
-        flash('Tidak ada file dipilih', 'error')
-        return redirect('/dashboard')
-
-    try:
-        df = pd.read_excel(file)
-        conn = sqlite3.connect('penilaian.db')
-        c = conn.cursor()
-        sukses = 0
-        for _, row in df.iterrows():
-            try:
-                c.execute("INSERT OR REPLACE INTO users VALUES (?,?,?,?,?,?)",
-                         (str(row['npk']), row['nama'], str(row['password']), 'karyawan', row['divisi'], row['cabang']))
-                sukses += 1
-            except: pass
-        conn.commit()
-        conn.close()
-        flash(f'Berhasil upload {sukses} data karyawan', 'success')
-    except Exception as e:
-        flash(f'Error: {str(e)}', 'error')
-    return redirect('/dashboard')
-
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect('/')
-
-@app.route('/reset-db-sjam')
-def reset_db():
-    if os.path.exists('penilaian.db'):
-        os.remove('penilaian.db')
-    init_db()
-    return "Database berhasil direset! <a href='/'>Login</a>"
 @app.route('/nilai/<npk>', methods=['GET','POST'])
 def nilai(npk):
     if 'user' not in session or session['user']['role']!= 'kadiv':
@@ -220,7 +176,7 @@ def nilai(npk):
     conn = sqlite3.connect('penilaian.db')
     c = conn.cursor()
 
-    # NO 5: CEK UDAH FINAL ATAU BELUM
+    # CEK UDAH FINAL ATAU BELUM
     c.execute("SELECT is_final FROM penilaian WHERE npk=? ORDER BY id DESC LIMIT 1", (npk,))
     row = c.fetchone()
     if row and row[0] == 1:
@@ -243,7 +199,7 @@ def nilai(npk):
         # HAPUS DULU DATA LAMA KALO ADA & BELUM FINAL
         c.execute("DELETE FROM penilaian WHERE npk=? AND is_final=0", (npk,))
 
-        # NO 4: INI LOKASI INSERT YANG KAMU CARI
+        # NO 4: INSERT BARU PAKE is_final=0
         c.execute("""INSERT INTO penilaian
                      (npk, periode, nilai_akhir, grade, detail_json, tgl_finalisasi, divisi, is_final)
                      VALUES (?,?,?,?,?,?,?,0)""",
@@ -267,5 +223,57 @@ def nilai(npk):
                          divisi=karyawan[1],
                          indikator=INDIKATOR,
                          detail=detail_lama)
+
+@app.route('/download_template')
+def download_template():
+    if 'user' not in session or session['user']['role']!= 'hrd': return redirect('/')
+    # FIX: HAPUS CABANG DARI TEMPLATE
+    df = pd.DataFrame(columns=['npk', 'nama', 'password', 'divisi'])
+    df.loc[0] = ['K002', 'Contoh Nama', '123', 'IT']
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Template')
+    output.seek(0)
+    return send_file(output, download_name='template_karyawan.xlsx', as_attachment=True)
+
+@app.route('/upload_karyawan', methods=['POST'])
+def upload_karyawan():
+    if 'user' not in session or session['user']['role']!= 'hrd': return redirect('/')
+    file = request.files['file']
+    if file.filename == '':
+        flash('Tidak ada file dipilih', 'error')
+        return redirect('/dashboard')
+
+    try:
+        df = pd.read_excel(file)
+        conn = sqlite3.connect('penilaian.db')
+        c = conn.cursor()
+        sukses = 0
+        for _, row in df.iterrows():
+            try:
+                # FIX: 5 VALUES AJA, HAPUS CABANG
+                c.execute("INSERT OR REPLACE INTO users VALUES (?,?,?,?,?)",
+                         (str(row['npk']), row['nama'], str(row['password']), 'karyawan', row['divisi']))
+                sukses += 1
+            except: pass
+        conn.commit()
+        conn.close()
+        flash(f'Berhasil upload {sukses} data karyawan', 'success')
+    except Exception as e:
+        flash(f'Error: {str(e)}', 'error')
+    return redirect('/dashboard')
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect('/')
+
+@app.route('/reset-db-sjam')
+def reset_db():
+    if os.path.exists('penilaian.db'):
+        os.remove('penilaian.db')
+    init_db()
+    return "Database berhasil direset! <a href='/'>Login</a>"
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
