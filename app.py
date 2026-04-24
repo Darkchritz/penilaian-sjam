@@ -1,10 +1,12 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 import psycopg2
 import psycopg2.extras
 from psycopg2.extras import RealDictCursor
 import os
+import pandas as pd
+import io
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'sjam-penilaian-secret-2024')
@@ -24,26 +26,28 @@ def init_db():
         divisi TEXT,
         cabang TEXT
     )''')
+    
     c.execute('''CREATE TABLE IF NOT EXISTS penilaian (
-        id SERIAL PRIMARY KEY,
-        npk TEXT,
-        nama TEXT,
-        periode TEXT,
-        divisi TEXT,
-        cabang TEXT,
-        tanggung_jawab INTEGER,
-        inisiatif INTEGER,
-        kerjasama INTEGER,
-        kedisiplinan INTEGER,
-        kemampuan INTEGER,
-        target INTEGER,
-        proses INTEGER,
-        inovasi INTEGER,
-        nilai_akhir REAL,
-        grade TEXT,
-        tgl_finalisasi TEXT,
-        status TEXT
-    )''')
+    id SERIAL PRIMARY KEY,
+    npk TEXT,
+    nama TEXT,
+    periode TEXT,
+    divisi TEXT,
+    cabang TEXT,
+    tanggung_jawab INTEGER,
+    inisiatif INTEGER,
+    kerjasama INTEGER,
+    kedisiplinan INTEGER,
+    kemampuan INTEGER,
+    target INTEGER,
+    proses INTEGER,
+    inovasi INTEGER,
+    nilai_akhir REAL,
+    grade TEXT,
+    penilai TEXT,
+    tgl_finalisasi TEXT,
+    status TEXT
+)''')
 
     c.execute("SELECT COUNT(*) as count FROM users WHERE role='hrd'")
     if c.fetchone()['count'] == 0:
@@ -217,7 +221,7 @@ def submit_nilai():
         c.execute("""INSERT INTO penilaian 
             (npk, nama, periode, divisi, cabang, tanggung_jawab, inisiatif, kerjasama, kedisiplinan, 
              kemampuan, target, proses, inovasi, nilai_akhir, grade, penilai, status, tgl_finalisasi) 
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
             (data['npk'], karyawan['nama'], '2026', karyawan['divisi'], karyawan['cabang'],
              data['tanggung_jawab'], data['inisiatif'], data['kerjasama'], data['kedisiplinan'], 
              data['kemampuan'], data['target'], data['proses'], data['inovasi'],
