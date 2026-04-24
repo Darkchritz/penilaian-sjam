@@ -124,7 +124,15 @@ def dashboard():
             sudah_dinilai.append({'npk': r[0], 'nilai_akhir': r[1], 'grade': r[2], 'nama': nama})
 
         npk_sudah = [k['npk'] for k in sudah_dinilai]
-        belum_dinilai = [k for k in karyawan_divisi if k['npk'] not in npk_sudah]
+        # Tandai status tiap karyawan
+        for k in karyawan_divisi:
+            k['sudah_dinilai'] = k['npk'] in npk_sudah
+            if k['sudah_dinilai']:
+                detail = next((s for s in sudah_dinilai if s['npk']==k['npk']), {})
+                k['nilai_akhir'] = detail.get('nilai_akhir')
+                k['grade'] = detail.get('grade')
+
+        belum_dinilai = [k for k in karyawan_divisi if not k['sudah_dinilai']]
 
         conn.close()
         return render_template('dashboard_kadiv.html',
