@@ -122,40 +122,31 @@ def dashboard():
     c = conn.cursor()
 
     if user['role'] == 'hrd':
-        page = request.args.get('page', 1, type=int)
-        per_page = 20
-        offset = (page - 1) * per_page
-
-        c.execute("SELECT COUNT(*) as count FROM users WHERE role IN ('karyawan','kadiv')")
-        total_karyawan = c.fetchone()['count']
-        total_pages = (total_karyawan + per_page - 1) // per_page
-
-        c.execute("SELECT npk, nama, divisi, role, cabang FROM users WHERE role IN ('karyawan','kadiv') ORDER BY cabang, divisi, nama LIMIT %s OFFSET %s",
-                 (per_page, offset))
-        karyawan = c.fetchall()
-
-        c.execute("""
-            SELECT u.npk, u.nama, u.divisi, u.cabang
-            FROM users u
-            LEFT JOIN penilaian p ON u.npk = p.npk AND p.status = 'final'
-            WHERE u.role IN ('karyawan','kadiv') AND p.id IS NULL
-            ORDER BY u.cabang, u.divisi, u.nama
-        """)
-        belum_dinilai = c.fetchall()
-
-        conn.close()
-        # Tambahin ini biar HRD bisa liat list karyawan buat dinilai
-c.execute("SELECT npk, nama, divisi, role, cabang FROM users WHERE divisi=%s AND cabang=%s AND role IN ('karyawan','kadiv') AND npk!=%s ORDER BY role DESC, nama",
-         (user['divisi'], user['cabang'], user['npk']))
-karyawan_untuk_dinilai = c.fetchall()
-        return render_template('dashboard_hrd.html',
-                     user=user,
-                     karyawan=karyawan,
-                     belum_dinilai=belum_dinilai,
-                     page=page,
-                     total_pages=total_pages,
-                     karyawan_untuk_dinilai=karyawan_untuk_dinilai)  # <-- tambah ini
-
+    page = int(request.args.get('page', 1))
+    per_page = 20
+    c.execute("SELECT COUNT(*) FROM users WHERE npk!=%s", (user['npk'],))
+    total = c.fetchone()['count']
+    total_pages = (total + per_page - 1) // per_page
+    offset = (page - 1) * per_page
+    c.execute("SELECT npk,nama,divisi,role,cabang FROM users WHERE npk!=%s ORDER BY role DESC, nama LIMIT %s OFFSET %s",
+              (user['npk'], per_page, offset))
+    karyawan = c.fetchall()
+    c.execute("SELECT npk,nama,divisi,cabang FROM users WHERE npk NOT IN (SELECT npk FROM penilaian WHERE status='final') AND role='karyawan'")
+    belum_dinilai = c.fetchall()
+    
+    # TAMBAHIN INI: query buat tabel nilai
+    c.execute("SELECT npk, nama, divisi, role, cabang FROM users WHERE divisi=%s AND cabang=%s AND role IN ('karyawan','kadiv') AND npk!=%s ORDER BY role DESC, nama",
+             (user['divisi'], user['cabang'], user['npk']))
+    karyawan_untuk_dinilai = c.fetchall()
+    
+    return render_template('dashboard_hrd.html',
+                         user=user,
+                         karyawan=karyawan,
+                         belum_dinilai=belum_dinilai,
+                         page=page,
+                         total_pages=total_pages,
+                         karyawan_untuk_dinilai=karyawan_untuk_dinilai)
+    
     elif user['role'] == 'kadiv':
         c.execute("SELECT npk, nama, divisi, role, cabang FROM users WHERE divisi=%s AND cabang=%s AND role IN ('karyawan','kadiv') AND npk!=%s ORDER BY role DESC, nama",
                  (user['divisi'], user['cabang'], user['npk']))
