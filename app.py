@@ -274,6 +274,44 @@ def reset_db():
         os.remove('penilaian.db')
     init_db()
     return "Database berhasil direset! <a href='/'>Login</a>"
-
+@app.route('/export_hrd')
+def export_hrd():
+    if 'user' not in session or session['user']['role']!= 'hrd': 
+        return redirect('/')
+    
+    conn = sqlite3.connect('penilaian.db')
+    c = conn.cursor()
+    c.execute("""SELECT p.npk, u.nama, u.divisi, p.periode, p.nilai_akhir, p.grade, p.tgl_finalisasi, p.detail_json 
+                 FROM penilaian p JOIN users u ON p.npk=u.npk 
+                 WHERE p.is_final=1 
+                 ORDER BY p.tgl_finalisasi DESC""")
+    
+    data = []
+    for r in c.fetchall():
+        detail = json.loads(r[7])
+        row = {
+            'NPK': r[0],
+            'Nama': r[1], 
+            'Divisi': r[2],
+            'Periode': r[3],
+            'Nilai Akhir': r[4],
+            'Grade': r[5],
+            'Tgl Finalisasi': r[6]
+        }
+        # Tambahin detail aspek
+        for aspek, nilai in detail.items():
+            row[aspek] = nilai
+        data.append(row)
+    
+    conn.close()
+    
+    df = pd.DataFrame(data)
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Penilaian Final')
+    output.seek(0)
+    
+    filename = f'penilaian_hrd_{datetime.now().strftime("%Y%m%d")}.xlsx'
+    return send_file(output, download_name=filename, as_attachment=True)
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
