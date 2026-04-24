@@ -55,7 +55,7 @@
 
         <!-- TAB 1: PENILAIAN -->
         <div x-show="tab === 'penilaian'" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="p-6 border-b bg-gradient-to-r from-indigo-50 to-blue-50 flex justify-between items-center">
+            <div class="p-6 border-b bg-gradient-to-r from-indigo-50 to-blue-50 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                 <div class="flex items-center gap-3">
                     <div class="bg-indigo-100 p-2 rounded-lg"><i class="bi bi-table text-xl text-indigo-600"></i></div>
                     <div>
@@ -63,7 +63,7 @@
                         <p class="text-sm text-gray-500">Total: {{ data|length }} data</p>
                     </div>
                 </div>
-                <a href="/export_hrd" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm flex items-center gap-2">
+                <a href="/export_hrd" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm flex items-center gap-2 w-fit">
                     <i class="bi bi-file-earmark-excel"></i> Export Excel
                 </a>
             </div>
@@ -103,13 +103,14 @@
 
         <!-- TAB 2: KARYAWAN -->
         <div x-show="tab === 'karyawan'" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="p-6 border-b bg-gradient-to-r from-purple-50 to-pink-50 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+            <div class="p-6 border-b bg-gradient-to-r from-purple-50 to-pink-50 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                 <div class="flex items-center gap-3">
                     <div class="bg-purple-100 p-2 rounded-lg"><i class="bi bi-people text-xl text-purple-600"></i></div>
                     <div>
                         <h2 class="text-xl font-bold text-gray-800">Data Karyawan</h2>
                         <p class="text-sm text-gray-500">Total: {{ karyawan|length }} karyawan</p>
                     </div>
+                </div>
                 <div class="flex gap-2 flex-wrap">
                     <button @click="showTambah = true" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm flex items-center gap-2">
                         <i class="bi bi-plus-circle"></i> Tambah
