@@ -145,7 +145,7 @@ def dashboard():
                                  page=page,
                                  total_pages=total_pages,
                                  karyawan_untuk_dinilai=karyawan_untuk_dinilai)
-                                 
+        
         elif user['role'] == 'kadiv':
             c.execute("SELECT npk, nama, divisi, role, cabang FROM users WHERE divisi=%s AND cabang=%s AND role IN ('karyawan','kadiv') AND npk!=%s ORDER BY role DESC, nama",
                      (user['divisi'], user['cabang'], user['npk']))
@@ -154,84 +154,12 @@ def dashboard():
                      (user['npk'],))
             draft = c.fetchall()
             return render_template('dashboard_kadiv.html', user=user, karyawan=karyawan, draft=draft)
-            
+        
         else:
             c.execute("SELECT p.*, u.nama as nama_penilai FROM penilaian p JOIN users u ON p.penilai_npk=u.npk WHERE p.npk=%s AND p.status='final' ORDER BY p.updated_at DESC",
                      (user['npk'],))
             hasil = c.fetchall()
             return render_template('dashboard_karyawan.html', user=user, hasil=hasil)
-                                 
-        elif user['role'] == 'kadiv':
-            c.execute("SELECT npk, nama, divisi, role, cabang FROM users WHERE divisi=%s AND cabang=%s AND role IN ('karyawan','kadiv') AND npk!=%s ORDER BY role DESC, nama",
-                     (user['divisi'], user['cabang'], user['npk']))
-            karyawan = c.fetchall()
-            c.execute("SELECT p.*, u.nama FROM penilaian p JOIN users u ON p.npk=u.npk WHERE p.penilai=%s AND p.status='draft'",
-                     (user['npk'],))
-            draft = c.fetchall()
-            return render_template('dashboard_kadiv.html', user=user, karyawan=karyawan, draft=draft)
-            
-        else:
-            c.execute("SELECT p.*, u.nama as nama_penilai FROM penilaian p JOIN users u ON p.penilai=u.npk WHERE p.npk=%s AND p.status='final' ORDER BY p.updated_at DESC",
-                     (user['npk'],))
-            hasil = c.fetchall()
-            return render_template('dashboard_karyawan.html', user=user, hasil=hasil)
-            
-@app.route('/nilai/<npk>', methods=['GET','POST'])
-def nilai(npk):
-    if 'user' not in session or session['user']['role'] not in ['kadiv', 'hrd']:
-        flash('Akses ditolak', 'error')
-        return redirect('/')
-    
-    user = session['user']
-    conn = get_conn()
-    c = conn.cursor()
-    
-    c.execute("SELECT * FROM users WHERE npk=%s", (npk,))
-    karyawan = c.fetchone()
-    
-    if not karyawan:
-        conn.close()
-        flash('Karyawan tidak ditemukan', 'error')
-        return redirect('/dashboard')
-    
-    if karyawan['divisi'] != user['divisi'] or karyawan['cabang'] != user['cabang']:
-        conn.close()
-        flash('Anda hanya bisa menilai karyawan di divisi dan cabang yang sama', 'error')
-        return redirect('/dashboard')
-    
-    if request.method == 'POST':
-        periode = request.form['periode']
-        tj = int(request.form['tanggung_jawab'])
-        inis = int(request.form['inisiatif'])
-        kerja = int(request.form['kerjasama'])
-        disiplin = int(request.form['kedisiplinan'])
-        mampu = int(request.form['kemampuan'])
-        tgt = int(request.form['target'])
-        pros = int(request.form['proses'])
-        inov = int(request.form['inovasi'])
-        
-        nilai_akhir, grade = hitung_nilai(tj, inis, kerja, disiplin, mampu, tgt, pros, inov)
-        tgl = datetime.now().strftime('%Y-%m-%d %H:%M')
-        
-        c.execute("""INSERT INTO penilaian 
-            (npk,nama,periode,divisi,cabang,tanggung_jawab,inisiatif,kerjasama,kedisiplinan,kemampuan,target,proses,inovasi,nilai_akhir,grade,penilai,status,updated_at) 
-            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) 
-            ON CONFLICT (npk, penilai) DO UPDATE SET 
-            periode=EXCLUDED.periode, tanggung_jawab=EXCLUDED.tanggung_jawab, inisiatif=EXCLUDED.inisiatif, 
-            kerjasama=EXCLUDED.kerjasama, kedisiplinan=EXCLUDED.kedisiplinan, kemampuan=EXCLUDED.kemampuan, 
-            target=EXCLUDED.target, proses=EXCLUDED.proses, inovasi=EXCLUDED.inovasi, 
-            nilai_akhir=EXCLUDED.nilai_akhir, grade=EXCLUDED.grade, status='draft', updated_at=EXCLUDED.updated_at""",
-            (npk, karyawan['nama'], periode, karyawan['divisi'], karyawan['cabang'], tj, inis, kerja, disiplin, mampu, tgt, pros, inov, nilai_akhir, grade, user['npk'], 'draft', tgl))
-        conn.commit()
-        conn.close()
-        flash('Penilaian disimpan sebagai draft!', 'success')
-        return redirect('/dashboard')
-    
-    c.execute("SELECT * FROM penilaian WHERE npk=%s AND penilai=%s AND status='draft'", (npk, user['npk']))
-    draft = c.fetchone()
-    conn.close()
-    
-    return render_template('nilai.html', user=user, karyawan=karyawan, draft=draft)
     
 @app.route('/finalisasi/<int:id>')
 def finalisasi(id):
