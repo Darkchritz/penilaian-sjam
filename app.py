@@ -1,8 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
 import psycopg2
 import psycopg2.extras
-from psycopg2.extras import RealDictCursor  # <-- TAMBAHIN BARIS INI
+from psycopg2.extras import RealDictCursor
 import os
 
 app = Flask(__name__)
