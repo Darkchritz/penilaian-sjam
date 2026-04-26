@@ -136,6 +136,30 @@ def dashboard():
     else:
         hasil = Penilaian.query.filter_by(npk=user.npk, status='final', tahun=tahun_ini).order_by(Penilaian.tanggal_update.desc()).first()
         return render_template('dashboard_karyawan.html', user=user, hasil=hasil)
+
+@app.route('/nilai/<int:id>')
+@login_required
+def nilai(id):
+    if current_user.role != 'hrd':
+        return redirect(url_for('login'))
+    
+    periode = request.args.get('periode', 'Q1')
+    tahun_ini = datetime.now().year
+    
+    karyawan = Karyawan.query.get_or_404(id)
+    
+    # Cek udah ada penilaian periode ini belum
+    penilaian = Penilaian.query.filter_by(
+        npk=karyawan.npk, 
+        tahun=tahun_ini, 
+        periode=periode
+    ).first()
+    
+    return render_template('form_nilai.html', 
+                         karyawan=karyawan, 
+                         periode=periode, 
+                         penilaian=penilaian,
+                         user=current_user)
             
 @app.route('/penilaian/<npk>')
 @login_required
