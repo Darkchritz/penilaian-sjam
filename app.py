@@ -31,51 +31,6 @@ app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'sjam-penilaian-secret-2024')
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
-def get_conn():
-    return psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
-
-def init_db():
-    conn = get_conn()
-    c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS users (
-        npk TEXT PRIMARY KEY,
-        nama TEXT,
-        password TEXT,
-        role TEXT,
-        divisi TEXT,
-        cabang TEXT
-    )''')
-    c.execute('''CREATE TABLE IF NOT EXISTS penilaian (
-        id SERIAL PRIMARY KEY,
-        npk TEXT,
-        nama TEXT,
-        periode TEXT,
-        divisi TEXT,
-        cabang TEXT,
-        tanggung_jawab INTEGER,
-        inisiatif INTEGER,
-        kerjasama INTEGER,
-        kedisiplinan INTEGER,
-        kemampuan INTEGER,
-        target INTEGER,
-        proses INTEGER,
-        inovasi INTEGER,
-        nilai_akhir REAL,
-        grade TEXT,
-        penilai TEXT,
-        tgl_finalisasi TEXT,
-        status TEXT
-    )''')
-
-    c.execute("SELECT COUNT(*) as count FROM users WHERE role='hrd'")
-    if c.fetchone()['count'] == 0:
-        c.execute("INSERT INTO users (npk, nama, password, role, divisi, cabang) VALUES (%s,%s,%s,%s)",
-                 ('HRD001','HRD Admin',generate_password_hash('admin123'),'hrd','HRD','PUSAT'))
-    conn.commit()
-    conn.close()
-
-init_db()
-
 @app.route('/')
 def home():
     return redirect('/login')
