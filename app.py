@@ -178,46 +178,97 @@ def penilaian(npk):
     return render_template('form_penilaian.html', user=user, karyawan=karyawan, draft=draft)
 
 @app.route('/submit_nilai', methods=['POST'])
+@login_required
 def submit_nilai():
-    if 'user' not in session:
-        return redirect(url_for('login'))
-    
-    user = session['user']
-    data = request.form
-    
-    nilai_list = [
-        int(data['tanggung_jawab']), int(data['inisiatif']), int(data['kerjasama']), 
-        int(data['kedisiplinan']), int(data['kemampuan']), int(data['target']), 
-        int(data['proses']), int(data['inovasi'])
+    if current_user.role == 'hrd':
+        flash('HRD tidak bisa input nilai', 'error')
+        return redirect(url_for('dashboard'))
+
+    npk_dinilai = request.form.get('npk')
+    action = request.form.get('action')
+
+    # Ambil data karyawan yang dinilai
+    karyawan = Karyawan.query.filter_by(npk=npk_dinilai).first()
+    if not karyawan:
+        flash('Karyawan tidak ditemukan', 'error')
+        return redirect(url_for('dashboard'))
+
+    # Validasi divisi
+    if current_user.role == 'kadiv' and karyawan.divisi!= current_user.divisi:
+        flash('Anda hanya bisa menilai karyawan di divisi Anda', 'error')
+        return redirect(url_for('dashboard'))
+
+    # Daftar 35 indikator baru sesuai Excel
+    indikator_list = [
+        # KEDISIPLINAN
+        'kehadiran', 'kepatuhan_aturan', 'konsistensi', 'kepatuhan_seragam', 'disiplin_kebersihan',
+        # PRODUKTIVITAS KERJA
+        'efisiensi', 'prioritas', 'inovasi', 'multitasking', 'peningkatan_kinerja',
+        # KEHANDALAN
+        'terampil', 'keputusan', 'inisiatif', 'penyelesaian_masalah', 'responsif',
+        # KERJASAMA
+        'menanggapi_positif', 'koordinasi', 'sikap_positif', 'tidak_komplain', 'profesional',
+        # TANGGUNG JAWAB
+        'tanggung_jawab_kerja', 'menerima_kesalahan', 'inventaris', 'tanpa_pengawasan', 'mengelola_prioritas',
+        # KEMAMPUAN BERADAPTASI
+        'belajar_cepat', 'strategi_kerja', 'tantangan_baru', 'ubah_cara_kerja', 'solusi_alternatif',
+        # KOMUNIKASI
+        'keramahan', 'kejelasan', 'responsif_kom', 'lapor_pelanggaran', 'keterbukaan'
     ]
-    nilai_akhir = sum(nilai_list) / len(nilai_list)
-    
-    if nilai_akhir >= 4.5: grade = 'A'
-    elif nilai_akhir >= 3.5: grade = 'B' 
-    elif nilai_akhir >= 2.5: grade = 'C'
-    else: grade = 'D'
-    
-    status = 'final' if data['action'] == 'final' else 'draft'
-    tgl_final = datetime.now().strftime('%Y-%m-%d %H:%M:%S') if status == 'final' else None
-    
-    with get_conn() as conn:
-        c = conn.cursor()
-        c.execute("SELECT nama, divisi, cabang FROM users WHERE npk=%s", (data['npk'],))
-        karyawan = c.fetchone()
-        
-        c.execute("DELETE FROM penilaian WHERE npk=%s AND penilai=%s AND status='draft'", (data['npk'], user['npk']))
-        
-        c.execute("""INSERT INTO penilaian 
-            (npk, nama, periode, divisi, cabang, tanggung_jawab, inisiatif, kerjasama, kedisiplinan, 
-             kemampuan, target, proses, inovasi, nilai_akhir, grade, penilai, status, tgl_finalisasi) 
-            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
-            (data['npk'], karyawan['nama'], '2026', karyawan['divisi'], karyawan['cabang'],
-             data['tanggung_jawab'], data['inisiatif'], data['kerjasama'], data['kedisiplinan'], 
-             data['kemampuan'], data['target'], data['proses'], data['inovasi'],
-             nilai_akhir, grade, user['npk'], status, tgl_final))
-        conn.commit()
-    
-    flash('Data berhasil disimpan!', 'success')
+
+    # Ambil nilai dari form
+    data_nilai = {}
+    for ind in indikator_list:
+        data_nilai[ind] = int(request.form.get(ind, 2)) # default 2 = Cukup
+
+    # Cek sudah ada penilaian draft/final atau belum
+    penilaian = Penilaian.query.filter_by(npk=npk_dinilai, tahun=datetime.now().year).first()
+
+    if action == 'draft':
+        if penilaian:
+            # Update draft yang ada
+            for ind in indikator_list:
+                setattr(penilaian, ind, data_nilai[ind])
+            penilaian.status = 'draft'
+            penilaian.tanggal_update = datetime.now()
+        else:
+            # Buat draft baru
+            penilaian = Penilaian(
+                npk=npk_dinilai,
+                penilai_npk=current_user.npk,
+                tahun=datetime.now().year,
+                status='draft',
+                **data_nilai
+            )
+            db.session.add(penilaian)
+
+        db.session.commit()
+        flash('Draft berhasil disimpan', 'success')
+
+    elif action == 'final':
+        if penilaian and penilaian.status == 'final':
+            flash('Penilaian sudah difinalisasi, tidak bisa diubah', 'error')
+        else:
+            if penilaian:
+                # Update jadi final
+                for ind in indikator_list:
+                    setattr(penilaian, ind, data_nilai[ind])
+                penilaian.status = 'final'
+                penilaian.tanggal_update = datetime.now()
+            else:
+                # Buat final baru
+                penilaian = Penilaian(
+                    npk=npk_dinilai,
+                    penilai_npk=current_user.npk,
+                    tahun=datetime.now().year,
+                    status='final',
+                    **data_nilai
+                )
+                db.session.add(penilaian)
+
+            db.session.commit()
+            flash('Penilaian berhasil difinalisasi', 'success')
+
     return redirect(url_for('dashboard'))
 
 @app.route('/finalisasi/<int:id>')
