@@ -69,46 +69,48 @@ def register():
             flash('NPK sudah terdaftar!', 'error')
     return render_template('register.html')
 
-@app.route('/dashboard')
+@app.route('/hrd')
 @login_required
-def dashboard():
-    user = current_user
+def hrd():
+    if user.role != 'hrd':
+        return redirect(url_for('login'))
+        
+    page = int(request.args.get('page', 1))
+    per_page = 20
+    tahun_ini = datetime.now().year
+    periode_aktif = request.args.get('periode', 'Q1')
     
-    if user.role == 'hrd':
-        page = int(request.args.get('page', 1))
-        per_page = 20
-        pagination = Karyawan.query.filter(Karyawan.npk!= user.npk).paginate(page=page, per_page=per_page, error_out=False)
-        karyawan = pagination.items
-        total_pages = pagination.pages
-        
-        tahun_ini = datetime.now().year
-        # Ambil semua penilaian Q1 tahun ini
-        penilaian_q1 = Penilaian.query.filter_by(tahun=tahun_ini, periode='Q1').all()
-        penilaian_dict = {p.npk: p for p in penilaian_q1}
-        
-        # Cek yang belum dinilai Q1
-        belum_dinilai = Karyawan.query.filter(
-            Karyawan.role == 'karyawan',
-            ~Karyawan.npk.in_(db.session.query(Penilaian.npk).filter_by(periode='Q1', tahun=tahun_ini))
-        ).all()
-        
-        karyawan_untuk_dinilai = Karyawan.query.filter(
-            Karyawan.divisi == user.divisi,
-            Karyawan.cabang == user.cabang,
-            Karyawan.role.in_(['karyawan','kadiv']),
-            Karyawan.npk!= user.npk
-        ).order_by(Karyawan.role.desc(), Karyawan.nama).all()
-        
-        return render_template('dashboard_hrd.html',
-                             user=user,
-                             karyawan_list=karyawan_untuk_dinilai,  # <-- samain nama biar ga error
-                             belum_dinilai=belum_dinilai,
-                             page=page,
-                             total_pages=total_pages,
-                             penilaian_dict=penilaian_dict)  # <-- kirim full objek
-
-    # bagian elif user.role == 'kadiv' dan 'karyawan' biarin dulu, nanti kita ubah nyusul
-
+    # 1. Data untuk tabel MASTER KARYAWAN - semua karyawan kecuali diri sendiri
+    pagination = Karyawan.query.filter(Karyawan.npk != user.npk).paginate(page=page, per_page=per_page, error_out=False)
+    semua_karyawan = pagination.items
+    total_pages = pagination.pages
+    
+    # 2. Data untuk tabel PENILAIAN - cuma karyawan HRD yg bisa dinilai
+    karyawan_hrd = Karyawan.query.filter(
+        Karyawan.divisi == user.divisi,
+        Karyawan.cabang == user.cabang,
+        Karyawan.role.in_(['karyawan','kadiv']),
+        Karyawan.npk != user.npk
+    ).order_by(Karyawan.role.desc(), Karyawan.nama).all()
+    
+    # 3. Ambil penilaian Q1 tahun ini buat cek status
+    penilaian_q1 = Penilaian.query.filter_by(tahun=tahun_ini, periode=periode_aktif).all()
+    penilaian_dict = {p.npk: p for p in penilaian_q1}
+    
+    # 4. Karyawan yg belum dinilai
+    sudah_dinilai_npk = [p.npk for p in penilaian_q1]
+    belum_dinilai = [k for k in karyawan_hrd if k.npk not in sudah_dinilai_npk]
+    
+    return render_template('dashboard_hrd.html',
+                         user=user,
+                         karyawan=semua_karyawan,  # <-- ini buat tabel master karyawan
+                         karyawan_hrd=karyawan_hrd,  # <-- ini buat tabel penilaian
+                         belum_dinilai=belum_dinilai,
+                         page=page,
+                         total_pages=total_pages,
+                         penilaian_dict=penilaian_dict,
+                         periode_aktif=periode_aktif)
+    
     elif user.role == 'karyawan':
         tahun_ini = datetime.now().year
         hasil = Penilaian.query.filter_by(npk=user.npk, tahun=tahun_ini, periode='Q1').first()
