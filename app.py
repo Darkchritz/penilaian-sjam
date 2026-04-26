@@ -281,7 +281,37 @@ def hapus_draft(id):
     db.session.commit()
     flash('Draft dihapus!', 'success')
     return redirect('/dashboard')
-
+    
+@app.route('/simpan_nilai/<npk>/<periode>', methods=['POST'])
+@login_required
+def simpan_nilai(npk, periode):
+    if current_user.role != 'hrd':
+        return redirect(url_for('login'))
+    
+    karyawan = Karyawan.query.filter_by(npk=npk).first_or_404()
+    tahun_ini = datetime.now().year
+    
+    # Ambil/bikin record penilaian
+    p = Penilaian.query.filter_by(npk=npk, tahun=tahun_ini, periode=periode).first()
+    if not p:
+        p = Penilaian(npk=npk, tahun=tahun_ini, periode=periode, penilai_npk=current_user.npk)
+    
+    # Simpan 8 KPI
+    p.tanggung_jawab = int(request.form.get('kpi1', 0))
+    p.inisiatif = int(request.form.get('kpi2', 0))
+    p.kerjasama = int(request.form.get('kpi3', 0))
+    p.kedisiplinan = int(request.form.get('kpi4', 0))
+    p.kemampuan = int(request.form.get('kpi5', 0))
+    p.target = int(request.form.get('kpi6', 0))
+    p.proses = int(request.form.get('kpi7', 0))
+    p.inovasi = int(request.form.get('kpi8', 0))
+    p.status = 'draft'  # atau 'final' kalo mau langsung final
+    
+    db.session.add(p)
+    db.session.commit()
+    
+    return redirect(url_for('hrd'))
+    
 @app.route('/hrd/tambah_karyawan', methods=['POST'])
 @login_required
 def tambah_karyawan():
