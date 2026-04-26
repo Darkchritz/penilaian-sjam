@@ -81,12 +81,10 @@ def hrd():
     tahun_ini = datetime.now().year
     periode_aktif = request.args.get('periode', 'Q1')
     
-    # Data buat tabel Master Karyawan
     pagination = Karyawan.query.filter(Karyawan.npk != user.npk).paginate(page=page, per_page=per_page, error_out=False)
     semua_karyawan = pagination.items
     total_pages = pagination.pages
     
-    # Data buat tabel Penilaian
     karyawan_hrd = Karyawan.query.filter(
         Karyawan.divisi == user.divisi,
         Karyawan.cabang == user.cabang,
@@ -110,9 +108,17 @@ def hrd():
                          penilaian_dict=penilaian_dict,
                          status_penilaian={p.npk: p.status for p in penilaian_q1},
                          periode_aktif=periode_aktif)
+
+@app.route('/dashboard')
+@login_required  
+def dashboard():
+    user = current_user
+    tahun_ini = datetime.now().year
+    
+    if user.role == 'hrd':
+        return redirect(url_for('hrd'))
     
     elif user.role == 'karyawan':
-        tahun_ini = datetime.now().year
         hasil = Penilaian.query.filter_by(npk=user.npk, tahun=tahun_ini, periode='Q1').first()
         return render_template('dashboard_karyawan.html', user=user, hasil=hasil)
     
@@ -128,7 +134,6 @@ def hrd():
         return render_template('dashboard_kadiv.html', user=user, karyawan=karyawan, draft=draft)
     
     else:
-        tahun_ini = datetime.now().year
         hasil = Penilaian.query.filter_by(npk=user.npk, status='final', tahun=tahun_ini).order_by(Penilaian.tanggal_update.desc()).first()
         return render_template('dashboard_karyawan.html', user=user, hasil=hasil)
             
