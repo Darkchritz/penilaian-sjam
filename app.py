@@ -545,8 +545,8 @@ with app.app_context():
         # Bikin user admin kalo belum ada
         if not Karyawan.query.filter_by(npk=12345).first():
             admin = Karyawan(
-                npk=HRD001, 
-                nama='HRD', 
+                npk=2018032349, 
+                nama='Wendy Wangsaharja', 
                 password=generate_password_hash('123456'),
                 role='HRD',
                 divisi='HRD',
