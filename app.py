@@ -43,7 +43,10 @@ class Penilaian(db.Model):
 
 @login_manager.user_loader
 def load_user(user_id):
-    return Karyawan.query.get(int(user_id))  # Harus pake int()
+    try:
+        return Karyawan.query.get(int(user_id))
+    except (ValueError, TypeError):
+        return None  # Kalo user_id bukan angka, anggap aja logout
     
 @app.route('/')
 def home():
