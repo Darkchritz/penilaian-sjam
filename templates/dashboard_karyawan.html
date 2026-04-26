@@ -1,134 +1,182 @@
-<main class="max-w-4xl mx-auto p-4 sm:p-6">
-    <div class="text-center mb-8">
-        <h2 class="text-3xl font-bold text-gray-800 mb-2">Hasil Penilaian</h2>
-        <p class="text-gray-500">{{ user.nama }} - {{ user.npk }}</p>
-        <p class="text-sm text-gray-400">{{ user.divisi }} | {{ user.cabang }}</p>
-    </div>
-
-    {% if hasil %}
-    {# Hitung total persentase berdasarkan bobot #}
-    {% set p1 = hasil.kehadiran / 5 * 4 %}
-    {% set p2 = hasil.kepatuhan_aturan / 5 * 4 %}
-    {% set p3 = hasil.konsistensi / 5 * 4 %}
-    {% set p4 = hasil.kepatuhan_seragam / 5 * 4 %}
-    {% set p5 = hasil.disiplin_kebersihan / 5 * 4 %}
-    {% set p6 = hasil.efisiensi / 5 * 4 %}
-    {% set p7 = hasil.prioritas / 5 * 4 %}
-    {% set p8 = hasil.inovasi / 5 * 4 %}
-    {% set p9 = hasil.multitasking / 5 * 4 %}
-    {% set p10 = hasil.peningkatan_kinerja / 5 * 4 %}
-    {% set p11 = hasil.terampil / 5 * 3 %}
-    {% set p12 = hasil.keputusan / 5 * 3 %}
-    {% set p13 = hasil.inisiatif / 5 * 3 %}
-    {% set p14 = hasil.penyelesaian_masalah / 5 * 3 %}
-    {% set p15 = hasil.responsif / 5 * 3 %}
-    {% set p16 = hasil.menanggapi_positif / 5 * 2 %}
-    {% set p17 = hasil.koordinasi / 5 * 2 %}
-    {% set p18 = hasil.sikap_positif / 5 * 2 %}
-    {% set p19 = hasil.tidak_komplain / 5 * 2 %}
-    {% set p20 = hasil.profesional / 5 * 2 %}
-    {% set p21 = hasil.tanggung_jawab_kerja / 5 * 3 %}
-    {% set p22 = hasil.menerima_kesalahan / 5 * 3 %}
-    {% set p23 = hasil.inventaris / 5 * 3 %}
-    {% set p24 = hasil.tanpa_pengawasan / 5 * 3 %}
-    {% set p25 = hasil.mengelola_prioritas / 5 * 3 %}
-    {% set p26 = hasil.belajar_cepat / 5 * 2 %}
-    {% set p27 = hasil.strategi_kerja / 5 * 2 %}
-    {% set p28 = hasil.tantangan_baru / 5 * 2 %}
-    {% set p29 = hasil.ubah_cara_kerja / 5 * 2 %}
-    {% set p30 = hasil.solusi_alternatif / 5 * 2 %}
-    {% set p31 = hasil.keramahan / 5 * 2 %}
-    {% set p32 = hasil.kejelasan / 5 * 2 %}
-    {% set p33 = hasil.responsif_kom / 5 * 2 %}
-    {% set p34 = hasil.lapor_pelanggaran / 5 * 2 %}
-    {% set p35 = hasil.keterbukaan / 5 * 2 %}
-    
-    {% set persentase_total = p1+p2+p3+p4+p5+p6+p7+p8+p9+p10+p11+p12+p13+p14+p15+p16+p17+p18+p19+p20+p21+p22+p23+p24+p25+p26+p27+p28+p29+p30+p31+p32+p33+p34+p35 %}
-    
-    {% if persentase_total <= 20 %}
-        {% set grade = 'E' %}
-        {% set color = 'text-red-600' %}
-        {% set bg_color = 'bg-red-50' %}
-        {% set border_color = 'border-red-200' %}
-    {% elif persentase_total <= 30 %}
-        {% set grade = 'E+' %}
-        {% set color = 'text-red-500' %}
-        {% set bg_color = 'bg-red-50' %}
-        {% set border_color = 'border-red-200' %}
-    {% elif persentase_total <= 40 %}
-        {% set grade = 'D' %}
-        {% set color = 'text-orange-600' %}
-        {% set bg_color = 'bg-orange-50' %}
-        {% set border_color = 'border-orange-200' %}
-    {% elif persentase_total <= 50 %}
-        {% set grade = 'D+' %}
-        {% set color = 'text-orange-500' %}
-        {% set bg_color = 'bg-orange-50' %}
-        {% set border_color = 'border-orange-200' %}
-    {% elif persentase_total <= 60 %}
-        {% set grade = 'C' %}
-        {% set color = 'text-yellow-600' %}
-        {% set bg_color = 'bg-yellow-50' %}
-        {% set border_color = 'border-yellow-200' %}
-    {% elif persentase_total <= 70 %}
-        {% set grade = 'C+' %}
-        {% set color = 'text-yellow-500' %}
-        {% set bg_color = 'bg-yellow-50' %}
-        {% set border_color = 'border-yellow-200' %}
-    {% elif persentase_total <= 80 %}
-        {% set grade = 'B' %}
-        {% set color = 'text-blue-600' %}
-        {% set bg_color = 'bg-blue-50' %}
-        {% set border_color = 'border-blue-200' %}
-    {% elif persentase_total <= 85 %}
-        {% set grade = 'B+' %}
-        {% set color = 'text-blue-500' %}
-        {% set bg_color = 'bg-blue-50' %}
-        {% set border_color = 'border-blue-200' %}
-    {% elif persentase_total <= 90 %}
-        {% set grade = 'A' %}
-        {% set color = 'text-green-600' %}
-        {% set bg_color = 'bg-green-50' %}
-        {% set border_color = 'border-green-200' %}
-    {% else %}
-        {% set grade = 'A+' %}
-        {% set color = 'text-green-500' %}
-        {% set bg_color = 'bg-green-50' %}
-        {% set border_color = 'border-green-200' %}
-    {% endif %}
-
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden max-w-lg mx-auto">
-        <div class="bg-gradient-to-r from-indigo-50 to-purple-50 p-6 border-b border-gray-100">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-gray-600">Periode Penilaian</p>
-                    <p class="text-lg font-bold text-gray-800">Januari - Maret {{ hasil.tahun }}</p>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Karyawan | SJAM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap'); body { font-family: 'Poppins', sans-serif; }</style>
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="SJAM">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/static/sw.js').catch(err => console.log('SW error', err));
+        });
+      }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+    <nav class="bg-white/80 backdrop-blur-md shadow-sm border-b sticky top-0 z-10">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-2">
+                    <i class="bi bi-person-circle text-2xl text-indigo-600"></i>
+                    <h1 class="text-xl font-bold text-indigo-600">SJAM Karyawan</h1>
                 </div>
-                <span class="px-4 py-2 bg-indigo-600 text-white rounded-full text-sm font-bold shadow-sm">
-                    <i class="bi bi-calendar3"></i> Q1
-                </span>
+                <div class="flex items-center gap-4">
+                    <div class="text-right hidden sm:block">
+                        <p class="text-sm font-medium text-gray-700">{{ user.nama }}</p>
+                        <p class="text-xs text-gray-500">{{ user.divisi }} | {{ user.cabang }}</p>
+                    </div>
+                    <a href="/logout" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </a>
+                </div>
             </div>
         </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto p-4 sm:p-6">
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">Hasil Penilaian</h2>
+            <p class="text-gray-500">{{ user.nama }} - {{ user.npk }}</p>
+            <p class="text-sm text-gray-400">{{ user.divisi }} | {{ user.cabang }}</p>
+        </div>
+
+        {% if hasil %}
+        {# Hitung total persentase berdasarkan bobot #}
+        {% set p1 = hasil.kehadiran / 5 * 4 %}
+        {% set p2 = hasil.kepatuhan_aturan / 5 * 4 %}
+        {% set p3 = hasil.konsistensi / 5 * 4 %}
+        {% set p4 = hasil.kepatuhan_seragam / 5 * 4 %}
+        {% set p5 = hasil.disiplin_kebersihan / 5 * 4 %}
+        {% set p6 = hasil.efisiensi / 5 * 4 %}
+        {% set p7 = hasil.prioritas / 5 * 4 %}
+        {% set p8 = hasil.inovasi / 5 * 4 %}
+        {% set p9 = hasil.multitasking / 5 * 4 %}
+        {% set p10 = hasil.peningkatan_kinerja / 5 * 4 %}
+        {% set p11 = hasil.terampil / 5 * 3 %}
+        {% set p12 = hasil.keputusan / 5 * 3 %}
+        {% set p13 = hasil.inisiatif / 5 * 3 %}
+        {% set p14 = hasil.penyelesaian_masalah / 5 * 3 %}
+        {% set p15 = hasil.responsif / 5 * 3 %}
+        {% set p16 = hasil.menanggapi_positif / 5 * 2 %}
+        {% set p17 = hasil.koordinasi / 5 * 2 %}
+        {% set p18 = hasil.sikap_positif / 5 * 2 %}
+        {% set p19 = hasil.tidak_komplain / 5 * 2 %}
+        {% set p20 = hasil.profesional / 5 * 2 %}
+        {% set p21 = hasil.tanggung_jawab_kerja / 5 * 3 %}
+        {% set p22 = hasil.menerima_kesalahan / 5 * 3 %}
+        {% set p23 = hasil.inventaris / 5 * 3 %}
+        {% set p24 = hasil.tanpa_pengawasan / 5 * 3 %}
+        {% set p25 = hasil.mengelola_prioritas / 5 * 3 %}
+        {% set p26 = hasil.belajar_cepat / 5 * 2 %}
+        {% set p27 = hasil.strategi_kerja / 5 * 2 %}
+        {% set p28 = hasil.tantangan_baru / 5 * 2 %}
+        {% set p29 = hasil.ubah_cara_kerja / 5 * 2 %}
+        {% set p30 = hasil.solusi_alternatif / 5 * 2 %}
+        {% set p31 = hasil.keramahan / 5 * 2 %}
+        {% set p32 = hasil.kejelasan / 5 * 2 %}
+        {% set p33 = hasil.responsif_kom / 5 * 2 %}
+        {% set p34 = hasil.lapor_pelanggaran / 5 * 2 %}
+        {% set p35 = hasil.keterbukaan / 5 * 2 %}
         
-        <div class="p-10 text-center">
-            <div class="inline-flex items-center justify-center w-40 h-40 rounded-full {{ bg_color }} border-4 {{ border_color }} mb-6">
-                <div>
-                    <p class="text-6xl font-bold {{ color }}">{{ "%.0f"|format(persentase_total) }}%</p>
-                    <p class="text-2xl font-bold text-gray-700 mt-1">Grade {{ grade }}</p>
+        {% set persentase_total = p1+p2+p3+p4+p5+p6+p7+p8+p9+p10+p11+p12+p13+p14+p15+p16+p17+p18+p19+p20+p21+p22+p23+p24+p25+p26+p27+p28+p29+p30+p31+p32+p33+p34+p35 %}
+        
+        {% if persentase_total <= 20 %}
+            {% set grade = 'E' %}
+            {% set color = 'text-red-600' %}
+            {% set bg_color = 'bg-red-50' %}
+            {% set border_color = 'border-red-200' %}
+        {% elif persentase_total <= 30 %}
+            {% set grade = 'E+' %}
+            {% set color = 'text-red-500' %}
+            {% set bg_color = 'bg-red-50' %}
+            {% set border_color = 'border-red-200' %}
+        {% elif persentase_total <= 40 %}
+            {% set grade = 'D' %}
+            {% set color = 'text-orange-600' %}
+            {% set bg_color = 'bg-orange-50' %}
+            {% set border_color = 'border-orange-200' %}
+        {% elif persentase_total <= 50 %}
+            {% set grade = 'D+' %}
+            {% set color = 'text-orange-500' %}
+            {% set bg_color = 'bg-orange-50' %}
+            {% set border_color = 'border-orange-200' %}
+        {% elif persentase_total <= 60 %}
+            {% set grade = 'C' %}
+            {% set color = 'text-yellow-600' %}
+            {% set bg_color = 'bg-yellow-50' %}
+            {% set border_color = 'border-yellow-200' %}
+        {% elif persentase_total <= 70 %}
+            {% set grade = 'C+' %}
+            {% set color = 'text-yellow-500' %}
+            {% set bg_color = 'bg-yellow-50' %}
+            {% set border_color = 'border-yellow-200' %}
+        {% elif persentase_total <= 80 %}
+            {% set grade = 'B' %}
+            {% set color = 'text-blue-600' %}
+            {% set bg_color = 'bg-blue-50' %}
+            {% set border_color = 'border-blue-200' %}
+        {% elif persentase_total <= 85 %}
+            {% set grade = 'B+' %}
+            {% set color = 'text-blue-500' %}
+            {% set bg_color = 'bg-blue-50' %}
+            {% set border_color = 'border-blue-200' %}
+        {% elif persentase_total <= 90 %}
+            {% set grade = 'A' %}
+            {% set color = 'text-green-600' %}
+            {% set bg_color = 'bg-green-50' %}
+            {% set border_color = 'border-green-200' %}
+        {% else %}
+            {% set grade = 'A+' %}
+            {% set color = 'text-green-500' %}
+            {% set bg_color = 'bg-green-50' %}
+            {% set border_color = 'border-green-200' %}
+        {% endif %}
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden max-w-lg mx-auto">
+            <div class="bg-gradient-to-r from-indigo-50 to-purple-50 p-6 border-b border-gray-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600">Periode Penilaian</p>
+                        <p class="text-lg font-bold text-gray-800">Januari - Maret {{ hasil.tahun }}</p>
+                    </div>
+                    <span class="px-4 py-2 bg-indigo-600 text-white rounded-full text-sm font-bold shadow-sm">
+                        <i class="bi bi-calendar3"></i> Q1
+                    </span>
                 </div>
             </div>
-            <p class="text-xs text-gray-500">
-                <i class="bi bi-clock-history"></i> Terakhir diperbarui: {{ hasil.tanggal_update.strftime('%d %B %Y') if hasil.tanggal_update else '-' }}
-            </p>
+            
+            <div class="p-10 text-center">
+                <div class="inline-flex items-center justify-center w-40 h-40 rounded-full {{ bg_color }} border-4 {{ border_color }} mb-6">
+                    <div>
+                        <p class="text-6xl font-bold {{ color }}">{{ "%.0f"|format(persentase_total) }}%</p>
+                        <p class="text-2xl font-bold text-gray-700 mt-1">Grade {{ grade }}</p>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500">
+                    <i class="bi bi-clock-history"></i> Terakhir diperbarui: {{ hasil.tanggal_update.strftime('%d %B %Y') if hasil.tanggal_update else '-' }}
+                </p>
+            </div>
         </div>
-    </div>
-    {% else %}
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center max-w-lg mx-auto">
-        <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <i class="bi bi-hourglass-split text-4xl text-gray-400"></i>
+        {% else %}
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center max-w-lg mx-auto">
+            <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="bi bi-hourglass-split text-4xl text-gray-400"></i>
+            </div>
+            <p class="text-gray-800 font-semibold text-lg mb-2">Belum Ada Penilaian</p>
+            <p class="text-sm text-gray-500 leading-relaxed">Penilaian Q1 tahun ini belum tersedia.<br>Silakan hubungi Kepala Divisi untuk informasi lebih lanjut</p>
         </div>
-        <p class="text-gray-800 font-semibold text-lg mb-2">Belum Ada Penilaian</p>
-        <p class="text-sm text-gray-500 leading-relaxed">Penilaian Q1 tahun ini belum tersedia.<br>Silakan hubungi Kepala Divisi untuk informasi lebih lanjut</p>
-    </div>
-    {% endif %}
-</main>
+        {% endif %}
+    </main>
+</body>
+</html>
