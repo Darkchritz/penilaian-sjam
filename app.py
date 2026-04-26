@@ -532,21 +532,34 @@ def logout():
     session.clear()
     return redirect('/login')
 
+from werkzeug.security import generate_password_hash
+import sys
+
+print("Mulai bikin tabel...", file=sys.stderr)
+
 with app.app_context():
-    db.create_all()
-    # Bikin user admin kalo belum ada
-    if not Karyawan.query.filter_by(npk=12345).first():
-        admin = Karyawan(
-            npk=HRD001, 
-            nama='HRD', 
-            password=generate_password_hash('123456'),
-            role='HRD',
-            divisi='HRD',
-            cabang='PUSAT/MD'
-        )
-        db.session.add(admin)
-        db.session.commit()
+    try:
+        db.create_all()
+        print("Tabel berhasil dibikin", file=sys.stderr)
+        
+        # Bikin user admin kalo belum ada
+        if not Karyawan.query.filter_by(npk=12345).first():
+            admin = Karyawan(
+                npk=HRD001, 
+                nama='HRD', 
+                password=generate_password_hash('123456'),
+                role='HRD',
+                divisi='HRD',
+                cabang='PUSAT/MD'
+            )
+            db.session.add(admin)
+            db.session.commit()
+            print("User admin dibikin", file=sys.stderr)
+        else:
+            print("User admin udah ada", file=sys.stderr)
+            
+    except Exception as e:
+        print(f"ERROR pas bikin tabel: {e}", file=sys.stderr)
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run()
