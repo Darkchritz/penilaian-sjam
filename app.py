@@ -101,10 +101,10 @@ def register():
             flash('NPK sudah terdaftar!', 'error')
     return render_template('register.html')
 
-@app.route('/HRD')
+@app.route('/hrd')
 @login_required
 def hrd():
-    if current_user.role!= 'HRD':
+    if current_user.role != 'HRD':  # GANTI JADI HURUF BESAR
         return redirect(url_for('login'))
 
     user = current_user
@@ -157,7 +157,7 @@ def dashboard():
     user = current_user
     tahun_ini = datetime.now().year
 
-    if user.role == 'hrd':
+    if user.role == 'HRD':  # GANTI JADI HURUF BESAR
         return redirect(url_for('hrd'))
 
     elif user.role == 'karyawan':
