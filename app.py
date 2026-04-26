@@ -27,7 +27,7 @@ class Karyawan(UserMixin, db.Model):
 
 class Penilaian(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    id_karyawan = db.Column(db.Integer, db.ForeignKey('karyawan.id'))
+    id_karyawan = db.Column(db.Integer, db.ForeignKey('karyawan.id')) # ini udah bener
     tahun = db.Column(db.Integer)
     periode = db.Column(db.String(2))
     penilai_npk = db.Column(db.Integer)
@@ -40,6 +40,9 @@ class Penilaian(db.Model):
     proses = db.Column(db.Integer)
     inovasi = db.Column(db.Integer)
     status = db.Column(db.String(10), default='draft')
+    
+    # TAMBAHIN INI
+    karyawan = db.relationship('Karyawan', backref='daftar_penilaian')
 
 @login_manager.user_loader
 def load_user(user_id):
