@@ -531,35 +531,25 @@ def logout():
     logout_user()
     session.clear()
     return redirect('/login')
-
+    
 from werkzeug.security import generate_password_hash
-import sys
-
-print("Mulai bikin tabel...", file=sys.stderr)
 
 with app.app_context():
-    try:
-        db.create_all()
-        print("Tabel berhasil dibikin", file=sys.stderr)
-        
-        # Bikin user admin kalo belum ada
-        if not Karyawan.query.filter_by(npk=12345).first():
-            admin = Karyawan(
-                npk=2018032349, 
-                nama='Wendy Wangsaharja', 
-                password=generate_password_hash('123456'),
-                role='HRD',
-                divisi='HRD',
-                cabang='PUSAT/MD'
-            )
-            db.session.add(admin)
-            db.session.commit()
-            print("User admin dibikin", file=sys.stderr)
-        else:
-            print("User admin udah ada", file=sys.stderr)
-            
-    except Exception as e:
-        print(f"ERROR pas bikin tabel: {e}", file=sys.stderr)
+    # Drop semua tabel terus bikin ulang biar bersih total
+    db.drop_all()
+    print("Semua tabel di-drop")
+    
+    db.create_all()
+    print("Tabel berhasil dibikin ulang")
 
+    # Bikin user default
+    users = [
+        Karyawan(npk=12345, nama='Admin', password=generate_password_hash('admin123'), role='admin', divisi='IT', cabang='Pusat'),
+        Karyawan(npk=2018032349, nama='Wendy Wangsaharja', password=generate_password_hash('password123'), role='HRD', divisi='HRD', cabang='PUSAT/MD')
+    ]
+    db.session.add_all(users)
+    db.session.commit()
+    print("User default dibikin")
+    
 if __name__ == '__main__':
     app.run()
