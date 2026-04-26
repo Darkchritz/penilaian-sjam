@@ -85,10 +85,11 @@ def dashboard():
         total_pages = pagination.pages
         
         tahun_ini = datetime.now().year
-        # Ambil semua penilaian Q1 tahun ini, kirim full objeknya
+        # Ambil semua penilaian Q1 tahun ini
         penilaian_q1 = Penilaian.query.filter_by(tahun=tahun_ini, periode='Q1').all()
         penilaian_dict = {p.npk: p for p in penilaian_q1}
         
+        # Cek yang belum dinilai Q1
         belum_dinilai = Karyawan.query.filter(
             Karyawan.role == 'karyawan',
             ~Karyawan.npk.in_(db.session.query(Penilaian.npk).filter_by(periode='Q1', tahun=tahun_ini))
@@ -103,12 +104,13 @@ def dashboard():
         
         return render_template('dashboard_hrd.html',
                              user=user,
-                             karyawan=karyawan,
+                             karyawan_list=karyawan_untuk_dinilai,  # <-- samain nama biar ga error
                              belum_dinilai=belum_dinilai,
                              page=page,
                              total_pages=total_pages,
-                             karyawan_untuk_dinilai=karyawan_untuk_dinilai,
-                             penilaian_dict=penilaian_dict) # <-- GANTI INI
+                             penilaian_dict=penilaian_dict)  # <-- kirim full objek
+
+    # bagian elif user.role == 'kadiv' dan 'karyawan' biarin dulu, nanti kita ubah nyusul
 
     elif user.role == 'karyawan':
         tahun_ini = datetime.now().year
