@@ -72,18 +72,21 @@ def register():
 @app.route('/hrd')
 @login_required
 def hrd():
-    if user.role != 'hrd':
+    if current_user.role != 'hrd':
         return redirect(url_for('login'))
-        
+    
+    user = current_user
     page = int(request.args.get('page', 1))
     per_page = 20
     tahun_ini = datetime.now().year
     periode_aktif = request.args.get('periode', 'Q1')
     
+    # Data buat tabel Master Karyawan
     pagination = Karyawan.query.filter(Karyawan.npk != user.npk).paginate(page=page, per_page=per_page, error_out=False)
     semua_karyawan = pagination.items
     total_pages = pagination.pages
     
+    # Data buat tabel Penilaian
     karyawan_hrd = Karyawan.query.filter(
         Karyawan.divisi == user.divisi,
         Karyawan.cabang == user.cabang,
