@@ -119,7 +119,7 @@
                                             <i class="bi bi-pencil-square text-xl"></i>
                                         </button>
                                         <button type="button"
-                                                @click="showHapus = true; hapusData = {npk: '{{ k.npk }}', nama: '{{ k.nama|replace(\"'\", \"\\'\") }}'}"
+                                                @click="showHapus = true; hapusData = {npk: {{ k.npk|tojson }}, nama: {{ k.nama|tojson }}}"
                                                 class="text-red-600 hover:text-red-800 transition">
                                             <i class="bi bi-trash text-xl"></i>
                                         </button>
