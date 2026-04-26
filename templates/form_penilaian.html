@@ -1,42 +1,90 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-    <title>Form Penilaian</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Penilaian | SJAM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap'); body { font-family: 'Poppins', sans-serif; }</style>
 </head>
-<body>
-    <h2>Form Penilaian: {{ karyawan.nama }}</h2>
-    <p>NPK: {{ karyawan.npk }} | Divisi: {{ karyawan.divisi }}</p>
-    
-    <form method="POST" action="/submit_nilai">
-        <input type="hidden" name="npk" value="{{ karyawan.npk }}">
-        
-        <label>Tanggung Jawab 1-5:</label><br>
-        <input type="number" name="tanggung_jawab" min="1" max="5" required value="{{ draft.tanggung_jawab if draft else '' }}"><br><br>
-        
-        <label>Inisiatif 1-5:</label><br>
-        <input type="number" name="inisiatif" min="1" max="5" required value="{{ draft.inisiatif if draft else '' }}"><br><br>
-        
-        <label>Kerjasama 1-5:</label><br>
-        <input type="number" name="kerjasama" min="1" max="5" required value="{{ draft.kerjasama if draft else '' }}"><br><br>
-        
-        <label>Kedisiplinan 1-5:</label><br>
-        <input type="number" name="kedisiplinan" min="1" max="5" required value="{{ draft.kedisiplinan if draft else '' }}"><br><br>
-        
-        <label>Kemampuan 1-5:</label><br>
-        <input type="number" name="kemampuan" min="1" max="5" required value="{{ draft.kemampuan if draft else '' }}"><br><br>
-        
-        <label>Target 1-5:</label><br>
-        <input type="number" name="target" min="1" max="5" required value="{{ draft.target if draft else '' }}"><br><br>
-        
-        <label>Proses 1-5:</label><br>
-        <input type="number" name="proses" min="1" max="5" required value="{{ draft.proses if draft else '' }}"><br><br>
-        
-        <label>Inovasi 1-5:</label><br>
-        <input type="number" name="inovasi" min="1" max="5" required value="{{ draft.inovasi if draft else '' }}"><br><br>
-        
-        <button type="submit" name="action" value="draft">Simpan Draft</button>
-        <button type="submit" name="action" value="final">Submit Final</button>
-    </form>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+    <nav class="bg-white/80 backdrop-blur-md shadow-sm border-b sticky top-0 z-10">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-2">
+                    <a href="/dashboard" class="text-indigo-600 hover:text-indigo-800">
+                        <i class="bi bi-arrow-left text-xl"></i>
+                    </a>
+                    <h1 class="text-xl font-bold text-indigo-600">Form Penilaian</h1>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm font-medium text-gray-700">{{ user.nama }}</p>
+                    <p class="text-xs text-gray-500">{{ user.role|upper }}</p>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto p-4 sm:p-6">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-8 text-white">
+                <h2 class="text-2xl font-bold mb-2">{{ karyawan.nama }}</h2>
+                <div class="flex flex-wrap gap-4 text-indigo-100 text-sm">
+                    <span><i class="bi bi-person-badge"></i> NPK: {{ karyawan.npk }}</span>
+                    <span><i class="bi bi-building"></i> Divisi: {{ karyawan.divisi }}</span>
+                    <span><i class="bi bi-geo-alt"></i> Cabang: {{ karyawan.cabang }}</span>
+                </div>
+            </div>
+
+            <form action="/submit_nilai" method="POST" class="p-6">
+                <input type="hidden" name="npk" value="{{ karyawan.npk }}">
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    {% set kriteria = [
+                        {'name': 'tanggung_jawab', 'label': 'Tanggung Jawab', 'desc': 'Kesanggupan menyelesaikan tugas'},
+                        {'name': 'inisiatif', 'label': 'Inisiatif', 'desc': 'Kemampuan bekerja tanpa disuruh'},
+                        {'name': 'kerjasama', 'label': 'Kerjasama', 'desc': 'Kemampuan bekerja dalam tim'},
+                        {'name': 'kedisiplinan', 'label': 'Kedisiplinan', 'desc': 'Ketaatan pada aturan & waktu'},
+                        {'name': 'kemampuan', 'label': 'Kemampuan Kerja', 'desc': 'Skill & kompetensi teknis'},
+                        {'name': 'target', 'label': 'Pencapaian Target', 'desc': 'Hasil kerja vs target'},
+                        {'name': 'proses', 'label': 'Proses Kerja', 'desc': 'Kesesuaian dengan SOP'},
+                        {'name': 'inovasi', 'label': 'Inovasi', 'desc': 'Ide perbaikan & kreativitas'}
+                    ] %}
+                    
+                    {% for k in kriteria %}
+                    <div class="bg-gray-50 rounded-xl p-4">
+                        <label class="block font-semibold text-gray-800 mb-1">{{ k.label }}</label>
+                        <p class="text-xs text-gray-500 mb-3">{{ k.desc }}</p>
+                        <div class="flex items-center gap-2">
+                            <input type="range" name="{{ k.name }}" min="1" max="5" 
+                                   value="{{ draft[k.name] if draft else 3 }}"
+                                   class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                                   oninput="this.nextElementSibling.value = this.value">
+                            <output class="bg-indigo-600 text-white w-10 h-10 rounded-lg flex items-center justify-center font-bold">
+                                {{ draft[k.name] if draft else 3 }}
+                            </output>
+                        </div>
+                        <div class="flex justify-between text-xs text-gray-400 mt-1">
+                            <span>1 - Kurang</span>
+                            <span>5 - Sangat Baik</span>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="mt-8 flex flex-col sm:flex-row gap-3">
+                    <button type="submit" name="action" value="draft" 
+                            class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-3 rounded-xl font-semibold transition flex items-center justify-center gap-2">
+                        <i class="bi bi-save"></i> Simpan Draft
+                    </button>
+                    <button type="submit" name="action" value="final" 
+                            class="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-6 py-3 rounded-xl font-semibold transition shadow-md flex items-center justify-center gap-2"
+                            onclick="return confirm('Finalisasi? Data tidak bisa diubah lagi.')">
+                        <i class="bi bi-check-circle"></i> Finalisasi Nilai
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
 </body>
 </html>
