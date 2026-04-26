@@ -32,10 +32,10 @@ class Karyawan(UserMixin, db.Model):
 
 class Penilaian(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    npk = db.Column(db.Integer, db.ForeignKey('karyawan.npk'))
+    id_karyawan = db.Column(db.Integer, db.ForeignKey('karyawan.id'))  # <-- ganti dari npk
     tahun = db.Column(db.Integer)
     periode = db.Column(db.String(2))
-    penilai_npk = db.Column(db.Integer)
+    penilai_npk = db.Column(db.Integer)  # <-- ini biarin integer aja
     
     tanggung_jawab = db.Column(db.Integer)
     inisiatif = db.Column(db.Integer)
