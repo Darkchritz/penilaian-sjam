@@ -18,14 +18,16 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-class Karyawan(UserMixin, db.Model):  # <-- UserMixin sekarang udah kebaca
-    id = db.Column(db.Integer, primary_key=True)
-    npk = db.Column(db.Integer, unique=True, nullable=False)
+class Karyawan(UserMixin, db.Model):
+    npk = db.Column(db.Integer, primary_key=True)  # <-- npk jadi PK, hapus id
     nama = db.Column(db.String(100), nullable=False)
     password = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(20), nullable=False)
     divisi = db.Column(db.String(50), nullable=False)
     cabang = db.Column(db.String(50), nullable=False)
+
+    def get_id(self):
+        return str(self.npk)  # <-- wajib buat Flask-Login
 
 class Penilaian(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -167,29 +169,28 @@ def dashboard():
         hasil = Penilaian.query.filter_by(npk=user.npk, status='final', tahun=tahun_ini).order_by(Penilaian.tanggal_update.desc()).first()
         return render_template('dashboard_karyawan.html', user=user, hasil=hasil)
 
-@app.route('/nilai/<int:id>')
+@app.route('/nilai/<int:npk>')  # <-- ganti int:id jadi int:npk
 @login_required
-def nilai(id):
+def nilai(npk):
     if current_user.role != 'hrd':
         return redirect(url_for('login'))
     
     periode = request.args.get('periode', 'Q1')
     tahun_ini = datetime.now().year
     
-    karyawan = Karyawan.query.get_or_404(id)
+    karyawan = Karyawan.query.get_or_404(npk)  # <-- get pake npk
     
-    # Cek udah ada penilaian periode ini belum
     penilaian = Penilaian.query.filter_by(
         npk=karyawan.npk, 
         tahun=tahun_ini, 
         periode=periode
     ).first()
     
-    return render_template('form_nilai.html', 
+    return render_template('nilai_form.html', 
                          karyawan=karyawan, 
                          periode=periode, 
                          penilaian=penilaian,
-                         user=current_user)
+                         tahun_ini=tahun_ini)
             
 @app.route('/penilaian/<npk>')
 @login_required
