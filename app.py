@@ -42,8 +42,8 @@ class Penilaian(db.Model):
     status = db.Column(db.String(10), default='draft')
 
 @login_manager.user_loader
-def load_user(npk):
-    return Karyawan.query.get(npk)
+def load_user(user_id):
+    return Karyawan.query.get(int(user_id))  # Harus pake int()
     
 @app.route('/')
 def home():
