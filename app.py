@@ -15,11 +15,38 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 migrate = Migrate(app, db)
 
-db.init_app(app)
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
+
+class Karyawan(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    npk = db.Column(db.Integer, unique=True, nullable=False)
+    nama = db.Column(db.String(100), nullable=False)
+    password = db.Column(db.String(255), nullable=False)
+    role = db.Column(db.String(20), nullable=False)
+    divisi = db.Column(db.String(50), nullable=False)
+    cabang = db.Column(db.String(50), nullable=False)
+
+class Penilaian(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    npk = db.Column(db.Integer, db.ForeignKey('karyawan.npk'))
+    tahun = db.Column(db.Integer)
+    periode = db.Column(db.String(2))  # Q1, Q2, Q3, Q4
+    penilai_npk = db.Column(db.Integer)
+    
+    tanggung_jawab = db.Column(db.Integer)
+    inisiatif = db.Column(db.Integer)
+    kerjasama = db.Column(db.Integer)
+    kedisiplinan = db.Column(db.Integer)
+    kemampuan = db.Column(db.Integer)
+    target = db.Column(db.Integer)
+    proses = db.Column(db.Integer)
+    inovasi = db.Column(db.Integer)
+    status = db.Column(db.String(10), default='draft')
 
 @login_manager.user_loader
 def load_user(npk):
