@@ -52,12 +52,12 @@
                     <i class="bi bi-person-plus text-lg"></i>
                     <span>Tambah Karyawan</span>
                 </button>
-                
+
                 <a href="/hrd/download_karyawan" class="bg-white border-2 border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 text-gray-700 hover:text-indigo-700 px-4 py-3 rounded-xl font-semibold transition shadow-sm flex items-center justify-center gap-2">
                     <i class="bi bi-download text-lg"></i>
                     <span>Download Template</span>
                 </a>
-                
+
                 <form action="/hrd/upload_karyawan" method="POST" enctype="multipart/form-data">
                     <label class="bg-white border-2 border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 text-gray-700 hover:text-indigo-700 px-4 py-3 rounded-xl font-semibold transition shadow-sm cursor-pointer flex items-center justify-center gap-2 w-full">
                         <i class="bi bi-upload text-lg"></i>
@@ -65,7 +65,7 @@
                         <input type="file" name="file" accept=".xlsx" class="hidden" onchange="this.form.submit()">
                     </label>
                 </form>
-                
+
                 <a href="/export_hrd" class="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-4 py-3 rounded-xl font-semibold transition shadow-md flex items-center justify-center gap-2">
                     <i class="bi bi-file-earmark-excel text-lg"></i>
                     <span>Export Rekap</span>
@@ -75,59 +75,68 @@
 
         <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
             <!-- Master Karyawan -->
-            <div class="overflow-x-auto">
-    <table class="w-full">
-        <thead class="bg-gray-50">
-            <tr>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">NPK</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Nama</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Divisi</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Cabang</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Role</th>
-                <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase w-24">Aksi</th>
-            </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-200">
-            {% for k in karyawan %}
-            <tr class="hover:bg-gray-50 transition-colors">
-                <td class="px-6 py-4 text-sm font-mono text-gray-900 whitespace-nowrap">{{ k.npk }}</td>
-                <td class="px-6 py-4 text-sm text-gray-900">{{ k.nama }}</td>
-                <td class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">{{ k.divisi }}</td>
-                <td class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">{{ k.cabang }}</td>
-                <td class="px-6 py-4 text-sm">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                        {% if k.role == 'kadiv' %}bg-purple-100 text-purple-800
-                        {% else %}bg-blue-100 text-blue-800{% endif %}">
-                        {{ k.role|upper }}
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                    <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                        <i class="bi bi-people text-indigo-600"></i> Master Karyawan
+                    </h3>
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-semibold">
+                        {{ karyawan|length }} orang
                     </span>
-                </td>
-                <td class="px-6 py-4 text-sm text-center whitespace-nowrap">
-                    <div class="flex items-center justify-center gap-3">
-                        <button @click="showEdit = true; editData = {{ k|tojson }}" 
-                                class="text-blue-600 hover:text-blue-800">
-                            <i class="bi bi-pencil-square text-lg"></i>
-                        </button>
-                        <form method="POST" action="/hrd/hapus_karyawan/{{ k.npk }}" class="inline" onsubmit="return confirm('Hapus {{ k.nama }}?')">
-                            <button type="submit" class="text-red-600 hover:text-red-800">
-                                <i class="bi bi-trash text-lg"></i>
-                            </button>
-                        </form>
-                    </div>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">NPK</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Nama</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Divisi</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Cabang</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Role</th>
+                                <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase w-24">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            {% for k in karyawan %}
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="px-6 py-4 text-sm font-mono text-gray-900 whitespace-nowrap">{{ k.npk }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-900">{{ k.nama }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">{{ k.divisi }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">{{ k.cabang }}</td>
+                                <td class="px-6 py-4 text-sm">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                        {% if k.role == 'kadiv' %}bg-purple-100 text-purple-800
+                                        {% else %}bg-blue-100 text-blue-800{% endif %}">
+                                        {{ k.role|upper }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-center whitespace-nowrap">
+                                    <div class="flex items-center justify-center gap-3">
+                                        <button type="button" @click="showEdit = true; editData = {'npk': '{{ k.npk }}', 'nama': '{{ k.nama|e }}', 'role': '{{ k.role }}', 'divisi': '{{ k.divisi|e }}', 'cabang': '{{ k.cabang|e }}'}"
+                                                class="text-blue-600 hover:text-blue-800">
+                                            <i class="bi bi-pencil-square text-lg"></i>
+                                        </button>
+                                        <form method="POST" action="/hrd/hapus_karyawan/{{ k.npk }}" class="inline" onsubmit="return confirm('Yakin hapus {{ k.nama }}? Data tidak bisa dikembalikan.')">
+                                            <button type="submit" class="text-red-600 hover:text-red-800">
+                                                <i class="bi bi-trash text-lg"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
                 <!-- Pagination -->
                 {% if total_pages > 1 %}
                 <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
-                    <a href="/dashboard?page={{ page - 1 }}" 
+                    <a href="/dashboard?page={{ page - 1 }}"
                        class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 {% if page <= 1 %}pointer-events-none opacity-50{% endif %}">
                         <i class="bi bi-chevron-left"></i> Sebelumnya
                     </a>
                     <span class="text-sm text-gray-600">{{ page }} / {{ total_pages }}</span>
-                    <a href="/dashboard?page={{ page + 1 }}" 
+                    <a href="/dashboard?page={{ page + 1 }}"
                        class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 {% if page >= total_pages %}pointer-events-none opacity-50{% endif %}">
                         Selanjutnya <i class="bi bi-chevron-right"></i>
                     </a>
@@ -136,84 +145,105 @@
             </div>
 
             <!-- Rekap Final - Hanya yang Belum Dinilai -->
-            <div class="overflow-x-auto">
-    {% if belum_dinilai|length > 0 %}
-    <table class="w-full">
-        <thead class="bg-gray-50">
-            <tr>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">NPK</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Nama</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Divisi</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Cabang</th>
-                <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase min-w-[120px]">Status</th>
-            </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100">
-            {% for b in belum_dinilai %}
-            <tr class="hover:bg-orange-50 transition">
-                <td class="px-6 py-4 text-sm font-mono text-gray-900 whitespace-nowrap">{{ b.npk }}</td>
-                <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ b.nama }}</td>
-                <td class="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">{{ b.divisi }}</td>
-                <td class="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">{{ b.cabang }}</td>
-                <td class="px-6 py-4 text-center">
-                    <span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-semibold whitespace-nowrap">
-                        Belum Dinilai
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                    <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                        <i class="bi bi-exclamation-triangle text-orange-600"></i> Belum Dinilai Final
+                    </h3>
+                    <span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-semibold">
+                        {{ belum_dinilai|length }} karyawan
                     </span>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <div class="p-12 text-center">
-        <i class="bi bi-check-circle text-5xl text-green-400 mb-3"></i>
-        <p class="text-gray-500">Semua karyawan sudah dinilai final!</p>
-    </div>
-    {% endif %}
-</div>
+                </div>
+                <div class="overflow-x-auto">
+                    {% if belum_dinilai|length > 0 %}
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">NPK</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Nama</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Divisi</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Cabang</th>
+                                <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase min-w-[120px]">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for b in belum_dinilai %}
+                            <tr class="hover:bg-orange-50 transition">
+                                <td class="px-6 py-4 text-sm font-mono text-gray-900 whitespace-nowrap">{{ b.npk }}</td>
+                                <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ b.nama }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">{{ b.divisi }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">{{ b.cabang }}</td>
+                                <td class="px-6 py-4 text-center">
+                                    <span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-semibold whitespace-nowrap">
+                                        Belum Dinilai
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="p-12 text-center">
+                        <i class="bi bi-check-circle text-5xl text-green-400 mb-3"></i>
+                        <p class="text-gray-500">Semua karyawan sudah dinilai final!</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
 
             <!-- Penilaian Karyawan Divisi -->
-            <div class="overflow-x-auto">
-    {% if karyawan_untuk_dinilai %}
-    <table class="w-full">
-        <thead class="bg-gray-50">
-            <tr>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">NPK</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Nama</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Role</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Divisi</th>
-                <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Aksi</th>
-            </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-200">
-            {% for k in karyawan_untuk_dinilai %}
-            <tr class="hover:bg-gray-50 transition-colors">
-                <td class="px-6 py-4 text-sm font-mono text-gray-900 whitespace-nowrap">{{ k.npk }}</td>
-                <td class="px-6 py-4 text-sm text-gray-900">{{ k.nama }}</td>
-                <td class="px-6 py-4 text-sm">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                        {% if k.role == 'kadiv' %}bg-purple-100 text-purple-800
-                        {% else %}bg-blue-100 text-blue-800{% endif %}">
-                        {{ k.role|upper }}
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden xl:col-span-2">
+                <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                    <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                        <i class="bi bi-clipboard-check text-green-600"></i> Penilaian Karyawan Divisi {{ user.divisi }}
+                    </h3>
+                    <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
+                        {{ karyawan_untuk_dinilai|length }} orang
                     </span>
-                </td>
-                <td class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">{{ k.divisi }}</td>
-                <td class="px-6 py-4 text-sm text-center">
-                    <a href="/penilaian/{{ k.npk }}" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition inline-flex items-center gap-1">
-                        <i class="bi bi-pencil"></i> Nilai
-                    </a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <div class="p-12 text-center">
-        <i class="bi bi-people text-5xl text-gray-300 mb-3"></i>
-        <p class="text-gray-500">Tidak ada karyawan di divisi ini.</p>
-    </div>
-    {% endif %}
-</div>
+                </div>
+                <div class="overflow-x-auto">
+                    {% if karyawan_untuk_dinilai %}
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">NPK</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Nama</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Role</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Divisi</th>
+                                <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            {% for k in karyawan_untuk_dinilai %}
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="px-6 py-4 text-sm font-mono text-gray-900 whitespace-nowrap">{{ k.npk }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-900">{{ k.nama }}</td>
+                                <td class="px-6 py-4 text-sm">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                        {% if k.role == 'kadiv' %}bg-purple-100 text-purple-800
+                                        {% else %}bg-blue-100 text-blue-800{% endif %}">
+                                        {{ k.role|upper }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">{{ k.divisi }}</td>
+                                <td class="px-6 py-4 text-sm text-center">
+                                    <a href="/penilaian/{{ k.npk }}" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition inline-flex items-center gap-1">
+                                        <i class="bi bi-pencil"></i> Nilai
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="p-12 text-center">
+                        <i class="bi bi-people text-5xl text-gray-300 mb-3"></i>
+                        <p class="text-gray-500">Tidak ada karyawan di divisi ini.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
 
         <!-- Modal Tambah Karyawan -->
         <div x-show="showTambah" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display: none;">
@@ -254,4 +284,14 @@
                         <option value="hrd" :selected="editData.role=='hrd'">HRD</option>
                     </select>
                     <input name="divisi" :value="editData.divisi" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500" placeholder="Divisi">
-                    <input name="cabang" :value="
+                    <input name="cabang" :value="editData.cabang" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500" placeholder="Cabang">
+                    <div class="flex gap-3 pt-2">
+                        <button type="button" @click="showEdit = false" class="flex-1 px-4 py-3 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50">Batal</button>
+                        <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-xl font-semibold">Update</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
