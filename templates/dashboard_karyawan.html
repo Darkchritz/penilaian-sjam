@@ -47,73 +47,60 @@
     
     {% if persentase_total <= 20 %}
         {% set grade = 'E' %}
-        {% set color = 'text-red-600' %}
-        {% set bg_color = 'bg-red-50' %}
     {% elif persentase_total <= 30 %}
         {% set grade = 'E+' %}
-        {% set color = 'text-red-500' %}
-        {% set bg_color = 'bg-red-50' %}
     {% elif persentase_total <= 40 %}
         {% set grade = 'D' %}
-        {% set color = 'text-orange-600' %}
-        {% set bg_color = 'bg-orange-50' %}
     {% elif persentase_total <= 50 %}
         {% set grade = 'D+' %}
-        {% set color = 'text-orange-500' %}
-        {% set bg_color = 'bg-orange-50' %}
     {% elif persentase_total <= 60 %}
         {% set grade = 'C' %}
-        {% set color = 'text-yellow-600' %}
-        {% set bg_color = 'bg-yellow-50' %}
     {% elif persentase_total <= 70 %}
         {% set grade = 'C+' %}
-        {% set color = 'text-yellow-500' %}
-        {% set bg_color = 'bg-yellow-50' %}
     {% elif persentase_total <= 80 %}
         {% set grade = 'B' %}
-        {% set color = 'text-blue-600' %}
-        {% set bg_color = 'bg-blue-50' %}
     {% elif persentase_total <= 85 %}
         {% set grade = 'B+' %}
-        {% set color = 'text-blue-500' %}
-        {% set bg_color = 'bg-blue-50' %}
     {% elif persentase_total <= 90 %}
         {% set grade = 'A' %}
-        {% set color = 'text-green-600' %}
-        {% set bg_color = 'bg-green-50' %}
     {% else %}
         {% set grade = 'A+' %}
-        {% set color = 'text-green-500' %}
-        {% set bg_color = 'bg-green-50' %}
     {% endif %}
 
-    <div class="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden max-w-md mx-auto">
-        <div class="bg-gradient-to-br from-indigo-500 to-purple-600 p-8 text-center text-white">
-            <p class="text-sm opacity-90 mb-2">Periode Penilaian Tahun {{ hasil.tahun }}</p>
-            <div class="inline-flex items-center justify-center w-40 h-40 rounded-full bg-white/20 backdrop-blur-sm mb-4">
-                <div class="text-center">
-                    <p class="text-6xl font-bold">{{ "%.0f"|format(persentase_total) }}%</p>
-                    <p class="text-2xl font-bold mt-1">Grade {{ grade }}</p>
+    <div class="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden max-w-md mx-auto">
+        <div class="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-10 text-center text-white relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-40 h-40 bg-white/10 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+            <div class="absolute bottom-0 right-0 w-32 h-32 bg-white/10 rounded-full translate-x-1/2 translate-y-1/2"></div>
+            
+            <div class="relative z-10">
+                <p class="text-sm opacity-90 mb-1">Periode Penilaian</p>
+                <p class="text-lg font-bold mb-6">Januari - Maret {{ hasil.tahun }}</p>
+                
+                <div class="inline-flex items-center justify-center w-44 h-44 rounded-full bg-white/20 backdrop-blur-md border-4 border-white/30 mb-5 shadow-2xl">
+                    <div class="text-center">
+                        <p class="text-6xl font-bold drop-shadow-lg">{{ "%.0f"|format(persentase_total) }}%</p>
+                        <p class="text-3xl font-bold mt-1">Grade {{ grade }}</p>
+                    </div>
                 </div>
-            <div>
-                <span class="px-5 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sm font-semibold">
-                    <i class="bi bi-calendar3"></i> Q1
-                </span>
+                
+                <div class="inline-flex items-center gap-2 px-6 py-2.5 bg-white/25 backdrop-blur-md rounded-full text-sm font-bold shadow-lg">
+                    <i class="bi bi-calendar3"></i> Penilaian Q1
+                </div>
             </div>
         </div>
-        <div class="p-6 text-center">
-            <p class="text-xs text-gray-400">
-                <i class="bi bi-clock"></i> Terakhir update: {{ hasil.tanggal_update.strftime('%d %b %Y') if hasil.tanggal_update else '-' }}
+        <div class="p-6 bg-gray-50 text-center">
+            <p class="text-xs text-gray-500">
+                <i class="bi bi-clock-history"></i> Terakhir diperbarui: {{ hasil.tanggal_update.strftime('%d %B %Y') if hasil.tanggal_update else '-' }}
             </p>
         </div>
     </div>
     {% else %}
-    <div class="bg-white rounded-3xl shadow-lg border border-gray-100 p-12 text-center max-w-md mx-auto">
-        <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <i class="bi bi-inbox text-4xl text-gray-400"></i>
+    <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-12 text-center max-w-md mx-auto">
+        <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-5">
+            <i class="bi bi-hourglass-split text-5xl text-gray-400"></i>
         </div>
-        <p class="text-gray-700 font-semibold text-lg mb-1">Belum Ada Penilaian</p>
-        <p class="text-sm text-gray-500">Penilaian Q1 tahun ini belum tersedia.<br>Hubungi Kepala Divisi untuk info lebih lanjut</p>
+        <p class="text-gray-800 font-bold text-xl mb-2">Belum Ada Penilaian</p>
+        <p class="text-sm text-gray-500 leading-relaxed">Penilaian Q1 tahun ini belum tersedia.<br>Silakan hubungi Kepala Divisi untuk informasi lebih lanjut</p>
     </div>
     {% endif %}
 </main>
