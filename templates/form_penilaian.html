@@ -46,6 +46,9 @@
         responsif_kom: {{ draft.responsif_kom if draft else 3 }},
         lapor_pelanggaran: {{ draft.lapor_pelanggaran if draft else 3 }},
         keterbukaan: {{ draft.keterbukaan if draft else 3 }}
+      }, 
+      labelNilai(n) { 
+        return n == 0? 'Tidak Ada' : n == 1? 'Sangat Kurang' : n == 2? 'Kurang' : n == 3? 'Cukup' : n == 4? 'Baik' : 'Sangat Baik' 
       }}">
     <nav class="bg-white/80 backdrop-blur-md shadow-sm border-b sticky top-0 z-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -92,78 +95,63 @@
                 </h3>
                 <div class="space-y-8">
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-semibold text-gray-800">1. Kehadiran tepat waktu</label>
-                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.kehadiran"></span>
-                        </div>
-                        <input type="range" min="0" max="5" step="1" x-model="nilai.kehadiran" name="kehadiran" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-2">
-                        <div class="grid grid-cols-6 text-center text-xs text-gray-500">
-                            <div class="flex flex-col items-center"><span class="font-semibold">0</span><span>Tidak Ada</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">1</span><span>Sangat Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">2</span><span>Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">3</span><span>Cukup</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">4</span><span>Baik</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">5</span><span>Sangat Baik</span></div>
+                        <label class="text-sm font-semibold text-gray-800 mb-3 block">1. Kehadiran tepat waktu</label>
+                        <input type="hidden" name="kehadiran" x-model="nilai.kehadiran">
+                        <div class="grid grid-cols-6 gap-2">
+                            <template x-for="n in [0,1,2,3,4,5]" :key="n">
+                                <button type="button" @click="nilai.kehadiran = n" :class="nilai.kehadiran == n? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'" class="border-2 rounded-xl py-3 transition flex flex-col items-center justify-center">
+                                    <span class="font-bold text-lg" x-text="n"></span>
+                                    <span class="text-[10px] leading-tight mt-1" x-text="labelNilai(n)"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-semibold text-gray-800">2. Kepatuhan terhadap aturan perusahaan</label>
-                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.kepatuhan_aturan"></span>
-                        </div>
-                        <input type="range" min="0" max="5" step="1" x-model="nilai.kepatuhan_aturan" name="kepatuhan_aturan" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-2">
-                        <div class="grid grid-cols-6 text-center text-xs text-gray-500">
-                            <div class="flex flex-col items-center"><span class="font-semibold">0</span><span>Tidak Ada</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">1</span><span>Sangat Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">2</span><span>Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">3</span><span>Cukup</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">4</span><span>Baik</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">5</span><span>Sangat Baik</span></div>
+                        <label class="text-sm font-semibold text-gray-800 mb-3 block">2. Kepatuhan terhadap aturan perusahaan</label>
+                        <input type="hidden" name="kepatuhan_aturan" x-model="nilai.kepatuhan_aturan">
+                        <div class="grid grid-cols-6 gap-2">
+                            <template x-for="n in [0,1,2,3,4,5]" :key="n">
+                                <button type="button" @click="nilai.kepatuhan_aturan = n" :class="nilai.kepatuhan_aturan == n? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'" class="border-2 rounded-xl py-3 transition flex flex-col items-center justify-center">
+                                    <span class="font-bold text-lg" x-text="n"></span>
+                                    <span class="text-[10px] leading-tight mt-1" x-text="labelNilai(n)"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-semibold text-gray-800">3. Konsistensi dalam bekerja</label>
-                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.konsistensi"></span>
-                        </div>
-                        <input type="range" min="0" max="5" step="1" x-model="nilai.konsistensi" name="konsistensi" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-2">
-                        <div class="grid grid-cols-6 text-center text-xs text-gray-500">
-                            <div class="flex flex-col items-center"><span class="font-semibold">0</span><span>Tidak Ada</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">1</span><span>Sangat Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">2</span><span>Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">3</span><span>Cukup</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">4</span><span>Baik</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">5</span><span>Sangat Baik</span></div>
+                        <label class="text-sm font-semibold text-gray-800 mb-3 block">3. Konsistensi dalam bekerja</label>
+                        <input type="hidden" name="konsistensi" x-model="nilai.konsistensi">
+                        <div class="grid grid-cols-6 gap-2">
+                            <template x-for="n in [0,1,2,3,4,5]" :key="n">
+                                <button type="button" @click="nilai.konsistensi = n" :class="nilai.konsistensi == n? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'" class="border-2 rounded-xl py-3 transition flex flex-col items-center justify-center">
+                                    <span class="font-bold text-lg" x-text="n"></span>
+                                    <span class="text-[10px] leading-tight mt-1" x-text="labelNilai(n)"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-semibold text-gray-800">4. Kepatuhan seragam & atribut</label>
-                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.kepatuhan_seragam"></span>
-                        </div>
-                        <input type="range" min="0" max="5" step="1" x-model="nilai.kepatuhan_seragam" name="kepatuhan_seragam" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-2">
-                        <div class="grid grid-cols-6 text-center text-xs text-gray-500">
-                            <div class="flex flex-col items-center"><span class="font-semibold">0</span><span>Tidak Ada</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">1</span><span>Sangat Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">2</span><span>Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">3</span><span>Cukup</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">4</span><span>Baik</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">5</span><span>Sangat Baik</span></div>
+                        <label class="text-sm font-semibold text-gray-800 mb-3 block">4. Kepatuhan seragam & atribut</label>
+                        <input type="hidden" name="kepatuhan_seragam" x-model="nilai.kepatuhan_seragam">
+                        <div class="grid grid-cols-6 gap-2">
+                            <template x-for="n in [0,1,2,3,4,5]" :key="n">
+                                <button type="button" @click="nilai.kepatuhan_seragam = n" :class="nilai.kepatuhan_seragam == n? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'" class="border-2 rounded-xl py-3 transition flex flex-col items-center justify-center">
+                                    <span class="font-bold text-lg" x-text="n"></span>
+                                    <span class="text-[10px] leading-tight mt-1" x-text="labelNilai(n)"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-semibold text-gray-800">5. Disiplin kebersihan tempat kerja</label>
-                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.disiplin_kebersihan"></span>
-                        </div>
-                        <input type="range" min="0" max="5" step="1" x-model="nilai.disiplin_kebersihan" name="disiplin_kebersihan" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-2">
-                        <div class="grid grid-cols-6 text-center text-xs text-gray-500">
-                            <div class="flex flex-col items-center"><span class="font-semibold">0</span><span>Tidak Ada</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">1</span><span>Sangat Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">2</span><span>Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">3</span><span>Cukup</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">4</span><span>Baik</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">5</span><span>Sangat Baik</span></div>
+                        <label class="text-sm font-semibold text-gray-800 mb-3 block">5. Disiplin kebersihan tempat kerja</label>
+                        <input type="hidden" name="disiplin_kebersihan" x-model="nilai.disiplin_kebersihan">
+                        <div class="grid grid-cols-6 gap-2">
+                            <template x-for="n in [0,1,2,3,4,5]" :key="n">
+                                <button type="button" @click="nilai.disiplin_kebersihan = n" :class="nilai.disiplin_kebersihan == n? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'" class="border-2 rounded-xl py-3 transition flex flex-col items-center justify-center">
+                                    <span class="font-bold text-lg" x-text="n"></span>
+                                    <span class="text-[10px] leading-tight mt-1" x-text="labelNilai(n)"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                 </div>
@@ -176,78 +164,63 @@
                 </h3>
                 <div class="space-y-8">
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-semibold text-gray-800">1. Efisiensi dalam menyelesaikan tugas</label>
-                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.efisiensi"></span>
-                        </div>
-                        <input type="range" min="0" max="5" step="1" x-model="nilai.efisiensi" name="efisiensi" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-2">
-                        <div class="grid grid-cols-6 text-center text-xs text-gray-500">
-                            <div class="flex flex-col items-center"><span class="font-semibold">0</span><span>Tidak Ada</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">1</span><span>Sangat Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">2</span><span>Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">3</span><span>Cukup</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">4</span><span>Baik</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">5</span><span>Sangat Baik</span></div>
+                        <label class="text-sm font-semibold text-gray-800 mb-3 block">1. Efisiensi dalam menyelesaikan tugas</label>
+                        <input type="hidden" name="efisiensi" x-model="nilai.efisiensi">
+                        <div class="grid grid-cols-6 gap-2">
+                            <template x-for="n in [0,1,2,3,4,5]" :key="n">
+                                <button type="button" @click="nilai.efisiensi = n" :class="nilai.efisiensi == n? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'" class="border-2 rounded-xl py-3 transition flex flex-col items-center justify-center">
+                                    <span class="font-bold text-lg" x-text="n"></span>
+                                    <span class="text-[10px] leading-tight mt-1" x-text="labelNilai(n)"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-semibold text-gray-800">2. Kemampuan menentukan prioritas</label>
-                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.prioritas"></span>
-                        </div>
-                        <input type="range" min="0" max="5" step="1" x-model="nilai.prioritas" name="prioritas" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-2">
-                        <div class="grid grid-cols-6 text-center text-xs text-gray-500">
-                            <div class="flex flex-col items-center"><span class="font-semibold">0</span><span>Tidak Ada</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">1</span><span>Sangat Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">2</span><span>Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">3</span><span>Cukup</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">4</span><span>Baik</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">5</span><span>Sangat Baik</span></div>
+                        <label class="text-sm font-semibold text-gray-800 mb-3 block">2. Kemampuan menentukan prioritas</label>
+                        <input type="hidden" name="prioritas" x-model="nilai.prioritas">
+                        <div class="grid grid-cols-6 gap-2">
+                            <template x-for="n in [0,1,2,3,4,5]" :key="n">
+                                <button type="button" @click="nilai.prioritas = n" :class="nilai.prioritas == n? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'" class="border-2 rounded-xl py-3 transition flex flex-col items-center justify-center">
+                                    <span class="font-bold text-lg" x-text="n"></span>
+                                    <span class="text-[10px] leading-tight mt-1" x-text="labelNilai(n)"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-semibold text-gray-800">3. Inovasi dalam bekerja</label>
-                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.inovasi"></span>
-                        </div>
-                        <input type="range" min="0" max="5" step="1" x-model="nilai.inovasi" name="inovasi" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-2">
-                        <div class="grid grid-cols-6 text-center text-xs text-gray-500">
-                            <div class="flex flex-col items-center"><span class="font-semibold">0</span><span>Tidak Ada</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">1</span><span>Sangat Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">2</span><span>Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">3</span><span>Cukup</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">4</span><span>Baik</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">5</span><span>Sangat Baik</span></div>
+                        <label class="text-sm font-semibold text-gray-800 mb-3 block">3. Inovasi dalam bekerja</label>
+                        <input type="hidden" name="inovasi" x-model="nilai.inovasi">
+                        <div class="grid grid-cols-6 gap-2">
+                            <template x-for="n in [0,1,2,3,4,5]" :key="n">
+                                <button type="button" @click="nilai.inovasi = n" :class="nilai.inovasi == n? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'" class="border-2 rounded-xl py-3 transition flex flex-col items-center justify-center">
+                                    <span class="font-bold text-lg" x-text="n"></span>
+                                    <span class="text-[10px] leading-tight mt-1" x-text="labelNilai(n)"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-semibold text-gray-800">4. Kemampuan multitasking</label>
-                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.multitasking"></span>
-                        </div>
-                        <input type="range" min="0" max="5" step="1" x-model="nilai.multitasking" name="multitasking" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-2">
-                        <div class="grid grid-cols-6 text-center text-xs text-gray-500">
-                            <div class="flex flex-col items-center"><span class="font-semibold">0</span><span>Tidak Ada</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">1</span><span>Sangat Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">2</span><span>Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">3</span><span>Cukup</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">4</span><span>Baik</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">5</span><span>Sangat Baik</span></div>
+                        <label class="text-sm font-semibold text-gray-800 mb-3 block">4. Kemampuan multitasking</label>
+                        <input type="hidden" name="multitasking" x-model="nilai.multitasking">
+                        <div class="grid grid-cols-6 gap-2">
+                            <template x-for="n in [0,1,2,3,4,5]" :key="n">
+                                <button type="button" @click="nilai.multitasking = n" :class="nilai.multitasking == n? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'" class="border-2 rounded-xl py-3 transition flex flex-col items-center justify-center">
+                                    <span class="font-bold text-lg" x-text="n"></span>
+                                    <span class="text-[10px] leading-tight mt-1" x-text="labelNilai(n)"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-semibold text-gray-800">5. Peningkatan kinerja berkelanjutan</label>
-                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.peningkatan_kinerja"></span>
-                        </div>
-                        <input type="range" min="0" max="5" step="1" x-model="nilai.peningkatan_kinerja" name="peningkatan_kinerja" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-2">
-                        <div class="grid grid-cols-6 text-center text-xs text-gray-500">
-                            <div class="flex flex-col items-center"><span class="font-semibold">0</span><span>Tidak Ada</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">1</span><span>Sangat Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">2</span><span>Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">3</span><span>Cukup</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">4</span><span>Baik</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">5</span><span>Sangat Baik</span></div>
+                        <label class="text-sm font-semibold text-gray-800 mb-3 block">5. Peningkatan kinerja berkelanjutan</label>
+                        <input type="hidden" name="peningkatan_kinerja" x-model="nilai.peningkatan_kinerja">
+                        <div class="grid grid-cols-6 gap-2">
+                            <template x-for="n in [0,1,2,3,4,5]" :key="n">
+                                <button type="button" @click="nilai.peningkatan_kinerja = n" :class="nilai.peningkatan_kinerja == n? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'" class="border-2 rounded-xl py-3 transition flex flex-col items-center justify-center">
+                                    <span class="font-bold text-lg" x-text="n"></span>
+                                    <span class="text-[10px] leading-tight mt-1" x-text="labelNilai(n)"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                 </div>
@@ -260,78 +233,63 @@
                 </h3>
                 <div class="space-y-8">
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-semibold text-gray-800">1. Terampil dalam pekerjaan</label>
-                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.terampil"></span>
-                        </div>
-                        <input type="range" min="0" max="5" step="1" x-model="nilai.terampil" name="terampil" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-2">
-                        <div class="grid grid-cols-6 text-center text-xs text-gray-500">
-                            <div class="flex flex-col items-center"><span class="font-semibold">0</span><span>Tidak Ada</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">1</span><span>Sangat Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">2</span><span>Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">3</span><span>Cukup</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">4</span><span>Baik</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">5</span><span>Sangat Baik</span></div>
+                        <label class="text-sm font-semibold text-gray-800 mb-3 block">1. Terampil dalam pekerjaan</label>
+                        <input type="hidden" name="terampil" x-model="nilai.terampil">
+                        <div class="grid grid-cols-6 gap-2">
+                            <template x-for="n in [0,1,2,3,4,5]" :key="n">
+                                <button type="button" @click="nilai.terampil = n" :class="nilai.terampil == n? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'" class="border-2 rounded-xl py-3 transition flex flex-col items-center justify-center">
+                                    <span class="font-bold text-lg" x-text="n"></span>
+                                    <span class="text-[10px] leading-tight mt-1" x-text="labelNilai(n)"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-semibold text-gray-800">2. Pengambilan keputusan</label>
-                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.keputusan"></span>
-                        </div>
-                        <input type="range" min="0" max="5" step="1" x-model="nilai.keputusan" name="keputusan" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-2">
-                        <div class="grid grid-cols-6 text-center text-xs text-gray-500">
-                            <div class="flex flex-col items-center"><span class="font-semibold">0</span><span>Tidak Ada</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">1</span><span>Sangat Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">2</span><span>Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">3</span><span>Cukup</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">4</span><span>Baik</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">5</span><span>Sangat Baik</span></div>
+                        <label class="text-sm font-semibold text-gray-800 mb-3 block">2. Pengambilan keputusan</label>
+                        <input type="hidden" name="keputusan" x-model="nilai.keputusan">
+                        <div class="grid grid-cols-6 gap-2">
+                            <template x-for="n in [0,1,2,3,4,5]" :key="n">
+                                <button type="button" @click="nilai.keputusan = n" :class="nilai.keputusan == n? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'" class="border-2 rounded-xl py-3 transition flex flex-col items-center justify-center">
+                                    <span class="font-bold text-lg" x-text="n"></span>
+                                    <span class="text-[10px] leading-tight mt-1" x-text="labelNilai(n)"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-semibold text-gray-800">3. Inisiatif</label>
-                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.inisiatif"></span>
-                        </div>
-                        <input type="range" min="0" max="5" step="1" x-model="nilai.inisiatif" name="inisiatif" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-2">
-                        <div class="grid grid-cols-6 text-center text-xs text-gray-500">
-                            <div class="flex flex-col items-center"><span class="font-semibold">0</span><span>Tidak Ada</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">1</span><span>Sangat Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">2</span><span>Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">3</span><span>Cukup</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">4</span><span>Baik</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">5</span><span>Sangat Baik</span></div>
+                        <label class="text-sm font-semibold text-gray-800 mb-3 block">3. Inisiatif</label>
+                        <input type="hidden" name="inisiatif" x-model="nilai.inisiatif">
+                        <div class="grid grid-cols-6 gap-2">
+                            <template x-for="n in [0,1,2,3,4,5]" :key="n">
+                                <button type="button" @click="nilai.inisiatif = n" :class="nilai.inisiatif == n? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'" class="border-2 rounded-xl py-3 transition flex flex-col items-center justify-center">
+                                    <span class="font-bold text-lg" x-text="n"></span>
+                                    <span class="text-[10px] leading-tight mt-1" x-text="labelNilai(n)"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-semibold text-gray-800">4. Penyelesaian masalah</label>
-                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.penyelesaian_masalah"></span>
-                        </div>
-                        <input type="range" min="0" max="5" step="1" x-model="nilai.penyelesaian_masalah" name="penyelesaian_masalah" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-2">
-                        <div class="grid grid-cols-6 text-center text-xs text-gray-500">
-                            <div class="flex flex-col items-center"><span class="font-semibold">0</span><span>Tidak Ada</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">1</span><span>Sangat Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">2</span><span>Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">3</span><span>Cukup</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">4</span><span>Baik</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">5</span><span>Sangat Baik</span></div>
+                        <label class="text-sm font-semibold text-gray-800 mb-3 block">4. Penyelesaian masalah</label>
+                        <input type="hidden" name="penyelesaian_masalah" x-model="nilai.penyelesaian_masalah">
+                        <div class="grid grid-cols-6 gap-2">
+                            <template x-for="n in [0,1,2,3,4,5]" :key="n">
+                                <button type="button" @click="nilai.penyelesaian_masalah = n" :class="nilai.penyelesaian_masalah == n? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'" class="border-2 rounded-xl py-3 transition flex flex-col items-center justify-center">
+                                    <span class="font-bold text-lg" x-text="n"></span>
+                                    <span class="text-[10px] leading-tight mt-1" x-text="labelNilai(n)"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-semibold text-gray-800">5. Responsif terhadap tugas</label>
-                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.responsif"></span>
-                        </div>
-                        <input type="range" min="0" max="5" step="1" x-model="nilai.responsif" name="responsif" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-2">
-                        <div class="grid grid-cols-6 text-center text-xs text-gray-500">
-                            <div class="flex flex-col items-center"><span class="font-semibold">0</span><span>Tidak Ada</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">1</span><span>Sangat Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">2</span><span>Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">3</span><span>Cukup</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">4</span><span>Baik</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">5</span><span>Sangat Baik</span></div>
+                        <label class="text-sm font-semibold text-gray-800 mb-3 block">5. Responsif terhadap tugas</label>
+                        <input type="hidden" name="responsif" x-model="nilai.responsif">
+                        <div class="grid grid-cols-6 gap-2">
+                            <template x-for="n in [0,1,2,3,4,5]" :key="n">
+                                <button type="button" @click="nilai.responsif = n" :class="nilai.responsif == n? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'" class="border-2 rounded-xl py-3 transition flex flex-col items-center justify-center">
+                                    <span class="font-bold text-lg" x-text="n"></span>
+                                    <span class="text-[10px] leading-tight mt-1" x-text="labelNilai(n)"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                 </div>
@@ -344,79 +302,63 @@
                 </h3>
                 <div class="space-y-8">
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-semibold text-gray-800">1. Menanggapi positif masukan</label>
-                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.menanggapi_positif"></span>
-                        </div>
-                        <input type="range" min="0" max="5" step="1" x-model="nilai.menanggapi_positif" name="menanggapi_positif" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-2">
-                        <div class="grid grid-cols-6 text-center text-xs text-gray-500">
-                            <div class="flex flex-col items-center"><span class="font-semibold">0</span><span>Tidak Ada</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">1</span><span>Sangat Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">2</span><span>Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">3</span><span>Cukup</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">4</span><span>Baik</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">5</span><span>Sangat Baik</span></div>
+                        <label class="text-sm font-semibold text-gray-800 mb-3 block">1. Menanggapi positif masukan</label>
+                        <input type="hidden" name="menanggapi_positif" x-model="nilai.menanggapi_positif">
+                        <div class="grid grid-cols-6 gap-2">
+                            <template x-for="n in [0,1,2,3,4,5]" :key="n">
+                                <button type="button" @click="nilai.menanggapi_positif = n" :class="nilai.menanggapi_positif == n? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'" class="border-2 rounded-xl py-3 transition flex flex-col items-center justify-center">
+                                    <span class="font-bold text-lg" x-text="n"></span>
+                                    <span class="text-[10px] leading-tight mt-1" x-text="labelNilai(n)"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-semibold text-gray-800">2. Koordinasi dengan tim</label>
-                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.koordinasi"></span>
-                        </div>
-                        <input type="range" min="0" max="5" step="1" x-model="nilai.koordinasi" name="koordinasi" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-2">
-                        <div class="grid grid-cols-6 text-center text-xs text-gray-500">
-                            <div class="flex flex-col items-center"><span class="font-semibold">0</span><span>Tidak Ada</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">1</span><span>Sangat Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">2</span><span>Kurang</span></div>
-                            <div class="flex flex-col items-center"><
-                                                    <div class="flex flex-col items-center"><span class="font-semibold">3</span><span>Cukup</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">4</span><span>Baik</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">5</span><span>Sangat Baik</span></div>
+                        <label class="text-sm font-semibold text-gray-800 mb-3 block">2. Koordinasi dengan tim</label>
+                        <input type="hidden" name="koordinasi" x-model="nilai.koordinasi">
+                        <div class="grid grid-cols-6 gap-2">
+                            <template x-for="n in [0,1,2,3,4,5]" :key="n">
+                                <button type="button" @click="nilai.koordinasi = n" :class="nilai.koordinasi == n? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'" class="border-2 rounded-xl py-3 transition flex flex-col items-center justify-center">
+                                    <span class="font-bold text-lg" x-text="n"></span>
+                                    <span class="text-[10px] leading-tight mt-1" x-text="labelNilai(n)"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-semibold text-gray-800">3. Sikap positif</label>
-                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.sikap_positif"></span>
-                        </div>
-                        <input type="range" min="0" max="5" step="1" x-model="nilai.sikap_positif" name="sikap_positif" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-2">
-                        <div class="grid grid-cols-6 text-center text-xs text-gray-500">
-                            <div class="flex flex-col items-center"><span class="font-semibold">0</span><span>Tidak Ada</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">1</span><span>Sangat Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">2</span><span>Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">3</span><span>Cukup</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">4</span><span>Baik</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">5</span><span>Sangat Baik</span></div>
+                        <label class="text-sm font-semibold text-gray-800 mb-3 block">3. Sikap positif</label>
+                        <input type="hidden" name="sikap_positif" x-model="nilai.sikap_positif">
+                        <div class="grid grid-cols-6 gap-2">
+                            <template x-for="n in [0,1,2,3,4,5]" :key="n">
+                                <button type="button" @click="nilai.sikap_positif = n" :class="nilai.sikap_positif == n? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'" class="border-2 rounded-xl py-3 transition flex flex-col items-center justify-center">
+                                    <span class="font-bold text-lg" x-text="n"></span>
+                                    <span class="text-[10px] leading-tight mt-1" x-text="labelNilai(n)"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-semibold text-gray-800">4. Tidak komplain berlebihan</label>
-                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.tidak_komplain"></span>
-                        </div>
-                        <input type="range" min="0" max="5" step="1" x-model="nilai.tidak_komplain" name="tidak_komplain" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-2">
-                        <div class="grid grid-cols-6 text-center text-xs text-gray-500">
-                            <div class="flex flex-col items-center"><span class="font-semibold">0</span><span>Tidak Ada</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">1</span><span>Sangat Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">2</span><span>Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">3</span><span>Cukup</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">4</span><span>Baik</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">5</span><span>Sangat Baik</span></div>
+                        <label class="text-sm font-semibold text-gray-800 mb-3 block">4. Tidak komplain berlebihan</label>
+                        <input type="hidden" name="tidak_komplain" x-model="nilai.tidak_komplain">
+                        <div class="grid grid-cols-6 gap-2">
+                            <template x-for="n in [0,1,2,3,4,5]" :key="n">
+                                <button type="button" @click="nilai.tidak_komplain = n" :class="nilai.tidak_komplain == n? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'" class="border-2 rounded-xl py-3 transition flex flex-col items-center justify-center">
+                                    <span class="font-bold text-lg" x-text="n"></span>
+                                    <span class="text-[10px] leading-tight mt-1" x-text="labelNilai(n)"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-semibold text-gray-800">5. Profesional dalam bekerja</label>
-                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.profesional"></span>
-                        </div>
-                        <input type="range" min="0" max="5" step="1" x-model="nilai.profesional" name="profesional" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-2">
-                        <div class="grid grid-cols-6 text-center text-xs text-gray-500">
-                            <div class="flex flex-col items-center"><span class="font-semibold">0</span><span>Tidak Ada</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">1</span><span>Sangat Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">2</span><span>Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">3</span><span>Cukup</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">4</span><span>Baik</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">5</span><span>Sangat Baik</span></div>
+                        <label class="text-sm font-semibold text-gray-800 mb-3 block">5. Profesional dalam bekerja</label>
+                        <input type="hidden" name="profesional" x-model="nilai.profesional">
+                        <div class="grid grid-cols-6 gap-2">
+                            <template x-for="n in [0,1,2,3,4,5]" :key="n">
+                                <button type="button" @click="nilai.profesional = n" :class="nilai.profesional == n? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'" class="border-2 rounded-xl py-3 transition flex flex-col items-center justify-center">
+                                    <span class="font-bold text-lg" x-text="n"></span>
+                                    <span class="text-[10px] leading-tight mt-1" x-text="labelNilai(n)"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                 </div>
@@ -429,78 +371,63 @@
                 </h3>
                 <div class="space-y-8">
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-semibold text-gray-800">1. Tanggung jawab terhadap pekerjaan</label>
-                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.tanggung_jawab_kerja"></span>
-                        </div>
-                        <input type="range" min="0" max="5" step="1" x-model="nilai.tanggung_jawab_kerja" name="tanggung_jawab_kerja" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-2">
-                        <div class="grid grid-cols-6 text-center text-xs text-gray-500">
-                            <div class="flex flex-col items-center"><span class="font-semibold">0</span><span>Tidak Ada</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">1</span><span>Sangat Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">2</span><span>Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">3</span><span>Cukup</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">4</span><span>Baik</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">5</span><span>Sangat Baik</span></div>
+                        <label class="text-sm font-semibold text-gray-800 mb-3 block">1. Tanggung jawab terhadap pekerjaan</label>
+                        <input type="hidden" name="tanggung_jawab_kerja" x-model="nilai.tanggung_jawab_kerja">
+                        <div class="grid grid-cols-6 gap-2">
+                            <template x-for="n in [0,1,2,3,4,5]" :key="n">
+                                <button type="button" @click="nilai.tanggung_jawab_kerja = n" :class="nilai.tanggung_jawab_kerja == n? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'" class="border-2 rounded-xl py-3 transition flex flex-col items-center justify-center">
+                                    <span class="font-bold text-lg" x-text="n"></span>
+                                    <span class="text-[10px] leading-tight mt-1" x-text="labelNilai(n)"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-semibold text-gray-800">2. Menerima kesalahan</label>
-                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.menerima_kesalahan"></span>
-                        </div>
-                        <input type="range" min="0" max="5" step="1" x-model="nilai.menerima_kesalahan" name="menerima_kesalahan" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-2">
-                        <div class="grid grid-cols-6 text-center text-xs text-gray-500">
-                            <div class="flex flex-col items-center"><span class="font-semibold">0</span><span>Tidak Ada</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">1</span><span>Sangat Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">2</span><span>Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">3</span><span>Cukup</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">4</span><span>Baik</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">5</span><span>Sangat Baik</span></div>
+                        <label class="text-sm font-semibold text-gray-800 mb-3 block">2. Menerima kesalahan</label>
+                        <input type="hidden" name="menerima_kesalahan" x-model="nilai.menerima_kesalahan">
+                        <div class="grid grid-cols-6 gap-2">
+                            <template x-for="n in [0,1,2,3,4,5]" :key="n">
+                                <button type="button" @click="nilai.menerima_kesalahan = n" :class="nilai.menerima_kesalahan == n? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'" class="border-2 rounded-xl py-3 transition flex flex-col items-center justify-center">
+                                    <span class="font-bold text-lg" x-text="n"></span>
+                                    <span class="text-[10px] leading-tight mt-1" x-text="labelNilai(n)"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-semibold text-gray-800">3. Menjaga inventaris perusahaan</label>
-                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.inventaris"></span>
-                        </div>
-                        <input type="range" min="0" max="5" step="1" x-model="nilai.inventaris" name="inventaris" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-2">
-                        <div class="grid grid-cols-6 text-center text-xs text-gray-500">
-                            <div class="flex flex-col items-center"><span class="font-semibold">0</span><span>Tidak Ada</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">1</span><span>Sangat Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">2</span><span>Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">3</span><span>Cukup</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">4</span><span>Baik</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">5</span><span>Sangat Baik</span></div>
+                        <label class="text-sm font-semibold text-gray-800 mb-3 block">3. Menjaga inventaris perusahaan</label>
+                        <input type="hidden" name="inventaris" x-model="nilai.inventaris">
+                        <div class="grid grid-cols-6 gap-2">
+                            <template x-for="n in [0,1,2,3,4,5]" :key="n">
+                                <button type="button" @click="nilai.inventaris = n" :class="nilai.inventaris == n? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'" class="border-2 rounded-xl py-3 transition flex flex-col items-center justify-center">
+                                                                        <span class="font-bold text-lg" x-text="n"></span>
+                                    <span class="text- leading-tight mt-1" x-text="labelNilai(n)"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-semibold text-gray-800">4. Bekerja tanpa pengawasan</label>
-                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.tanpa_pengawasan"></span>
-                        </div>
-                        <input type="range" min="0" max="5" step="1" x-model="nilai.tanpa_pengawasan" name="tanpa_pengawasan" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-2">
-                        <div class="grid grid-cols-6 text-center text-xs text-gray-500">
-                            <div class="flex flex-col items-center"><span class="font-semibold">0</span><span>Tidak Ada</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">1</span><span>Sangat Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">2</span><span>Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">3</span><span>Cukup</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">4</span><span>Baik</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">5</span><span>Sangat Baik</span></div>
+                        <label class="text-sm font-semibold text-gray-800 mb-3 block">4. Bekerja tanpa pengawasan</label>
+                        <input type="hidden" name="tanpa_pengawasan" x-model="nilai.tanpa_pengawasan">
+                        <div class="grid grid-cols-6 gap-2">
+                            <template x-for="n in [0,1,2,3,4,5]" :key="n">
+                                <button type="button" @click="nilai.tanpa_pengawasan = n" :class="nilai.tanpa_pengawasan == n? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'" class="border-2 rounded-xl py-3 transition flex flex-col items-center justify-center">
+                                    <span class="font-bold text-lg" x-text="n"></span>
+                                    <span class="text- leading-tight mt-1" x-text="labelNilai(n)"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-semibold text-gray-800">5. Mengelola prioritas kerja</label>
-                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.mengelola_prioritas"></span>
-                        </div>
-                        <input type="range" min="0" max="5" step="1" x-model="nilai.mengelola_prioritas" name="mengelola_prioritas" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-2">
-                        <div class="grid grid-cols-6 text-center text-xs text-gray-500">
-                            <div class="flex flex-col items-center"><span class="font-semibold">0</span><span>Tidak Ada</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">1</span><span>Sangat Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">2</span><span>Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">3</span><span>Cukup</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">4</span><span>Baik</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">5</span><span>Sangat Baik</span></div>
+                        <label class="text-sm font-semibold text-gray-800 mb-3 block">5. Mengelola prioritas kerja</label>
+                        <input type="hidden" name="mengelola_prioritas" x-model="nilai.mengelola_prioritas">
+                        <div class="grid grid-cols-6 gap-2">
+                            <template x-for="n in [0,1,2,3,4,5]" :key="n">
+                                <button type="button" @click="nilai.mengelola_prioritas = n" :class="nilai.mengelola_prioritas == n? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'" class="border-2 rounded-xl py-3 transition flex flex-col items-center justify-center">
+                                    <span class="font-bold text-lg" x-text="n"></span>
+                                    <span class="text- leading-tight mt-1" x-text="labelNilai(n)"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                 </div>
@@ -513,78 +440,63 @@
                 </h3>
                 <div class="space-y-8">
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-semibold text-gray-800">1. Cepat belajar hal baru</label>
-                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.belajar_cepat"></span>
-                        </div>
-                        <input type="range" min="0" max="5" step="1" x-model="nilai.belajar_cepat" name="belajar_cepat" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-2">
-                        <div class="grid grid-cols-6 text-center text-xs text-gray-500">
-                            <div class="flex flex-col items-center"><span class="font-semibold">0</span><span>Tidak Ada</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">1</span><span>Sangat Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">2</span><span>Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">3</span><span>Cukup</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">4</span><span>Baik</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">5</span><span>Sangat Baik</span></div>
+                        <label class="text-sm font-semibold text-gray-800 mb-3 block">1. Cepat belajar hal baru</label>
+                        <input type="hidden" name="belajar_cepat" x-model="nilai.belajar_cepat">
+                        <div class="grid grid-cols-6 gap-2">
+                            <template x-for="n in [0,1,2,3,4,5]" :key="n">
+                                <button type="button" @click="nilai.belajar_cepat = n" :class="nilai.belajar_cepat == n? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'" class="border-2 rounded-xl py-3 transition flex flex-col items-center justify-center">
+                                    <span class="font-bold text-lg" x-text="n"></span>
+                                    <span class="text- leading-tight mt-1" x-text="labelNilai(n)"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-semibold text-gray-800">2. Mengembangkan strategi kerja</label>
-                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.strategi_kerja"></span>
-                        </div>
-                        <input type="range" min="0" max="5" step="1" x-model="nilai.strategi_kerja" name="strategi_kerja" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-2">
-                        <div class="grid grid-cols-6 text-center text-xs text-gray-500">
-                            <div class="flex flex-col items-center"><span class="font-semibold">0</span><span>Tidak Ada</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">1</span><span>Sangat Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">2</span><span>Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">3</span><span>Cukup</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">4</span><span>Baik</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">5</span><span>Sangat Baik</span></div>
+                        <label class="text-sm font-semibold text-gray-800 mb-3 block">2. Mengembangkan strategi kerja</label>
+                        <input type="hidden" name="strategi_kerja" x-model="nilai.strategi_kerja">
+                        <div class="grid grid-cols-6 gap-2">
+                            <template x-for="n in [0,1,2,3,4,5]" :key="n">
+                                <button type="button" @click="nilai.strategi_kerja = n" :class="nilai.strategi_kerja == n? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'" class="border-2 rounded-xl py-3 transition flex flex-col items-center justify-center">
+                                    <span class="font-bold text-lg" x-text="n"></span>
+                                    <span class="text- leading-tight mt-1" x-text="labelNilai(n)"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-semibold text-gray-800">3. Menghadapi tantangan baru</label>
-                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.tantangan_baru"></span>
-                        </div>
-                        <input type="range" min="0" max="5" step="1" x-model="nilai.tantangan_baru" name="tantangan_baru" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-2">
-                        <div class="grid grid-cols-6 text-center text-xs text-gray-500">
-                            <div class="flex flex-col items-center"><span class="font-semibold">0</span><span>Tidak Ada</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">1</span><span>Sangat Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">2</span><span>Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">3</span><span>Cukup</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">4</span><span>Baik</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">5</span><span>Sangat Baik</span></div>
+                        <label class="text-sm font-semibold text-gray-800 mb-3 block">3. Menghadapi tantangan baru</label>
+                        <input type="hidden" name="tantangan_baru" x-model="nilai.tantangan_baru">
+                        <div class="grid grid-cols-6 gap-2">
+                            <template x-for="n in [0,1,2,3,4,5]" :key="n">
+                                <button type="button" @click="nilai.tantangan_baru = n" :class="nilai.tantangan_baru == n? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'" class="border-2 rounded-xl py-3 transition flex flex-col items-center justify-center">
+                                    <span class="font-bold text-lg" x-text="n"></span>
+                                    <span class="text- leading-tight mt-1" x-text="labelNilai(n)"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-semibold text-gray-800">4. Kesediaan untuk merubah cara kerja agar lebih efisien</label>
-                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.ubah_cara_kerja"></span>
-                        </div>
-                        <input type="range" min="0" max="5" step="1" x-model="nilai.ubah_cara_kerja" name="ubah_cara_kerja" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-2">
-                        <div class="grid grid-cols-6 text-center text-xs text-gray-500">
-                            <div class="flex flex-col items-center"><span class="font-semibold">0</span><span>Tidak Ada</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">1</span><span>Sangat Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">2</span><span>Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">3</span><span>Cukup</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">4</span><span>Baik</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">5</span><span>Sangat Baik</span></div>
+                        <label class="text-sm font-semibold text-gray-800 mb-3 block">4. Kesediaan untuk merubah cara kerja agar lebih efisien</label>
+                        <input type="hidden" name="ubah_cara_kerja" x-model="nilai.ubah_cara_kerja">
+                        <div class="grid grid-cols-6 gap-2">
+                            <template x-for="n in [0,1,2,3,4,5]" :key="n">
+                                <button type="button" @click="nilai.ubah_cara_kerja = n" :class="nilai.ubah_cara_kerja == n? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'" class="border-2 rounded-xl py-3 transition flex flex-col items-center justify-center">
+                                    <span class="font-bold text-lg" x-text="n"></span>
+                                    <span class="text- leading-tight mt-1" x-text="labelNilai(n)"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-semibold text-gray-800">5. Mencari solusi alternatif</label>
-                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.solusi_alternatif"></span>
-                        </div>
-                        <input type="range" min="0" max="5" step="1" x-model="nilai.solusi_alternatif" name="solusi_alternatif" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-2">
-                        <div class="grid grid-cols-6 text-center text-xs text-gray-500">
-                            <div class="flex flex-col items-center"><span class="font-semibold">0</span><span>Tidak Ada</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">1</span><span>Sangat Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">2</span><span>Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">3</span><span>Cukup</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">4</span><span>Baik</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">5</span><span>Sangat Baik</span></div>
+                        <label class="text-sm font-semibold text-gray-800 mb-3 block">5. Mencari solusi alternatif</label>
+                        <input type="hidden" name="solusi_alternatif" x-model="nilai.solusi_alternatif">
+                        <div class="grid grid-cols-6 gap-2">
+                            <template x-for="n in [0,1,2,3,4,5]" :key="n">
+                                <button type="button" @click="nilai.solusi_alternatif = n" :class="nilai.solusi_alternatif == n? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'" class="border-2 rounded-xl py-3 transition flex flex-col items-center justify-center">
+                                    <span class="font-bold text-lg" x-text="n"></span>
+                                    <span class="text- leading-tight mt-1" x-text="labelNilai(n)"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                 </div>
@@ -597,78 +509,63 @@
                 </h3>
                 <div class="space-y-8">
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-semibold text-gray-800">1. Keramahan dalam berkomunikasi</label>
-                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.keramahan"></span>
-                        </div>
-                        <input type="range" min="0" max="5" step="1" x-model="nilai.keramahan" name="keramahan" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-2">
-                        <div class="grid grid-cols-6 text-center text-xs text-gray-500">
-                            <div class="flex flex-col items-center"><span class="font-semibold">0</span><span>Tidak Ada</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">1</span><span>Sangat Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">2</span><span>Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">3</span><span>Cukup</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">4</span><span>Baik</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">5</span><span>Sangat Baik</span></div>
+                        <label class="text-sm font-semibold text-gray-800 mb-3 block">1. Keramahan dalam berkomunikasi</label>
+                        <input type="hidden" name="keramahan" x-model="nilai.keramahan">
+                        <div class="grid grid-cols-6 gap-2">
+                            <template x-for="n in [0,1,2,3,4,5]" :key="n">
+                                <button type="button" @click="nilai.keramahan = n" :class="nilai.keramahan == n? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'" class="border-2 rounded-xl py-3 transition flex flex-col items-center justify-center">
+                                    <span class="font-bold text-lg" x-text="n"></span>
+                                    <span class="text- leading-tight mt-1" x-text="labelNilai(n)"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-semibold text-gray-800">2. Kejelasan dalam menyampaikan informasi</label>
-                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.kejelasan"></span>
-                        </div>
-                        <input type="range" min="0" max="5" step="1" x-model="nilai.kejelasan" name="kejelasan" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-2">
-                        <div class="grid grid-cols-6 text-center text-xs text-gray-500">
-                            <div class="flex flex-col items-center"><span class="font-semibold">0</span><span>Tidak Ada</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">1</span><span>Sangat Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">2</span><span>Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">3</span><span>Cukup</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">4</span><span>Baik</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">5</span><span>Sangat Baik</span></div>
+                        <label class="text-sm font-semibold text-gray-800 mb-3 block">2. Kejelasan dalam menyampaikan informasi</label>
+                        <input type="hidden" name="kejelasan" x-model="nilai.kejelasan">
+                        <div class="grid grid-cols-6 gap-2">
+                            <template x-for="n in [0,1,2,3,4,5]" :key="n">
+                                <button type="button" @click="nilai.kejelasan = n" :class="nilai.kejelasan == n? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'" class="border-2 rounded-xl py-3 transition flex flex-col items-center justify-center">
+                                    <span class="font-bold text-lg" x-text="n"></span>
+                                    <span class="text- leading-tight mt-1" x-text="labelNilai(n)"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-semibold text-gray-800">3. Responsif dalam komunikasi</label>
-                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.responsif_kom"></span>
-                        </div>
-                        <input type="range" min="0" max="5" step="1" x-model="nilai.responsif_kom" name="responsif_kom" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-2">
-                        <div class="grid grid-cols-6 text-center text-xs text-gray-500">
-                            <div class="flex flex-col items-center"><span class="font-semibold">0</span><span>Tidak Ada</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">1</span><span>Sangat Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">2</span><span>Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">3</span><span>Cukup</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">4</span><span>Baik</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">5</span><span>Sangat Baik</span></div>
+                        <label class="text-sm font-semibold text-gray-800 mb-3 block">3. Responsif dalam komunikasi</label>
+                        <input type="hidden" name="responsif_kom" x-model="nilai.responsif_kom">
+                        <div class="grid grid-cols-6 gap-2">
+                            <template x-for="n in [0,1,2,3,4,5]" :key="n">
+                                <button type="button" @click="nilai.responsif_kom = n" :class="nilai.responsif_kom == n? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'" class="border-2 rounded-xl py-3 transition flex flex-col items-center justify-center">
+                                    <span class="font-bold text-lg" x-text="n"></span>
+                                    <span class="text- leading-tight mt-1" x-text="labelNilai(n)"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-semibold text-gray-800">4. Melaporkan pelanggaran/hambatan</label>
-                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.lapor_pelanggaran"></span>
-                        </div>
-                        <input type="range" min="0" max="5" step="1" x-model="nilai.lapor_pelanggaran" name="lapor_pelanggaran" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-2">
-                        <div class="grid grid-cols-6 text-center text-xs text-gray-500">
-                            <div class="flex flex-col items-center"><span class="font-semibold">0</span><span>Tidak Ada</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">1</span><span>Sangat Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">2</span><span>Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">3</span><span>Cukup</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">4</span><span>Baik</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">5</span><span>Sangat Baik</span></div>
+                        <label class="text-sm font-semibold text-gray-800 mb-3 block">4. Melaporkan pelanggaran/hambatan</label>
+                        <input type="hidden" name="lapor_pelanggaran" x-model="nilai.lapor_pelanggaran">
+                        <div class="grid grid-cols-6 gap-2">
+                            <template x-for="n in [0,1,2,3,4,5]" :key="n">
+                                <button type="button" @click="nilai.lapor_pelanggaran = n" :class="nilai.lapor_pelanggaran == n? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'" class="border-2 rounded-xl py-3 transition flex flex-col items-center justify-center">
+                                    <span class="font-bold text-lg" x-text="n"></span>
+                                    <span class="text- leading-tight mt-1" x-text="labelNilai(n)"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-semibold text-gray-800">5. Keterbukaan dalam berkomunikasi</label>
-                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.keterbukaan"></span>
-                        </div>
-                        <input type="range" min="0" max="5" step="1" x-model="nilai.keterbukaan" name="keterbukaan" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-2">
-                        <div class="grid grid-cols-6 text-center text-xs text-gray-500">
-                            <div class="flex flex-col items-center"><span class="font-semibold">0</span><span>Tidak Ada</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">1</span><span>Sangat Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">2</span><span>Kurang</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">3</span><span>Cukup</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">4</span><span>Baik</span></div>
-                            <div class="flex flex-col items-center"><span class="font-semibold">5</span><span>Sangat Baik</span></div>
+                        <label class="text-sm font-semibold text-gray-800 mb-3 block">5. Keterbukaan dalam berkomunikasi</label>
+                        <input type="hidden" name="keterbukaan" x-model="nilai.keterbukaan">
+                        <div class="grid grid-cols-6 gap-2">
+                            <template x-for="n in [0,1,2,3,4,5]" :key="n">
+                                <button type="button" @click="nilai.keterbukaan = n" :class="nilai.keterbukaan == n? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'" class="border-2 rounded-xl py-3 transition flex flex-col items-center justify-center">
+                                    <span class="font-bold text-lg" x-text="n"></span>
+                                    <span class="text- leading-tight mt-1" x-text="labelNilai(n)"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                 </div>
