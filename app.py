@@ -19,7 +19,8 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 
 class Karyawan(UserMixin, db.Model):
-    npk = db.Column(db.Integer, primary_key=True)  # <-- npk jadi PK, hapus id
+    id = db.Column(db.Integer, primary_key=True)  # <-- PK balik ke id
+    npk = db.Column(db.Integer, unique=True, nullable=False)  # <-- npk jadi kolom biasa
     nama = db.Column(db.String(100), nullable=False)
     password = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(20), nullable=False)
