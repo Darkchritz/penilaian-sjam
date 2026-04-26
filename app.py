@@ -136,9 +136,6 @@ def penilaian(npk):
 @app.route('/submit_nilai', methods=['POST'])
 @login_required
 def submit_nilai():
-    if current_user.role == 'hrd':
-        flash('HRD tidak bisa input nilai', 'error')
-        return redirect(url_for('dashboard'))
 
     npk_dinilai = request.form.get('npk')
     action = request.form.get('action')
