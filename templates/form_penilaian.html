@@ -59,20 +59,20 @@
                                 <label class="block font-semibold text-gray-800">{{ k.label }}</label>
                                 <p class="text-xs text-gray-500">{{ k.desc }}</p>
                             </div>
-                            <output class="bg-indigo-600 text-white min-w-[3rem] h-12 rounded-lg flex items-center justify-center font-bold text-lg">
-                                {{ draft[k.name] if draft else 3 }}
+                            <output class="bg-indigo-600 text-white min-w- h-12 rounded-lg flex items-center justify-center font-bold text-lg">
+                                {{ draft[k.name] if draft else 2 }}
                             </output>
                         </div>
-                        <input type="range" name="{{ k.name }}" min="1" max="5"
-                               value="{{ draft[k.name] if draft else 3 }}"
+                        <input type="range" name="{{ k.name }}" min="0" max="4"
+                               value="{{ draft[k.name] if draft else 2 }}"
                                class="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
                                oninput="this.previousElementSibling.querySelector('output').value = this.value">
                         <div class="flex justify-between text-xs text-gray-500 mt-2">
+                            <span>0 - Kurang sekali</span>
                             <span>1 - Kurang</span>
                             <span>2 - Cukup</span>
                             <span>3 - Baik</span>
-                            <span>4 - Sangat Baik</span>
-                            <span>5 - Istimewa</span>
+                            <span>4 - Baik sekali</span>
                         </div>
                     </div>
                     {% endfor %}
