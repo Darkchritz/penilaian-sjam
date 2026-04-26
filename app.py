@@ -1,3 +1,15 @@
+from flask import Flask, render_template, request, redirect, url_for, flash
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from models import db, Karyawan, Penilaian  # <-- tambah ini
+import os
+
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'rahasia'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sjam.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db.init_app(app) # <-- ganti dari db = SQLAlchemy(app) jadi ini
 from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
