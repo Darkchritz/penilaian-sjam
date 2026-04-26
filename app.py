@@ -23,15 +23,10 @@ login_manager.login_view = 'login'
 def load_user(npk):
     return Karyawan.query.get(npk)
 
-# Tambahin ini buat bikin tabel otomatis
+# BIKIN TABEL OTOMATIS - TARUH DISINI
 with app.app_context():
     db.create_all()
-
-# ... route kamu dibawah
-
-app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', 'sjam-penilaian-secret-2024')
-DATABASE_URL = os.environ.get('DATABASE_URL')
+    print("=== TABEL BERHASIL DIBUAT ===")
 
 @app.route('/')
 def home():
@@ -42,18 +37,15 @@ def login():
     if request.method == 'POST':
         npk = request.form['npk']
         password = request.form['password']
-        conn = get_conn()
-        c = conn.cursor()
-        c.execute("SELECT * FROM users WHERE npk=%s", (npk,))
-        user = c.fetchone()
-        conn.close()
-        if user and check_password_hash(user['password'], password):
+        user = Karyawan.query.filter_by(npk=npk).first()
+        if user and check_password_hash(user.password, password):
+            login_user(user)
             session['user'] = {
-                'npk': user['npk'],
-                'nama': user['nama'],
-                'role': user['role'],
-                'divisi': user['divisi'],
-                'cabang': user['cabang']
+                'npk': user.npk,
+                'nama': user.nama,
+                'role': user.role,
+                'divisi': user.divisi,
+                'cabang': user.cabang
             }
             return redirect('/dashboard')
         flash('NPK atau Password salah!', 'error')
@@ -69,89 +61,77 @@ def register():
         divisi = request.form['divisi']
         cabang = request.form['cabang']
 
-        conn = get_conn()
-        c = conn.cursor()
         try:
-            c.execute("INSERT INTO users (npk, nama, password, role, divisi, cabang) VALUES (%s,%s,%s,%s,%s,%s)", (npk, nama, password, role, divisi, cabang))
-            conn.commit()
+            user_baru = Karyawan(npk=npk, nama=nama, password=password, role=role, divisi=divisi, cabang=cabang)
+            db.session.add(user_baru)
+            db.session.commit()
             flash('Registrasi berhasil! Silakan login.', 'success')
             return redirect('/login')
-        except psycopg2.IntegrityError:
+        except:
+            db.session.rollback()
             flash('NPK sudah terdaftar!', 'error')
-        finally:
-            conn.close()
     return render_template('register.html')
 
 @app.route('/dashboard')
+@login_required
 def dashboard():
-    if 'user' not in session:
-        return redirect(url_for('login'))
+    user = current_user
     
-    user = session['user']
-    with get_conn() as conn:
-        c = conn.cursor()
+    if user.role == 'hrd':
+        page = int(request.args.get('page', 1))
+        per_page = 20
+        pagination = Karyawan.query.filter(Karyawan.npk!= user.npk).paginate(page=page, per_page=per_page, error_out=False)
+        karyawan = pagination.items
+        total_pages = pagination.pages
         
-        if user['role'] == 'hrd':
-            page = int(request.args.get('page', 1))
-            per_page = 20
-            c.execute("SELECT COUNT(*) as count FROM users WHERE npk!=%s", (user['npk'],))
-            total = c.fetchone()['count']
-            total_pages = (total + per_page - 1) // per_page
-            offset = (page - 1) * per_page
-            c.execute("SELECT npk,nama,divisi,role,cabang FROM users WHERE npk!=%s ORDER BY role DESC, nama LIMIT %s OFFSET %s",
-                      (user['npk'], per_page, offset))
-            karyawan = c.fetchall()
-            c.execute("SELECT npk,nama,divisi,cabang FROM users WHERE npk NOT IN (SELECT npk FROM penilaian WHERE status='final') AND role='karyawan'")
-            belum_dinilai = c.fetchall()
-            
-            c.execute("SELECT npk, nama, divisi, role, cabang FROM users WHERE divisi=%s AND cabang=%s AND role IN ('karyawan','kadiv') AND npk!=%s ORDER BY role DESC, nama",
-                     (user['divisi'], user['cabang'], user['npk']))
-            karyawan_untuk_dinilai = c.fetchall()
-            
-            return render_template('dashboard_hrd.html',
-                                 user=user,
-                                 karyawan=karyawan,
-                                 belum_dinilai=belum_dinilai,
-                                 page=page,
-                                 total_pages=total_pages,
-                                 karyawan_untuk_dinilai=karyawan_untuk_dinilai)
+        belum_dinilai = Karyawan.query.filter(
+            Karyawan.role == 'karyawan',
+            ~Karyawan.npk.in_(db.session.query(Penilaian.npk).filter_by(status='final'))
+        ).all()
         
-        elif user['role'] == 'kadiv':
-            c.execute("SELECT npk, nama, divisi, role, cabang FROM users WHERE divisi=%s AND cabang=%s AND role IN ('karyawan','kadiv') AND npk!=%s ORDER BY role DESC, nama",
-                     (user['divisi'], user['cabang'], user['npk']))
-            karyawan = c.fetchall()
-            c.execute("SELECT p.*, u.nama FROM penilaian p JOIN users u ON p.npk=u.npk WHERE p.penilai=%s AND p.status='draft'",
-                     (user['npk'],))
-            draft = c.fetchall()
-            return render_template('dashboard_kadiv.html', user=user, karyawan=karyawan, draft=draft)
+        karyawan_untuk_dinilai = Karyawan.query.filter(
+            Karyawan.divisi == user.divisi,
+            Karyawan.cabang == user.cabang,
+            Karyawan.role.in_(['karyawan','kadiv']),
+            Karyawan.npk!= user.npk
+        ).order_by(Karyawan.role.desc(), Karyawan.nama).all()
         
-        else:
-            c.execute("SELECT p.*, u.nama as nama_penilai FROM penilaian p JOIN users u ON p.penilai=u.npk WHERE p.npk=%s AND p.status='final' ORDER BY p.tgl_finalisasi DESC",
-                     (user['npk'],))
-            hasil = c.fetchall()
-            return render_template('dashboard_karyawan.html', user=user, hasil=hasil)
+        return render_template('dashboard_hrd.html',
+                             user=user,
+                             karyawan=karyawan,
+                             belum_dinilai=belum_dinilai,
+                             page=page,
+                             total_pages=total_pages,
+                             karyawan_untuk_dinilai=karyawan_untuk_dinilai)
+    
+    elif user.role == 'kadiv':
+        karyawan = Karyawan.query.filter(
+            Karyawan.divisi == user.divisi,
+            Karyawan.cabang == user.cabang,
+            Karyawan.role.in_(['karyawan','kadiv']),
+            Karyawan.npk!= user.npk
+        ).order_by(Karyawan.role.desc(), Karyawan.nama).all()
+        
+        draft = Penilaian.query.filter_by(penilai_npk=user.npk, status='draft').all()
+        return render_template('dashboard_kadiv.html', user=user, karyawan=karyawan, draft=draft)
+    
+    else:
+        hasil = Penilaian.query.filter_by(npk=user.npk, status='final').order_by(Penilaian.tanggal_update.desc()).all()
+        return render_template('dashboard_karyawan.html', user=user, hasil=hasil)
             
 @app.route('/penilaian/<npk>')
+@login_required
 def penilaian(npk):
-    if 'user' not in session:
-        return redirect(url_for('login'))
-    
-    user = session['user']
-    if user['role'] not in ['hrd', 'kadiv']:
+    if current_user.role not in ['hrd', 'kadiv']:
         return "Akses ditolak", 403
     
-    with get_conn() as conn:
-        c = conn.cursor()
-        c.execute("SELECT * FROM users WHERE npk=%s", (npk,))
-        karyawan = c.fetchone()
+    karyawan = Karyawan.query.filter_by(npk=npk).first()
+    if not karyawan:
+        return "Karyawan tidak ditemukan", 404
         
-        if not karyawan:
-            return "Karyawan tidak ditemukan", 404
-            
-        c.execute("SELECT * FROM penilaian WHERE npk=%s AND penilai=%s AND status='draft'", (npk, user['npk']))
-        draft = c.fetchone()
+    draft = Penilaian.query.filter_by(npk=npk, penilai_npk=current_user.npk, status='draft').first()
         
-    return render_template('form_penilaian.html', user=user, karyawan=karyawan, draft=draft)
+    return render_template('form_penilaian.html', user=current_user, karyawan=karyawan, draft=draft)
 
 @app.route('/submit_nilai', methods=['POST'])
 @login_required
@@ -163,52 +143,38 @@ def submit_nilai():
     npk_dinilai = request.form.get('npk')
     action = request.form.get('action')
 
-    # Ambil data karyawan yang dinilai
     karyawan = Karyawan.query.filter_by(npk=npk_dinilai).first()
     if not karyawan:
         flash('Karyawan tidak ditemukan', 'error')
         return redirect(url_for('dashboard'))
 
-    # Validasi divisi
     if current_user.role == 'kadiv' and karyawan.divisi!= current_user.divisi:
         flash('Anda hanya bisa menilai karyawan di divisi Anda', 'error')
         return redirect(url_for('dashboard'))
 
-    # Daftar 35 indikator baru sesuai Excel
     indikator_list = [
-        # KEDISIPLINAN
         'kehadiran', 'kepatuhan_aturan', 'konsistensi', 'kepatuhan_seragam', 'disiplin_kebersihan',
-        # PRODUKTIVITAS KERJA
         'efisiensi', 'prioritas', 'inovasi', 'multitasking', 'peningkatan_kinerja',
-        # KEHANDALAN
         'terampil', 'keputusan', 'inisiatif', 'penyelesaian_masalah', 'responsif',
-        # KERJASAMA
         'menanggapi_positif', 'koordinasi', 'sikap_positif', 'tidak_komplain', 'profesional',
-        # TANGGUNG JAWAB
         'tanggung_jawab_kerja', 'menerima_kesalahan', 'inventaris', 'tanpa_pengawasan', 'mengelola_prioritas',
-        # KEMAMPUAN BERADAPTASI
         'belajar_cepat', 'strategi_kerja', 'tantangan_baru', 'ubah_cara_kerja', 'solusi_alternatif',
-        # KOMUNIKASI
         'keramahan', 'kejelasan', 'responsif_kom', 'lapor_pelanggaran', 'keterbukaan'
     ]
 
-    # Ambil nilai dari form
     data_nilai = {}
     for ind in indikator_list:
-        data_nilai[ind] = int(request.form.get(ind, 2)) # default 2 = Cukup
+        data_nilai[ind] = int(request.form.get(ind, 2))
 
-    # Cek sudah ada penilaian draft/final atau belum
     penilaian = Penilaian.query.filter_by(npk=npk_dinilai, tahun=datetime.now().year).first()
 
     if action == 'draft':
         if penilaian:
-            # Update draft yang ada
             for ind in indikator_list:
                 setattr(penilaian, ind, data_nilai[ind])
             penilaian.status = 'draft'
             penilaian.tanggal_update = datetime.now()
         else:
-            # Buat draft baru
             penilaian = Penilaian(
                 npk=npk_dinilai,
                 penilai_npk=current_user.npk,
@@ -226,13 +192,11 @@ def submit_nilai():
             flash('Penilaian sudah difinalisasi, tidak bisa diubah', 'error')
         else:
             if penilaian:
-                # Update jadi final
                 for ind in indikator_list:
                     setattr(penilaian, ind, data_nilai[ind])
                 penilaian.status = 'final'
                 penilaian.tanggal_update = datetime.now()
             else:
-                # Buat final baru
                 penilaian = Penilaian(
                     npk=npk_dinilai,
                     penilai_npk=current_user.npk,
@@ -248,52 +212,41 @@ def submit_nilai():
     return redirect(url_for('dashboard'))
 
 @app.route('/finalisasi/<int:id>')
+@login_required
 def finalisasi(id):
-    if 'user' not in session or session['user']['role']!= 'kadiv':
+    if current_user.role!= 'kadiv':
         return redirect('/')
 
-    user = session['user']
-    conn = get_conn()
-    c = conn.cursor()
-
-    c.execute("SELECT divisi, cabang FROM penilaian WHERE id=%s", (id,))
-    data = c.fetchone()
-    if not data or data['divisi']!= user['divisi'] or data['cabang']!= user['cabang']:
-        conn.close()
+    penilaian = Penilaian.query.get(id)
+    if not penilaian or penilaian.karyawan.divisi!= current_user.divisi or penilaian.karyawan.cabang!= current_user.cabang:
         flash('Tidak bisa finalisasi data divisi/cabang lain!', 'error')
         return redirect('/dashboard')
 
-    c.execute("UPDATE penilaian SET status='final' WHERE id=%s", (id,))
-    conn.commit()
-    conn.close()
+    penilaian.status = 'final'
+    db.session.commit()
     flash('Penilaian berhasil difinalisasi!', 'success')
     return redirect('/dashboard')
 
 @app.route('/hapus_draft/<int:id>')
+@login_required
 def hapus_draft(id):
-    if 'user' not in session or session['user']['role']!= 'kadiv':
+    if current_user.role!= 'kadiv':
         return redirect('/')
 
-    user = session['user']
-    conn = get_conn()
-    c = conn.cursor()
-    c.execute("SELECT divisi, cabang FROM penilaian WHERE id=%s AND status='draft'", (id,))
-    data = c.fetchone()
-
-    if not data or data['divisi']!= user['divisi'] or data['cabang']!= user['cabang']:
-        conn.close()
+    penilaian = Penilaian.query.filter_by(id=id, status='draft').first()
+    if not penilaian or penilaian.karyawan.divisi!= current_user.divisi or penilaian.karyawan.cabang!= current_user.cabang:
         flash('Tidak bisa hapus data divisi/cabang lain!', 'error')
         return redirect('/dashboard')
 
-    c.execute("DELETE FROM penilaian WHERE id=%s", (id,))
-    conn.commit()
-    conn.close()
+    db.session.delete(penilaian)
+    db.session.commit()
     flash('Draft dihapus!', 'success')
     return redirect('/dashboard')
 
 @app.route('/hrd/tambah_karyawan', methods=['POST'])
+@login_required
 def tambah_karyawan():
-    if 'user' not in session or session['user']['role']!= 'hrd':
+    if current_user.role!= 'hrd':
         return redirect('/')
 
     npk = request.form['npk']
@@ -303,66 +256,64 @@ def tambah_karyawan():
     divisi = request.form['divisi']
     cabang = request.form['cabang']
 
-    conn = get_conn()
-    c = conn.cursor()
     try:
-        c.execute("INSERT INTO users (npk, nama, password, role, divisi, cabang) VALUES (%s,%s,%s,%s,%s,%s)", (npk, nama, password, role, divisi, cabang))
-        conn.commit()
+        user_baru = Karyawan(npk=npk, nama=nama, password=password, role=role, divisi=divisi, cabang=cabang)
+        db.session.add(user_baru)
+        db.session.commit()
         flash('Karyawan berhasil ditambahkan!', 'success')
-    except psycopg2.IntegrityError:
+    except:
+        db.session.rollback()
         flash('NPK sudah terdaftar!', 'error')
-    finally:
-        conn.close()
     return redirect('/dashboard')
 
 @app.route('/hrd/edit_karyawan/<npk>', methods=['POST'])
+@login_required
 def edit_karyawan(npk):
-    if 'user' not in session or session['user']['role']!= 'hrd':
+    if current_user.role!= 'hrd':
         return redirect('/')
 
-    nama = request.form['nama']
-    role = request.form['role']
-    divisi = request.form['divisi']
-    cabang = request.form['cabang']
-    password = request.form.get('password', '')
+    karyawan = Karyawan.query.filter_by(npk=npk).first()
+    if not karyawan:
+        flash('Karyawan tidak ditemukan', 'error')
+        return redirect('/dashboard')
 
-    conn = get_conn()
-    c = conn.cursor()
+    karyawan.nama = request.form['nama']
+    karyawan.role = request.form['role']
+    karyawan.divisi = request.form['divisi']
+    karyawan.cabang = request.form['cabang']
+    password = request.form.get('password', '')
     if password:
-        c.execute("UPDATE users SET nama=%s, password=%s, role=%s, divisi=%s, cabang=%s WHERE npk=%s",
-                 (nama, generate_password_hash(password), role, divisi, cabang, npk))
-    else:
-        c.execute("UPDATE users SET nama=%s, role=%s, divisi=%s, cabang=%s WHERE npk=%s",
-                 (nama, role, divisi, cabang, npk))
-    conn.commit()
-    conn.close()
+        karyawan.password = generate_password_hash(password)
+    
+    db.session.commit()
     flash('Data karyawan diupdate!', 'success')
     return redirect('/dashboard')
 
 @app.route('/hrd/hapus_karyawan/<npk>', methods=['POST'])
+@login_required
 def hapus_karyawan(npk):
-    if 'user' not in session or session['user']['role']!= 'hrd':
+    if current_user.role!= 'hrd':
         return redirect('/')
 
-    conn = get_conn()
-    c = conn.cursor()
-    c.execute("DELETE FROM users WHERE npk=%s", (npk,))
-    c.execute("DELETE FROM penilaian WHERE npk=%s", (npk,))
-    conn.commit()
-    conn.close()
-    flash('Karyawan & data penilaian dihapus!', 'success')
+    karyawan = Karyawan.query.filter_by(npk=npk).first()
+    if karyawan:
+        Penilaian.query.filter_by(npk=npk).delete()
+        db.session.delete(karyawan)
+        db.session.commit()
+        flash('Karyawan & data penilaian dihapus!', 'success')
     return redirect('/dashboard')
 
 @app.route('/hrd/download_karyawan')
+@login_required
 def download_karyawan():
-    if 'user' not in session or session['user']['role']!= 'hrd':
+    if current_user.role!= 'hrd':
         return redirect('/')
 
-    conn = get_conn()
-    df = pd.read_sql_query("SELECT npk, nama, divisi, role, cabang FROM users WHERE role IN ('karyawan','kadiv')", conn)
-    conn.close()
-
-    df['password'] = ''
+    karyawan = Karyawan.query.filter(Karyawan.role.in_(['karyawan','kadiv'])).all()
+    df = pd.DataFrame([{
+        'npk': k.npk, 'nama': k.nama, 'divisi': k.divisi, 
+        'role': k.role, 'cabang': k.cabang, 'password': ''
+    } for k in karyawan])
     df = df[['npk','nama','password','role','divisi','cabang']]
 
     output = io.BytesIO()
@@ -376,8 +327,9 @@ def download_karyawan():
                      download_name='template_karyawan_sjam.xlsx')
 
 @app.route('/hrd/upload_karyawan', methods=['POST'])
+@login_required
 def upload_karyawan():
-    if 'user' not in session or session['user']['role']!= 'hrd':
+    if current_user.role!= 'hrd':
         return redirect('/')
 
     file = request.files['file']
@@ -410,50 +362,63 @@ def upload_karyawan():
             flash('Maksimal 500 baris per upload. Pecah file Excel jadi beberapa bagian', 'error')
             return redirect('/dashboard')
 
-        conn = get_conn()
-        c = conn.cursor()
-
-        c.execute("SELECT npk FROM users")
-        existing_npk = set([r['npk'] for r in c.fetchall()])
-
+        existing_npk = set([k.npk for k in Karyawan.query.all()])
         data_batch = []
         skip = 0
+        
         for _, row in df.iterrows():
             if row['npk'] in existing_npk:
                 skip += 1
                 continue
 
             password = str(row['password']).strip() if 'password' in df.columns and str(row['password']).strip()!= '' else '123456'
-            data_batch.append((
-                row['npk'],
-                row['nama'],
-                generate_password_hash(password),
-                row['role'],
-                row['divisi'],
-                row['cabang']
+            data_batch.append(Karyawan(
+                npk=row['npk'],
+                nama=row['nama'],
+                password=generate_password_hash(password),
+                role=row['role'],
+                divisi=row['divisi'],
+                cabang=row['cabang']
             ))
             existing_npk.add(row['npk'])
 
         if data_batch:
-            c.executemany("INSERT INTO users (npk, nama, password, role, divisi, cabang) VALUES (%s,%s,%s,%s,%s,%s)", data_batch)
+            db.session.bulk_save_objects(data_batch)
+            db.session.commit()
 
-        conn.commit()
-        conn.close()
         flash(f'Upload selesai! Baru: {len(data_batch)}, Skip duplikat: {skip}', 'success')
 
     except Exception as e:
+        db.session.rollback()
         flash(f'Error: {str(e)}', 'error')
 
     return redirect('/dashboard')
 
 @app.route('/export_hrd')
+@login_required
 def export_hrd():
-    if 'user' not in session or session['user']['role']!= 'hrd':
+    if current_user.role!= 'hrd':
         return redirect('/')
 
-    conn = get_conn()
-    df = pd.read_sql_query("SELECT * FROM penilaian WHERE status='final'", conn)
-    conn.close()
+    penilaian = Penilaian.query.filter_by(status='final').all()
+    df = pd.DataFrame([{
+        'id': p.id, 'npk': p.npk, 'penilai_npk': p.penilai_npk, 'tahun': p.tahun,
+        'status': p.status, 'tanggal_update': p.tanggal_update,
+        'kehadiran': p.kehadiran, 'kepatuhan_aturan': p.kepatuhan_aturan, 'konsistensi': p.konsistensi,
+        'kepatuhan_seragam': p.kepatuhan_seragam, 'disiplin_kebersihan': p.disiplin_kebersihan,
+        'efisiensi': p.efisiensi, 'prioritas': p.prioritas, 'inovasi': p.inovasi,
+        'multitasking': p.multitasking, 'peningkatan_kinerja': p.peningkatan_kinerja,
+        'terampil': p.terampil, 'keputusan': p.keputusan, 'inisiatif': p.inisiatif,
+        'penyelesaian_masalah': p.penyelesaian_masalah, 'responsif': p.responsif,
+        'menanggapi_positif': p.menanggapi_positif, 'koordinasi': p.koordinasi,
+        'sikap_positif': p.sikap_positif, 'tidak_komplain': p.tidak_komplain, 'profesional': p.profesional,
+        'tanggung_jawab_kerja': p.tanggung_jawab_kerja, 'menerima_kesalahan': p.menerima_kesalahan,
+        'inventaris': p.inventaris, 'tanpa_pengawasan': p.tanpa_pengawasan, 'mengelola_prioritas': p.mengelola_prioritas,
+        'belajar_cepat': p.belajar_cepat, 'strategi_kerja': p.strategi_kerja, 'tantangan_baru': p.tantangan_baru,
+        'ubah_cara_kerja': p.ubah_cara_kerja, 'solusi_alternatif': p.solusi_alternatif,
+        'keramahan': p.keramahan, 'kejelasan': p.kejelasan, 'responsif_kom': p.responsif_kom,
+        'lapor_pelanggaran': p.lapor_pelanggaran, 'keterbukaan': p.keterbukaan
+    } for p in penilaian])
 
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
@@ -466,7 +431,9 @@ def export_hrd():
                      download_name='rekap_final_sjam.xlsx')
 
 @app.route('/logout')
+@login_required
 def logout():
+    logout_user()
     session.clear()
     return redirect('/login')
 
