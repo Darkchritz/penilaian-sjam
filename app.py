@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import pandas as pd
@@ -11,11 +10,10 @@ from models import db, Karyawan, Penilaian
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'sjam-penilaian-secret-2024')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///sjam.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
-migrate = Migrate(app, db)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -24,6 +22,10 @@ login_manager.login_view = 'login'
 @login_manager.user_loader
 def load_user(npk):
     return Karyawan.query.get(npk)
+
+# Tambahin ini buat bikin tabel otomatis
+with app.app_context():
+    db.create_all()
 
 # ... route kamu dibawah
 
