@@ -114,7 +114,7 @@
                                 <td class="px-6 py-4 text-sm text-center whitespace-nowrap">
                                     <div class="flex items-center justify-center gap-4">
                                         <button type="button"
-                                                @click="showEdit = true; editData = {npk: '{{ k.npk }}', nama: '{{ k.nama|replace(\"'\", \"\\'\") }}', role: '{{ k.role }}', divisi: '{{ k.divisi|replace(\"'\", \"\\'\") }}', cabang: '{{ k.cabang|replace(\"'\", \"\\'\") }}'}"
+                                                @click="showEdit = true; editData = {npk: {{ k.npk|tojson }}, nama: {{ k.nama|tojson }}, role: {{ k.role|tojson }}, divisi: {{ k.divisi|tojson }}, cabang: {{ k.cabang|tojson }}}"
                                                 class="text-blue-600 hover:text-blue-800 transition">
                                             <i class="bi bi-pencil-square text-xl"></i>
                                         </button>
