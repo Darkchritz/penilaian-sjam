@@ -161,7 +161,7 @@ def submit_nilai():
 
     data_nilai = {}
     for ind in indikator_list:
-        data_nilai[ind] = int(request.form.get(ind, 2))
+        data_nilai[ind] = int(request.form.get(ind, 3)) # <-- UBAH DARI 2 JADI 3
 
     penilaian = Penilaian.query.filter_by(npk=npk_dinilai, tahun=datetime.now().year).first()
 
