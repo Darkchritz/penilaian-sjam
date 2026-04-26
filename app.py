@@ -84,9 +84,14 @@ def dashboard():
         karyawan = pagination.items
         total_pages = pagination.pages
         
+        tahun_ini = datetime.now().year
+        # Ambil semua penilaian final tahun ini buat status
+        penilaian_final = Penilaian.query.filter_by(tahun=tahun_ini, status='final').all()
+        status_penilaian = {p.npk: p.status for p in penilaian_final}
+        
         belum_dinilai = Karyawan.query.filter(
             Karyawan.role == 'karyawan',
-            ~Karyawan.npk.in_(db.session.query(Penilaian.npk).filter_by(status='final'))
+            ~Karyawan.npk.in_(db.session.query(Penilaian.npk).filter_by(status='final', tahun=tahun_ini))
         ).all()
         
         karyawan_untuk_dinilai = Karyawan.query.filter(
@@ -102,7 +107,8 @@ def dashboard():
                              belum_dinilai=belum_dinilai,
                              page=page,
                              total_pages=total_pages,
-                             karyawan_untuk_dinilai=karyawan_untuk_dinilai)
+                             karyawan_untuk_dinilai=karyawan_untuk_dinilai,
+                             status_penilaian=status_penilaian) # <-- TAMBAH INI
     
     elif user.role == 'kadiv':
         karyawan = Karyawan.query.filter(
@@ -116,7 +122,8 @@ def dashboard():
         return render_template('dashboard_kadiv.html', user=user, karyawan=karyawan, draft=draft)
     
     else:
-        hasil = Penilaian.query.filter_by(npk=user.npk, status='final').order_by(Penilaian.tanggal_update.desc()).all()
+        tahun_ini = datetime.now().year
+        hasil = Penilaian.query.filter_by(npk=user.npk, status='final', tahun=tahun_ini).order_by(Penilaian.tanggal_update.desc()).first()
         return render_template('dashboard_karyawan.html', user=user, hasil=hasil)
             
 @app.route('/penilaian/<npk>')
