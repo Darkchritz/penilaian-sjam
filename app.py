@@ -85,13 +85,13 @@ def dashboard():
         total_pages = pagination.pages
         
         tahun_ini = datetime.now().year
-        # Ambil semua penilaian final tahun ini buat status
-        penilaian_final = Penilaian.query.filter_by(tahun=tahun_ini, status='final').all()
-        status_penilaian = {p.npk: p.status for p in penilaian_final}
+        # Ambil semua penilaian Q1 tahun ini, kirim full objeknya
+        penilaian_q1 = Penilaian.query.filter_by(tahun=tahun_ini, periode='Q1').all()
+        penilaian_dict = {p.npk: p for p in penilaian_q1}
         
         belum_dinilai = Karyawan.query.filter(
             Karyawan.role == 'karyawan',
-            ~Karyawan.npk.in_(db.session.query(Penilaian.npk).filter_by(status='final', tahun=tahun_ini))
+            ~Karyawan.npk.in_(db.session.query(Penilaian.npk).filter_by(periode='Q1', tahun=tahun_ini))
         ).all()
         
         karyawan_untuk_dinilai = Karyawan.query.filter(
@@ -108,7 +108,12 @@ def dashboard():
                              page=page,
                              total_pages=total_pages,
                              karyawan_untuk_dinilai=karyawan_untuk_dinilai,
-                             status_penilaian=status_penilaian) # <-- TAMBAH INI
+                             penilaian_dict=penilaian_dict) # <-- GANTI INI
+
+    elif user.role == 'karyawan':
+        tahun_ini = datetime.now().year
+        hasil = Penilaian.query.filter_by(npk=user.npk, tahun=tahun_ini, periode='Q1').first()
+        return render_template('dashboard_karyawan.html', user=user, hasil=hasil)
     
     elif user.role == 'kadiv':
         karyawan = Karyawan.query.filter(
