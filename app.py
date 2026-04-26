@@ -1,7 +1,6 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
@@ -12,31 +11,26 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
-migrate = Migrate(app, db)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
 class Karyawan(UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)  # <-- PK balik ke id
-    npk = db.Column(db.Integer, unique=True, nullable=False)  # <-- npk jadi kolom biasa
+    id = db.Column(db.Integer, primary_key=True)
+    npk = db.Column(db.Integer, unique=True, nullable=False)
     nama = db.Column(db.String(100), nullable=False)
     password = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(20), nullable=False)
     divisi = db.Column(db.String(50), nullable=False)
     cabang = db.Column(db.String(50), nullable=False)
 
-    def get_id(self):
-        return str(self.npk)  # <-- wajib buat Flask-Login
-
 class Penilaian(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    id_karyawan = db.Column(db.Integer, db.ForeignKey('karyawan.id'))  # <-- ganti dari npk
+    id_karyawan = db.Column(db.Integer, db.ForeignKey('karyawan.id'))
     tahun = db.Column(db.Integer)
     periode = db.Column(db.String(2))
-    penilai_npk = db.Column(db.Integer)  # <-- ini biarin integer aja
-    
+    penilai_npk = db.Column(db.Integer)
     tanggung_jawab = db.Column(db.Integer)
     inisiatif = db.Column(db.Integer)
     kerjasama = db.Column(db.Integer)
