@@ -12,6 +12,7 @@ app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'sjam-penilaian-secret-2024')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+migrate = Migrate(app, db)
 
 db.init_app(app)
 
