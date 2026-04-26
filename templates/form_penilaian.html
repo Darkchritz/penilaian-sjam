@@ -40,42 +40,248 @@
             <form action="/submit_nilai" method="POST" class="p-6">
                 <input type="hidden" name="npk" value="{{ karyawan.npk }}">
 
-                <div class="space-y-6">
-                    {% set kriteria = [
-                        {'name': 'tanggung_jawab', 'label': 'Tanggung Jawab', 'desc': 'Kesanggupan menyelesaikan tugas'},
-                        {'name': 'inisiatif', 'label': 'Inisiatif', 'desc': 'Kemampuan bekerja tanpa disuruh'},
-                        {'name': 'kerjasama', 'label': 'Kerjasama', 'desc': 'Kemampuan bekerja dalam tim'},
-                        {'name': 'kedisiplinan', 'label': 'Kedisiplinan', 'desc': 'Ketaatan pada aturan & waktu'},
-                        {'name': 'kemampuan', 'label': 'Kemampuan Kerja', 'desc': 'Skill & kompetensi teknis'},
-                        {'name': 'target', 'label': 'Pencapaian Target', 'desc': 'Hasil kerja vs target'},
-                        {'name': 'proses', 'label': 'Proses Kerja', 'desc': 'Kesesuaian dengan SOP'},
-                        {'name': 'inovasi', 'label': 'Inovasi', 'desc': 'Ide perbaikan & kreativitas'}
-                    ] %}
-
-                    {% for k in kriteria %}
-                    <div class="bg-gray-50 rounded-xl p-5">
-                        <div class="flex justify-between items-start mb-3">
-                            <div>
-                                <label class="block font-semibold text-gray-800">{{ k.label }}</label>
-                                <p class="text-xs text-gray-500">{{ k.desc }}</p>
-                            </div>
-                            <output class="bg-indigo-600 text-white min-w- h-12 rounded-lg flex items-center justify-center font-bold text-lg">
-                                {{ draft[k.name] if draft else 2 }}
-                            </output>
-                        </div>
-                        <input type="range" name="{{ k.name }}" min="0" max="4"
-                               value="{{ draft[k.name] if draft else 2 }}"
-                               class="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
-                               oninput="this.previousElementSibling.querySelector('output').value = this.value">
-                        <div class="flex justify-between text-xs text-gray-500 mt-2">
-                            <span>0 - Kurang sekali</span>
-                            <span>1 - Kurang</span>
-                            <span>2 - Cukup</span>
-                            <span>3 - Baik</span>
-                            <span>4 - Baik sekali</span>
+                <div class="space-y-8">
+                    <!-- KEDISIPLINAN 20% -->
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b-2 border-indigo-200">KEDISIPLINAN (20%)</h3>
+                        <div class="space-y-6">
+                            {% set kedisiplinan = [
+                                {'name': 'kehadiran', 'label': 'Kehadiran dan Ketepatan Waktu'},
+                                {'name': 'kepatuhan_aturan', 'label': 'Kepatuhan terhadap Aturan dan Kebijakan Perusahaan'},
+                                {'name': 'konsistensi', 'label': 'Konsistensi dalam pelaporan dan penyelesaian tugas'},
+                                {'name': 'kepatuhan_seragam', 'label': 'Kepatuhan terhadap penggunaan seragam atau identitas kerja'},
+                                {'name': 'disiplin_kebersihan', 'label': 'Disiplin dalam Menjaga Kebersihan dan Kerapian Tempat Kerja'}
+                            ] %}
+                            {% for k in kedisiplinan %}
+                            <div class="bg-gray-50 rounded-xl p-5">
+                                <div class="flex justify-between items-start mb-3">
+                                    <label class="block font-semibold text-gray-800">{{ loop.index }}. {{ k.label }}</label>
+                                    <output class="bg-indigo-600 text-white min-w-12 h-12 rounded-lg flex items-center justify-center font-bold text-lg">
+                                        {{ draft[k.name] if draft else 2 }}
+                                    </output>
+                                </div>
+                                <input type="range" name="{{ k.name }}" min="0" max="4"
+                                       value="{{ draft[k.name] if draft else 2 }}"
+                                       class="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                                       oninput="this.previousElementSibling.querySelector('output').value = this.value">
+                                <div class="flex justify-between text-xs text-gray-500 mt-2">
+                                    <span>0 - Kurang sekali</span>
+                                    <span>1 - Kurang</span>
+                                    <span>2 - Cukup</span>
+                                    <span>3 - Baik</span>
+                                    <span>4 - Baik sekali</span>
+                                </div>
+                            {% endfor %}
                         </div>
                     </div>
-                    {% endfor %}
+
+                    <!-- PRODUKTIVITAS KERJA 20% -->
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b-2 border-indigo-200">PRODUKTIVITAS KERJA (20%)</h3>
+                        <div class="space-y-6">
+                            {% set produktivitas = [
+                                {'name': 'efisiensi', 'label': 'Efisiensi dalam Penyelesaian Tugas yang diberikan'},
+                                {'name': 'prioritas', 'label': 'Kemampuan memprioritaskan tugas pokok'},
+                                {'name': 'inovasi', 'label': 'Inovasi dan Kreativitas dalam pekerjaan'},
+                                {'name': 'multitasking', 'label': 'Kemampuan multitasking'},
+                                {'name': 'peningkatan_kinerja', 'label': 'Peningkatan kinerja secara berkelanjutan'}
+                            ] %}
+                            {% for k in produktivitas %}
+                            <div class="bg-gray-50 rounded-xl p-5">
+                                <div class="flex justify-between items-start mb-3">
+                                    <label class="block font-semibold text-gray-800">{{ loop.index }}. {{ k.label }}</label>
+                                    <output class="bg-indigo-600 text-white min-w-12 h-12 rounded-lg flex items-center justify-center font-bold text-lg">
+                                        {{ draft[k.name] if draft else 2 }}
+                                    </output>
+                                </div>
+                                <input type="range" name="{{ k.name }}" min="0" max="4"
+                                       value="{{ draft[k.name] if draft else 2 }}"
+                                       class="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                                       oninput="this.previousElementSibling.querySelector('output').value = this.value">
+                                <div class="flex justify-between text-xs text-gray-500 mt-2">
+                                    <span>0 - Kurang sekali</span>
+                                    <span>1 - Kurang</span>
+                                    <span>2 - Cukup</span>
+                                    <span>3 - Baik</span>
+                                    <span>4 - Baik sekali</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- KEHANDALAN 15% -->
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b-2 border-indigo-200">KEHANDALAN (15%)</h3>
+                        <div class="space-y-6">
+                            {% set kehandalan = [
+                                {'name': 'terampil', 'label': 'Terampil dan jarang melakukan kesalahan'},
+                                {'name': 'keputusan', 'label': 'Kemampuan pengambilan keputusan cepat dan tepat'},
+                                {'name': 'inisiatif', 'label': 'Inisitif dan Proaktif'},
+                                {'name': 'penyelesaian_masalah', 'label': 'Kemampuan penyelesaian masalah'},
+                                {'name': 'responsif', 'label': 'Responsif terhadap tugas yang mendadak'}
+                            ] %}
+                            {% for k in kehandalan %}
+                            <div class="bg-gray-50 rounded-xl p-5">
+                                <div class="flex justify-between items-start mb-3">
+                                    <label class="block font-semibold text-gray-800">{{ loop.index }}. {{ k.label }}</label>
+                                    <output class="bg-indigo-600 text-white min-w-12 h-12 rounded-lg flex items-center justify-center font-bold text-lg">
+                                        {{ draft[k.name] if draft else 2 }}
+                                    </output>
+                                </div>
+                                <input type="range" name="{{ k.name }}" min="0" max="4"
+                                       value="{{ draft[k.name] if draft else 2 }}"
+                                       class="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                                       oninput="this.previousElementSibling.querySelector('output').value = this.value">
+                                <div class="flex justify-between text-xs text-gray-500 mt-2">
+                                    <span>0 - Kurang sekali</span>
+                                    <span>1 - Kurang</span>
+                                    <span>2 - Cukup</span>
+                                    <span>3 - Baik</span>
+                                    <span>4 - Baik sekali</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- KERJASAMA 10% -->
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b-2 border-indigo-200">KERJASAMA (10%)</h3>
+                        <div class="space-y-6">
+                            {% set kerjasama = [
+                                {'name': 'menanggapi_positif', 'label': 'Menanggapi secara positif kritik, saran, ide dan tugas baru'},
+                                {'name': 'koordinasi', 'label': 'Koordinasi dan Kolaborasi dengan teman kerja'},
+                                {'name': 'sikap_positif', 'label': 'Memiliki sikap positif dan kemampuan kerjasama dengan Team'},
+                                {'name': 'tidak_komplain', 'label': 'Tidak ada komplain / masalah dengan sesama karyawan dan atau Atasan'},
+                                {'name': 'profesional', 'label': 'Sikap Profesional dalam Interaksi Team'}
+                            ] %}
+                            {% for k in kerjasama %}
+                            <div class="bg-gray-50 rounded-xl p-5">
+                                <div class="flex justify-between items-start mb-3">
+                                    <label class="block font-semibold text-gray-800">{{ loop.index }}. {{ k.label }}</label>
+                                    <output class="bg-indigo-600 text-white min-w-12 h-12 rounded-lg flex items-center justify-center font-bold text-lg">
+                                        {{ draft[k.name] if draft else 2 }}
+                                    </output>
+                                </div>
+                                <input type="range" name="{{ k.name }}" min="0" max="4"
+                                       value="{{ draft[k.name] if draft else 2 }}"
+                                       class="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                                       oninput="this.previousElementSibling.querySelector('output').value = this.value">
+                                <div class="flex justify-between text-xs text-gray-500 mt-2">
+                                    <span>0 - Kurang sekali</span>
+                                    <span>1 - Kurang</span>
+                                    <span>2 - Cukup</span>
+                                    <span>3 - Baik</span>
+                                    <span>4 - Baik sekali</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- TANGGUNG JAWAB 15% -->
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b-2 border-indigo-200">TANGGUNG JAWAB (15%)</h3>
+                        <div class="space-y-6">
+                            {% set tanggung_jawab = [
+                                {'name': 'tanggung_jawab_kerja', 'label': 'Memiliki tanggung jawab terhadap pekerjaan'},
+                                {'name': 'menerima_kesalahan', 'label': 'Menerima dan mengakui kesalahan'},
+                                {'name': 'inventaris', 'label': 'Menjaga inventaris kantor yang digunakan dalam pekerjaan'},
+                                {'name': 'tanpa_pengawasan', 'label': 'Penyelesaian Tugas Tanpa Pengawasan Atasan'},
+                                {'name': 'mengelola_prioritas', 'label': 'Mengelola dan Mengatur Prioritas Kerja'}
+                            ] %}
+                            {% for k in tanggung_jawab %}
+                            <div class="bg-gray-50 rounded-xl p-5">
+                                <div class="flex justify-between items-start mb-3">
+                                    <label class="block font-semibold text-gray-800">{{ loop.index }}. {{ k.label }}</label>
+                                    <output class="bg-indigo-600 text-white min-w-12 h-12 rounded-lg flex items-center justify-center font-bold text-lg">
+                                        {{ draft[k.name] if draft else 2 }}
+                                    </output>
+                                </div>
+                                <input type="range" name="{{ k.name }}" min="0" max="4"
+                                       value="{{ draft[k.name] if draft else 2 }}"
+                                       class="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                                       oninput="this.previousElementSibling.querySelector('output').value = this.value">
+                                <div class="flex justify-between text-xs text-gray-500 mt-2">
+                                    <span>0 - Kurang sekali</span>
+                                    <span>1 - Kurang</span>
+                                    <span>2 - Cukup</span>
+                                    <span>3 - Baik</span>
+                                    <span>4 - Baik sekali</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- KEMAMPUAN BERADAPTASI 10% -->
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b-2 border-indigo-200">KEMAMPUAN BERADAPTASI (10%)</h3>
+                        <div class="space-y-6">
+                            {% set adaptasi = [
+                                {'name': 'belajar_cepat', 'label': 'Kesiapan untuk belajar dan beradaptasi dengan cepat'},
+                                {'name': 'strategi_kerja', 'label': 'Keahlian dalam menyesuaikan strategi kerja'},
+                                {'name': 'tantangan_baru', 'label': 'Kemampuan menghadapi tantangan baru'},
+                                {'name': 'ubah_cara_kerja', 'label': 'Kesediaan untuk merubah cara kerja agar lebih efisien'},
+                                {'name': 'solusi_alternatif', 'label': 'Proaktif dalam Mencari Solusi Alternatif'}
+                            ] %}
+                            {% for k in adaptasi %}
+                            <div class="bg-gray-50 rounded-xl p-5">
+                                <div class="flex justify-between items-start mb-3">
+                                    <label class="block font-semibold text-gray-800">{{ loop.index }}. {{ k.label }}</label>
+                                    <output class="bg-indigo-600 text-white min-w-12 h-12 rounded-lg flex items-center justify-center font-bold text-lg">
+                                        {{ draft[k.name] if draft else 2 }}
+                                    </output>
+                                </div>
+                                <input type="range" name="{{ k.name }}" min="0" max="4"
+                                       value="{{ draft[k.name] if draft else 2 }}"
+                                       class="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                                       oninput="this.previousElementSibling.querySelector('output').value = this.value">
+                                <div class="flex justify-between text-xs text-gray-500 mt-2">
+                                    <span>0 - Kurang sekali</span>
+                                    <span>1 - Kurang</span>
+                                    <span>2 - Cukup</span>
+                                    <span>3 - Baik</span>
+                                    <span>4 - Baik sekali</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- KOMUNIKASI 10% -->
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b-2 border-indigo-200">KOMUNIKASI (10%)</h3>
+                        <div class="space-y-6">
+                            {% set komunikasi = [
+                                {'name': 'keramahan', 'label': 'Keramahan komunikasi dengan karyawan dan Atasan'},
+                                {'name': 'kejelasan', 'label': 'Kejelasan dalam penyampaian informasi'},
+                                {'name': 'responsif_kom', 'label': 'Responsif terhadap pertanyaan dan masukan'},
+                                {'name': 'lapor_pelanggaran', 'label': 'Menyampaikan hal-hal yang dianggap melanggar SOP kepada Atasan'},
+                                {'name': 'keterbukaan', 'label': 'Keterbukaan dalam berkomunikasi'}
+                            ] %}
+                            {% for k in komunikasi %}
+                            <div class="bg-gray-50 rounded-xl p-5">
+                                <div class="flex justify-between items-start mb-3">
+                                    <label class="block font-semibold text-gray-800">{{ loop.index }}. {{ k.label }}</label>
+                                    <output class="bg-indigo-600 text-white min-w-12 h-12 rounded-lg flex items-center justify-center font-bold text-lg">
+                                        {{ draft[k.name] if draft else 2 }}
+                                    </output>
+                                </div>
+                                <input type="range" name="{{ k.name }}" min="0" max="4"
+                                       value="{{ draft[k.name] if draft else 2 }}"
+                                       class="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                                       oninput="this.previousElementSibling.querySelector('output').value = this.value">
+                                <div class="flex justify-between text-xs text-gray-500 mt-2">
+                                    <span>0 - Kurang sekali</span>
+                                    <span>1 - Kurang</span>
+                                    <span>2 - Cukup</span>
+                                    <span>3 - Baik</span>
+                                    <span>4 - Baik sekali</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
 
                 <div class="mt-8 flex flex-col sm:flex-row gap-3">
