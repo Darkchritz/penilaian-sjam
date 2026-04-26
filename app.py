@@ -25,11 +25,6 @@ login_manager.login_view = 'login'
 def load_user(npk):
     return Karyawan.query.get(npk)
 
-# BIKIN TABEL OTOMATIS - TARUH DISINI
-with app.app_context():
-    db.create_all()
-    print("=== TABEL BERHASIL DIBUAT ===")
-
 @app.route('/')
 def home():
     return redirect('/login')
