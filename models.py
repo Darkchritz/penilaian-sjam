@@ -24,6 +24,7 @@ class Penilaian(db.Model):
     npk = db.Column(db.String(20), db.ForeignKey('karyawan.npk'), nullable=False)
     penilai_npk = db.Column(db.String(20), db.ForeignKey('karyawan.npk'), nullable=False)
     tahun = db.Column(db.Integer, nullable=False)
+    periode = db.Column(db.String(10), default='Q1')  # <-- TAMBAH BARIS INI
     status = db.Column(db.String(10), default='draft') # draft, final
     tanggal_update = db.Column(db.DateTime, default=datetime.now)
     
