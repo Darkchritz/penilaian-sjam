@@ -101,10 +101,10 @@ def register():
             flash('NPK sudah terdaftar!', 'error')
     return render_template('register.html')
 
-@app.route('/hrd')
+@app.route('/HRD')
 @login_required
 def hrd():
-    if current_user.role!= 'hrd':
+    if current_user.role!= 'HRD':
         return redirect(url_for('login'))
 
     user = current_user
