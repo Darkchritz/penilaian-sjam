@@ -80,12 +80,10 @@ def hrd():
     tahun_ini = datetime.now().year
     periode_aktif = request.args.get('periode', 'Q1')
     
-    # 1. Data untuk tabel MASTER KARYAWAN - semua karyawan kecuali diri sendiri
     pagination = Karyawan.query.filter(Karyawan.npk != user.npk).paginate(page=page, per_page=per_page, error_out=False)
     semua_karyawan = pagination.items
     total_pages = pagination.pages
     
-    # 2. Data untuk tabel PENILAIAN - cuma karyawan HRD yg bisa dinilai
     karyawan_hrd = Karyawan.query.filter(
         Karyawan.divisi == user.divisi,
         Karyawan.cabang == user.cabang,
@@ -93,22 +91,21 @@ def hrd():
         Karyawan.npk != user.npk
     ).order_by(Karyawan.role.desc(), Karyawan.nama).all()
     
-    # 3. Ambil penilaian Q1 tahun ini buat cek status
     penilaian_q1 = Penilaian.query.filter_by(tahun=tahun_ini, periode=periode_aktif).all()
     penilaian_dict = {p.npk: p for p in penilaian_q1}
     
-    # 4. Karyawan yg belum dinilai
     sudah_dinilai_npk = [p.npk for p in penilaian_q1]
     belum_dinilai = [k for k in karyawan_hrd if k.npk not in sudah_dinilai_npk]
     
     return render_template('dashboard_hrd.html',
                          user=user,
-                         karyawan=semua_karyawan,  # <-- ini buat tabel master karyawan
-                         karyawan_hrd=karyawan_hrd,  # <-- ini buat tabel penilaian
+                         karyawan=semua_karyawan,
+                         karyawan_hrd=karyawan_hrd,
                          belum_dinilai=belum_dinilai,
                          page=page,
                          total_pages=total_pages,
                          penilaian_dict=penilaian_dict,
+                         status_penilaian={p.npk: p.status for p in penilaian_q1},
                          periode_aktif=periode_aktif)
     
     elif user.role == 'karyawan':
