@@ -534,6 +534,18 @@ def logout():
 
 with app.app_context():
     db.create_all()
+    # Bikin user admin kalo belum ada
+    if not Karyawan.query.filter_by(npk=12345).first():
+        admin = Karyawan(
+            npk=HRD001, 
+            nama='HRD', 
+            password=generate_password_hash('123456'),
+            role='HRD',
+            divisi='HRD',
+            cabang='PUSAT/MD'
+        )
+        db.session.add(admin)
+        db.session.commit()
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
