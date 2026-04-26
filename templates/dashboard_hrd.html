@@ -173,56 +173,47 @@
 </div>
 
             <!-- Penilaian Karyawan Divisi -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden xl:col-span-2">
-                <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                    <h3 class="font-bold text-gray-800 flex items-center gap-2">
-                        <i class="bi bi-clipboard-check text-green-600"></i> Penilaian Karyawan Divisi {{ user.divisi }}
-                    </h3>
-                    <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
-                        {{ karyawan_untuk_dinilai|length }} orang
+            <div class="overflow-x-auto">
+    {% if karyawan_untuk_dinilai %}
+    <table class="w-full">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">NPK</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Nama</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Role</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Divisi</th>
+                <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Aksi</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+            {% for k in karyawan_untuk_dinilai %}
+            <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-4 text-sm font-mono text-gray-900 whitespace-nowrap">{{ k.npk }}</td>
+                <td class="px-6 py-4 text-sm text-gray-900">{{ k.nama }}</td>
+                <td class="px-6 py-4 text-sm">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                        {% if k.role == 'kadiv' %}bg-purple-100 text-purple-800
+                        {% else %}bg-blue-100 text-blue-800{% endif %}">
+                        {{ k.role|upper }}
                     </span>
-                </div>
-                <div class="overflow-x-auto">
-                    {% if karyawan_untuk_dinilai %}
-                    <table class="w-full">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">NPK</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Nama</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Role</th>
-                                <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200">
-                            {% for k in karyawan_untuk_dinilai %}
-                            <tr class="hover:bg-gray-50 transition-colors">
-                                <td class="px-6 py-4 text-sm font-mono text-gray-900">{{ k.npk }}</td>
-                                <td class="px-6 py-4 text-sm text-gray-900">{{ k.nama }}</td>
-                                <td class="px-6 py-4 text-sm">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                        {% if k.role == 'kadiv' %}bg-purple-100 text-purple-800
-                                        {% else %}bg-blue-100 text-blue-800{% endif %}">
-                                        {{ k.role|upper }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 text-sm text-center">
-                                    <a href="/penilaian/{{ k.npk }}" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition">
-                                        <i class="bi bi-pencil"></i> Nilai
-                                    </a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    {% else %}
-                    <div class="p-12 text-center">
-                        <i class="bi bi-people text-5xl text-gray-300 mb-3"></i>
-                        <p class="text-gray-500">Tidak ada karyawan di divisi ini.</p>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">{{ k.divisi }}</td>
+                <td class="px-6 py-4 text-sm text-center">
+                    <a href="/penilaian/{{ k.npk }}" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition inline-flex items-center gap-1">
+                        <i class="bi bi-pencil"></i> Nilai
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="p-12 text-center">
+        <i class="bi bi-people text-5xl text-gray-300 mb-3"></i>
+        <p class="text-gray-500">Tidak ada karyawan di divisi ini.</p>
+    </div>
+    {% endif %}
+</div>
 
         <!-- Modal Tambah Karyawan -->
         <div x-show="showTambah" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display: none;">
