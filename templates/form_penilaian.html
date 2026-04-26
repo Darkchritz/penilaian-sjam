@@ -11,41 +11,41 @@
 </head>
 <body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen" 
       x-data="{nilai: {
-        kehadiran: {{ draft.kehadiran if draft else 2 }},
-        kepatuhan_aturan: {{ draft.kepatuhan_aturan if draft else 2 }},
-        konsistensi: {{ draft.konsistensi if draft else 2 }},
-        kepatuhan_seragam: {{ draft.kepatuhan_seragam if draft else 2 }},
-        disiplin_kebersihan: {{ draft.disiplin_kebersihan if draft else 2 }},
-        efisiensi: {{ draft.efisiensi if draft else 2 }},
-        prioritas: {{ draft.prioritas if draft else 2 }},
-        inovasi: {{ draft.inovasi if draft else 2 }},
-        multitasking: {{ draft.multitasking if draft else 2 }},
-        peningkatan_kinerja: {{ draft.peningkatan_kinerja if draft else 2 }},
-        terampil: {{ draft.terampil if draft else 2 }},
-        keputusan: {{ draft.keputusan if draft else 2 }},
-        inisiatif: {{ draft.inisiatif if draft else 2 }},
-        penyelesaian_masalah: {{ draft.penyelesaian_masalah if draft else 2 }},
-        responsif: {{ draft.responsif if draft else 2 }},
-        menanggapi_positif: {{ draft.menanggapi_positif if draft else 2 }},
-        koordinasi: {{ draft.koordinasi if draft else 2 }},
-        sikap_positif: {{ draft.sikap_positif if draft else 2 }},
-        tidak_komplain: {{ draft.tidak_komplain if draft else 2 }},
-        profesional: {{ draft.profesional if draft else 2 }},
-        tanggung_jawab_kerja: {{ draft.tanggung_jawab_kerja if draft else 2 }},
-        menerima_kesalahan: {{ draft.menerima_kesalahan if draft else 2 }},
-        inventaris: {{ draft.inventaris if draft else 2 }},
-        tanpa_pengawasan: {{ draft.tanpa_pengawasan if draft else 2 }},
-        mengelola_prioritas: {{ draft.mengelola_prioritas if draft else 2 }},
-        belajar_cepat: {{ draft.belajar_cepat if draft else 2 }},
-        strategi_kerja: {{ draft.strategi_kerja if draft else 2 }},
-        tantangan_baru: {{ draft.tantangan_baru if draft else 2 }},
-        ubah_cara_kerja: {{ draft.ubah_cara_kerja if draft else 2 }},
-        solusi_alternatif: {{ draft.solusi_alternatif if draft else 2 }},
-        keramahan: {{ draft.keramahan if draft else 2 }},
-        kejelasan: {{ draft.kejelasan if draft else 2 }},
-        responsif_kom: {{ draft.responsif_kom if draft else 2 }},
-        lapor_pelanggaran: {{ draft.lapor_pelanggaran if draft else 2 }},
-        keterbukaan: {{ draft.keterbukaan if draft else 2 }}
+        kehadiran: {{ draft.kehadiran if draft else 3 }},
+        kepatuhan_aturan: {{ draft.kepatuhan_aturan if draft else 3 }},
+        konsistensi: {{ draft.konsistensi if draft else 3 }},
+        kepatuhan_seragam: {{ draft.kepatuhan_seragam if draft else 3 }},
+        disiplin_kebersihan: {{ draft.disiplin_kebersihan if draft else 3 }},
+        efisiensi: {{ draft.efisiensi if draft else 3 }},
+        prioritas: {{ draft.prioritas if draft else 3 }},
+        inovasi: {{ draft.inovasi if draft else 3 }},
+        multitasking: {{ draft.multitasking if draft else 3 }},
+        peningkatan_kinerja: {{ draft.peningkatan_kinerja if draft else 3 }},
+        terampil: {{ draft.terampil if draft else 3 }},
+        keputusan: {{ draft.keputusan if draft else 3 }},
+        inisiatif: {{ draft.inisiatif if draft else 3 }},
+        penyelesaian_masalah: {{ draft.penyelesaian_masalah if draft else 3 }},
+        responsif: {{ draft.responsif if draft else 3 }},
+        menanggapi_positif: {{ draft.menanggapi_positif if draft else 3 }},
+        koordinasi: {{ draft.koordinasi if draft else 3 }},
+        sikap_positif: {{ draft.sikap_positif if draft else 3 }},
+        tidak_komplain: {{ draft.tidak_komplain if draft else 3 }},
+        profesional: {{ draft.profesional if draft else 3 }},
+        tanggung_jawab_kerja: {{ draft.tanggung_jawab_kerja if draft else 3 }},
+        menerima_kesalahan: {{ draft.menerima_kesalahan if draft else 3 }},
+        inventaris: {{ draft.inventaris if draft else 3 }},
+        tanpa_pengawasan: {{ draft.tanpa_pengawasan if draft else 3 }},
+        mengelola_prioritas: {{ draft.mengelola_prioritas if draft else 3 }},
+        belajar_cepat: {{ draft.belajar_cepat if draft else 3 }},
+        strategi_kerja: {{ draft.strategi_kerja if draft else 3 }},
+        tantangan_baru: {{ draft.tantangan_baru if draft else 3 }},
+        ubah_cara_kerja: {{ draft.ubah_cara_kerja if draft else 3 }},
+        solusi_alternatif: {{ draft.solusi_alternatif if draft else 3 }},
+        keramahan: {{ draft.keramahan if draft else 3 }},
+        kejelasan: {{ draft.kejelasan if draft else 3 }},
+        responsif_kom: {{ draft.responsif_kom if draft else 3 }},
+        lapor_pelanggaran: {{ draft.lapor_pelanggaran if draft else 3 }},
+        keterbukaan: {{ draft.keterbukaan if draft else 3 }}
       }}">
     <nav class="bg-white/80 backdrop-blur-md shadow-sm border-b sticky top-0 z-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -77,6 +77,9 @@
                 <p class="font-semibold">{{ karyawan.nama }} - {{ karyawan.npk }}</p>
                 <p class="text-sm">{{ karyawan.divisi }} | {{ karyawan.cabang }} | {{ karyawan.role|upper }}</p>
             </div>
+            <div class="mt-3 text-xs text-gray-500">
+                <p><strong>Skala:</strong> 1-Sangat Kurang, 2-Kurang, 3-Cukup, 4-Baik, 5-Sangat Baik</p>
+            </div>
         </div>
 
         <form method="POST" action="/submit_nilai" id="formPenilaian">
@@ -93,9 +96,9 @@
                             <label class="text-sm font-semibold text-gray-800">1. Kehadiran tepat waktu</label>
                             <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.kehadiran"></span>
                         </div>
-                        <input type="range" min="0" max="4" step="1" x-model="nilai.kehadiran" name="kehadiran" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <input type="range" min="1" max="5" step="1" x-model="nilai.kehadiran" name="kehadiran" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                         <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                         </div>
                     </div>
                     <div>
@@ -103,9 +106,9 @@
                             <label class="text-sm font-semibold text-gray-800">2. Kepatuhan terhadap aturan perusahaan</label>
                             <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.kepatuhan_aturan"></span>
                         </div>
-                        <input type="range" min="0" max="4" step="1" x-model="nilai.kepatuhan_aturan" name="kepatuhan_aturan" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <input type="range" min="1" max="5" step="1" x-model="nilai.kepatuhan_aturan" name="kepatuhan_aturan" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                         <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                         </div>
                     </div>
                     <div>
@@ -113,9 +116,9 @@
                             <label class="text-sm font-semibold text-gray-800">3. Konsistensi dalam bekerja</label>
                             <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.konsistensi"></span>
                         </div>
-                        <input type="range" min="0" max="4" step="1" x-model="nilai.konsistensi" name="konsistensi" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <input type="range" min="1" max="5" step="1" x-model="nilai.konsistensi" name="konsistensi" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                         <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                         </div>
                     </div>
                     <div>
@@ -123,9 +126,9 @@
                             <label class="text-sm font-semibold text-gray-800">4. Kepatuhan seragam & atribut</label>
                             <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.kepatuhan_seragam"></span>
                         </div>
-                        <input type="range" min="0" max="4" step="1" x-model="nilai.kepatuhan_seragam" name="kepatuhan_seragam" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <input type="range" min="1" max="5" step="1" x-model="nilai.kepatuhan_seragam" name="kepatuhan_seragam" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                         <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                         </div>
                     </div>
                     <div>
@@ -133,9 +136,9 @@
                             <label class="text-sm font-semibold text-gray-800">5. Disiplin kebersihan tempat kerja</label>
                             <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.disiplin_kebersihan"></span>
                         </div>
-                        <input type="range" min="0" max="4" step="1" x-model="nilai.disiplin_kebersihan" name="disiplin_kebersihan" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <input type="range" min="1" max="5" step="1" x-model="nilai.disiplin_kebersihan" name="disiplin_kebersihan" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                         <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                         </div>
                     </div>
                 </div>
@@ -152,9 +155,9 @@
                             <label class="text-sm font-semibold text-gray-800">1. Efisiensi dalam menyelesaikan tugas</label>
                             <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.efisiensi"></span>
                         </div>
-                        <input type="range" min="0" max="4" step="1" x-model="nilai.efisiensi" name="efisiensi" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <input type="range" min="1" max="5" step="1" x-model="nilai.efisiensi" name="efisiensi" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                         <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                         </div>
                     </div>
                     <div>
@@ -162,9 +165,9 @@
                             <label class="text-sm font-semibold text-gray-800">2. Kemampuan menentukan prioritas</label>
                             <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.prioritas"></span>
                         </div>
-                        <input type="range" min="0" max="4" step="1" x-model="nilai.prioritas" name="prioritas" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <input type="range" min="1" max="5" step="1" x-model="nilai.prioritas" name="prioritas" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                         <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                         </div>
                     </div>
                     <div>
@@ -172,9 +175,9 @@
                             <label class="text-sm font-semibold text-gray-800">3. Inovasi dalam bekerja</label>
                             <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.inovasi"></span>
                         </div>
-                        <input type="range" min="0" max="4" step="1" x-model="nilai.inovasi" name="inovasi" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <input type="range" min="1" max="5" step="1" x-model="nilai.inovasi" name="inovasi" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                         <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                         </div>
                     </div>
                     <div>
@@ -182,9 +185,9 @@
                             <label class="text-sm font-semibold text-gray-800">4. Kemampuan multitasking</label>
                             <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.multitasking"></span>
                         </div>
-                        <input type="range" min="0" max="4" step="1" x-model="nilai.multitasking" name="multitasking" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <input type="range" min="1" max="5" step="1" x-model="nilai.multitasking" name="multitasking" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                         <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                         </div>
                     </div>
                     <div>
@@ -192,9 +195,9 @@
                             <label class="text-sm font-semibold text-gray-800">5. Peningkatan kinerja berkelanjutan</label>
                             <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.peningkatan_kinerja"></span>
                         </div>
-                        <input type="range" min="0" max="4" step="1" x-model="nilai.peningkatan_kinerja" name="peningkatan_kinerja" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <input type="range" min="1" max="5" step="1" x-model="nilai.peningkatan_kinerja" name="peningkatan_kinerja" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                         <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                         </div>
                     </div>
                 </div>
@@ -211,9 +214,9 @@
                             <label class="text-sm font-semibold text-gray-800">1. Terampil dalam pekerjaan</label>
                             <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.terampil"></span>
                         </div>
-                        <input type="range" min="0" max="4" step="1" x-model="nilai.terampil" name="terampil" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <input type="range" min="1" max="5" step="1" x-model="nilai.terampil" name="terampil" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                         <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                         </div>
                     </div>
                     <div>
@@ -221,9 +224,9 @@
                             <label class="text-sm font-semibold text-gray-800">2. Pengambilan keputusan</label>
                             <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.keputusan"></span>
                         </div>
-                        <input type="range" min="0" max="4" step="1" x-model="nilai.keputusan" name="keputusan" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <input type="range" min="1" max="5" step="1" x-model="nilai.keputusan" name="keputusan" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                         <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                         </div>
                     </div>
                     <div>
@@ -231,9 +234,9 @@
                             <label class="text-sm font-semibold text-gray-800">3. Inisiatif</label>
                             <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.inisiatif"></span>
                         </div>
-                        <input type="range" min="0" max="4" step="1" x-model="nilai.inisiatif" name="inisiatif" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <input type="range" min="1" max="5" step="1" x-model="nilai.inisiatif" name="inisiatif" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                         <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                         </div>
                     </div>
                     <div>
@@ -241,9 +244,9 @@
                             <label class="text-sm font-semibold text-gray-800">4. Penyelesaian masalah</label>
                             <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.penyelesaian_masalah"></span>
                         </div>
-                        <input type="range" min="0" max="4" step="1" x-model="nilai.penyelesaian_masalah" name="penyelesaian_masalah" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <input type="range" min="1" max="5" step="1" x-model="nilai.penyelesaian_masalah" name="penyelesaian_masalah" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                         <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                         </div>
                     </div>
                     <div>
@@ -251,9 +254,9 @@
                             <label class="text-sm font-semibold text-gray-800">5. Responsif terhadap tugas</label>
                             <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.responsif"></span>
                         </div>
-                        <input type="range" min="0" max="4" step="1" x-model="nilai.responsif" name="responsif" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <input type="range" min="1" max="5" step="1" x-model="nilai.responsif" name="responsif" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                         <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                         </div>
                     </div>
                 </div>
@@ -270,9 +273,9 @@
                             <label class="text-sm font-semibold text-gray-800">1. Menanggapi positif masukan</label>
                             <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.menanggapi_positif"></span>
                         </div>
-                        <input type="range" min="0" max="4" step="1" x-model="nilai.menanggapi_positif" name="menanggapi_positif" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <input type="range" min="1" max="5" step="1" x-model="nilai.menanggapi_positif" name="menanggapi_positif" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                         <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                         </div>
                     </div>
                     <div>
@@ -280,9 +283,9 @@
                             <label class="text-sm font-semibold text-gray-800">2. Koordinasi dengan tim</label>
                             <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.koordinasi"></span>
                         </div>
-                        <input type="range" min="0" max="4" step="1" x-model="nilai.koordinasi" name="koordinasi" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <input type="range" min="1" max="5" step="1" x-model="nilai.koordinasi" name="koordinasi" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                         <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                         </div>
                     </div>
                     <div>
@@ -290,9 +293,9 @@
                             <label class="text-sm font-semibold text-gray-800">3. Sikap positif</label>
                             <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.sikap_positif"></span>
                         </div>
-                        <input type="range" min="0" max="4" step="1" x-model="nilai.sikap_positif" name="sikap_positif" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <input type="range" min="1" max="5" step="1" x-model="nilai.sikap_positif" name="sikap_positif" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                         <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                         </div>
                     </div>
                     <div>
@@ -300,9 +303,9 @@
                             <label class="text-sm font-semibold text-gray-800">4. Tidak komplain berlebihan</label>
                             <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.tidak_komplain"></span>
                         </div>
-                        <input type="range" min="0" max="4" step="1" x-model="nilai.tidak_komplain" name="tidak_komplain" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <input type="range" min="1" max="5" step="1" x-model="nilai.tidak_komplain" name="tidak_komplain" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                         <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                         </div>
                     </div>
                     <div>
@@ -310,9 +313,9 @@
                             <label class="text-sm font-semibold text-gray-800">5. Profesional dalam bekerja</label>
                             <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.profesional"></span>
                         </div>
-                        <input type="range" min="0" max="4" step="1" x-model="nilai.profesional" name="profesional" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <input type="range" min="1" max="5" step="1" x-model="nilai.profesional" name="profesional" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                         <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                         </div>
                     </div>
                 </div>
@@ -329,9 +332,9 @@
                             <label class="text-sm font-semibold text-gray-800">1. Tanggung jawab terhadap pekerjaan</label>
                             <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.tanggung_jawab_kerja"></span>
                         </div>
-                        <input type="range" min="0" max="4" step="1" x-model="nilai.tanggung_jawab_kerja" name="tanggung_jawab_kerja" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <input type="range" min="1" max="5" step="1" x-model="nilai.tanggung_jawab_kerja" name="tanggung_jawab_kerja" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                         <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                         </div>
                     </div>
                     <div>
@@ -339,9 +342,9 @@
                             <label class="text-sm font-semibold text-gray-800">2. Menerima kesalahan</label>
                             <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.menerima_kesalahan"></span>
                         </div>
-                        <input type="range" min="0" max="4" step="1" x-model="nilai.menerima_kesalahan" name="menerima_kesalahan" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <input type="range" min="1" max="5" step="1" x-model="nilai.menerima_kesalahan" name="menerima_kesalahan" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                         <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                         </div>
                     </div>
                     <div>
@@ -349,9 +352,9 @@
                             <label class="text-sm font-semibold text-gray-800">3. Menjaga inventaris perusahaan</label>
                             <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.inventaris"></span>
                         </div>
-                        <input type="range" min="0" max="4" step="1" x-model="nilai.inventaris" name="inventaris" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <input type="range" min="1" max="5" step="1" x-model="nilai.inventaris" name="inventaris" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                         <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                         </div>
                     </div>
                     <div>
@@ -359,9 +362,9 @@
                             <label class="text-sm font-semibold text-gray-800">4. Bekerja tanpa pengawasan</label>
                             <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.tanpa_pengawasan"></span>
                         </div>
-                        <input type="range" min="0" max="4" step="1" x-model="nilai.tanpa_pengawasan" name="tanpa_pengawasan" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <input type="range" min="1" max="5" step="1" x-model="nilai.tanpa_pengawasan" name="tanpa_pengawasan" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                         <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                         </div>
                     </div>
                     <div>
@@ -369,9 +372,9 @@
                             <label class="text-sm font-semibold text-gray-800">5. Mengelola prioritas kerja</label>
                             <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.mengelola_prioritas"></span>
                         </div>
-                        <input type="range" min="0" max="4" step="1" x-model="nilai.mengelola_prioritas" name="mengelola_prioritas" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <input type="range" min="1" max="5" step="1" x-model="nilai.mengelola_prioritas" name="mengelola_prioritas" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                         <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                         </div>
                     </div>
                 </div>
@@ -388,9 +391,9 @@
                             <label class="text-sm font-semibold text-gray-800">1. Cepat belajar hal baru</label>
                             <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.belajar_cepat"></span>
                         </div>
-                        <input type="range" min="0" max="4" step="1" x-model="nilai.belajar_cepat" name="belajar_cepat" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <input type="range" min="1" max="5" step="1" x-model="nilai.belajar_cepat" name="belajar_cepat" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                         <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                         </div>
                     </div>
                     <div>
@@ -398,28 +401,29 @@
                             <label class="text-sm font-semibold text-gray-800">2. Mengembangkan strategi kerja</label>
                             <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.strategi_kerja"></span>
                         </div>
-                        <input type="range" min="0" max="4" step="1" x-model="nilai.strategi_kerja" name="strategi_kerja" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <input type="range" min="1" max="5" step="1" x-model="nilai.strategi_kerja" name="strategi_kerja" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                         <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
-                        </div>
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                                                </div>
                     </div>
                     <div>
                         <div class="flex items-center justify-between mb-2">
                             <label class="text-sm font-semibold text-gray-800">3. Menghadapi tantangan baru</label>
                             <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.tantangan_baru"></span>
                         </div>
-                        <input type="range" min="0" max="4" step="1" x-model="nilai.tantangan_baru" name="tantangan_baru" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <input type="range" min="0" max="5" step="1" x-model="nilai.tantangan_baru" name="tantangan_baru" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                         <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                         </div>
+                    </div>
                     <div>
                         <div class="flex items-center justify-between mb-2">
                             <label class="text-sm font-semibold text-gray-800">4. Kesediaan untuk merubah cara kerja agar lebih efisien</label>
                             <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.ubah_cara_kerja"></span>
                         </div>
-                        <input type="range" min="0" max="4" step="1" x-model="nilai.ubah_cara_kerja" name="ubah_cara_kerja" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <input type="range" min="0" max="5" step="1" x-model="nilai.ubah_cara_kerja" name="ubah_cara_kerja" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                         <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                         </div>
                     </div>
                     <div>
@@ -427,77 +431,77 @@
                             <label class="text-sm font-semibold text-gray-800">5. Mencari solusi alternatif</label>
                             <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.solusi_alternatif"></span>
                         </div>
-                        <input type="range" min="0" max="4" step="1" x-model="nilai.solusi_alternatif" name="solusi_alternatif" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <input type="range" min="0" max="5" step="1" x-model="nilai.solusi_alternatif" name="solusi_alternatif" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                         <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- KOMUNIKASI -->
-            <!-- KOMUNIKASI -->
-<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
-    <h3 class="font-bold text-gray-800 mb-6 text-lg flex items-center gap-2">
-        <i class="bi bi-chat-dots text-indigo-600"></i> KOMUNIKASI (15%)
-    </h3>
-    <div class="space-y-8">
-        <div>
-            <div class="flex items-center justify-between mb-2">
-                <label class="text-sm font-semibold text-gray-800">1. Keramahan dalam berkomunikasi</label>
-                <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.keramahan"></span>
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+                <h3 class="font-bold text-gray-800 mb-6 text-lg flex items-center gap-2">
+                    <i class="bi bi-chat-dots text-indigo-600"></i> KOMUNIKASI (15%)
+                </h3>
+                <div class="space-y-8">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="text-sm font-semibold text-gray-800">1. Keramahan dalam berkomunikasi</label>
+                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.keramahan"></span>
+                        </div>
+                        <input type="range" min="0" max="5" step="1" x-model="nilai.keramahan" name="keramahan" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
+                            <span>0-Tidak Ada</span>
+                            <span>1-Sangat Kurang</span>
+                            <span>2-Kurang</span>
+                            <span>3-Cukup</span>
+                            <span>4-Baik</span>
+                            <span>5-Sangat Baik</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="text-sm font-semibold text-gray-800">2. Kejelasan dalam menyampaikan informasi</label>
+                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.kejelasan"></span>
+                        </div>
+                        <input type="range" min="0" max="5" step="1" x-model="nilai.kejelasan" name="kejelasan" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
+                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="text-sm font-semibold text-gray-800">3. Responsif dalam komunikasi</label>
+                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.responsif_kom"></span>
+                        </div>
+                        <input type="range" min="0" max="5" step="1" x-model="nilai.responsif_kom" name="responsif_kom" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
+                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="text-sm font-semibold text-gray-800">4. Melaporkan pelanggaran/hambatan</label>
+                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.lapor_pelanggaran"></span>
+                        </div>
+                        <input type="range" min="0" max="5" step="1" x-model="nilai.lapor_pelanggaran" name="lapor_pelanggaran" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
+                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="text-sm font-semibold text-gray-800">5. Keterbukaan dalam berkomunikasi</label>
+                            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.keterbukaan"></span>
+                        </div>
+                        <input type="range" min="0" max="5" step="1" x-model="nilai.keterbukaan" name="keterbukaan" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
+                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <input type="range" min="1" max="5" step="1" x-model="nilai.keramahan" name="keramahan" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
-            <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                <span>1 - Sangat kurang</span>
-                <span>2 - Kurang</span>
-                <span>3 - Cukup</span>
-                <span>4 - Baik</span>
-                <span>5 - Sangat baik</span>
-            </div>
-        </div>
-        <div>
-            <div class="flex items-center justify-between mb-2">
-                <label class="text-sm font-semibold text-gray-800">2. Kejelasan dalam menyampaikan informasi</label>
-                <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.kejelasan"></span>
-            </div>
-            <input type="range" min="1" max="5" step="1" x-model="nilai.kejelasan" name="kejelasan" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
-            <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
-            </div>
-        </div>
-        <div>
-            <div class="flex items-center justify-between mb-2">
-                <label class="text-sm font-semibold text-gray-800">3. Responsif dalam komunikasi</label>
-                <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.responsif_kom"></span>
-            </div>
-            <input type="range" min="1" max="5" step="1" x-model="nilai.responsif_kom" name="responsif_kom" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
-            <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
-            </div>
-        </div>
-        <div>
-            <div class="flex items-center justify-between mb-2">
-                <label class="text-sm font-semibold text-gray-800">4. Melaporkan pelanggaran/hambatan</label>
-                <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.lapor_pelanggaran"></span>
-            </div>
-            <input type="range" min="1" max="5" step="1" x-model="nilai.lapor_pelanggaran" name="lapor_pelanggaran" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
-            <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
-            </div>
-        </div>
-        <div>
-            <div class="flex items-center justify-between mb-2">
-                <label class="text-sm font-semibold text-gray-800">5. Keterbukaan dalam berkomunikasi</label>
-                <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-lg min-w- text-center" x-text="nilai.keterbukaan"></span>
-            </div>
-            <input type="range" min="1" max="5" step="1" x-model="nilai.keterbukaan" name="keterbukaan" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
-            <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
-            </div>
-        </div>
-    </div>
-</div>
 
             <!-- Tombol Submit -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
