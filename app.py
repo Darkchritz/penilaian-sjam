@@ -170,19 +170,19 @@ def dashboard():
         hasil = Penilaian.query.filter_by(npk=user.npk, status='final', tahun=tahun_ini).order_by(Penilaian.tanggal_update.desc()).first()
         return render_template('dashboard_karyawan.html', user=user, hasil=hasil)
 
-@app.route('/nilai/<int:npk>')  # <-- ganti int:id jadi int:npk
+@app.route('/nilai/<int:id>')  # <-- balik ke id
 @login_required
-def nilai(npk):
+def nilai(id):
     if current_user.role != 'hrd':
         return redirect(url_for('login'))
     
     periode = request.args.get('periode', 'Q1')
     tahun_ini = datetime.now().year
     
-    karyawan = Karyawan.query.get_or_404(npk)  # <-- get pake npk
+    karyawan = Karyawan.query.get_or_404(id)  # <-- get by id
     
     penilaian = Penilaian.query.filter_by(
-        npk=karyawan.npk, 
+        id_karyawan=karyawan.id,  # <-- pake id_karyawan
         tahun=tahun_ini, 
         periode=periode
     ).first()
