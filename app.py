@@ -20,6 +20,16 @@ import os
 import pandas as pd
 import io
 
+from models import db, Karyawan, Penilaian
+# ... config lain
+
+db.init_app(app)
+
+with app.app_context():
+    db.create_all()  # <-- tambah ini doang
+
+# ... route kamu dibawah
+
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'sjam-penilaian-secret-2024')
 DATABASE_URL = os.environ.get('DATABASE_URL')
