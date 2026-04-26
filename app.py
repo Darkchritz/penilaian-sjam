@@ -52,23 +52,28 @@ def load_user(user_id):
 def home():
     return redirect('/login')
 
-@app.route('/login', methods=['GET','POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        npk = request.form['npk']
-        password = request.form['password']
-        user = Karyawan.query.filter_by(npk=npk).first()
-        if user and check_password_hash(user.password, password):
-            login_user(user)
-            session['user'] = {
-                'npk': user.npk,
-                'nama': user.nama,
-                'role': user.role,
-                'divisi': user.divisi,
-                'cabang': user.cabang
-            }
-            return redirect('/dashboard')
-        flash('NPK atau Password salah!', 'error')
+        try:
+            npk_input = request.form['npk']
+            password_input = request.form['password']
+            
+            # WAJIB cast ke int karena npk di DB Integer
+            user = Karyawan.query.filter_by(npk=int(npk_input)).first()
+            
+            if user and check_password_hash(user.password, password_input):
+                login_user(user)
+                return redirect(url_for('dashboard')) # ganti sesuai route lu
+            else:
+                flash('NPK atau Password salah', 'danger')
+                
+        except ValueError:
+            flash('NPK harus angka', 'danger')
+        except Exception as e:
+            print(f"ERROR LOGIN: {e}") # biar muncul di log Railway
+            flash('Terjadi error di server', 'danger')
+            
     return render_template('login.html')
 
 @app.route('/register', methods=['GET','POST'])
