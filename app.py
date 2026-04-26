@@ -1,32 +1,29 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
-from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from models import db, Karyawan, Penilaian  # <-- tambah ini
-import os
-
-app = Flask(__name__)
-app.config['SECRET_KEY'] = 'rahasia'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sjam.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-db.init_app(app) # <-- ganti dari db = SQLAlchemy(app) jadi ini
 from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
-from datetime import datetime
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash, check_password_hash
-import psycopg2
-import psycopg2.extras
-from psycopg2.extras import RealDictCursor
-import os
+from datetime import datetime
 import pandas as pd
 import io
+import os
 
 from models import db, Karyawan, Penilaian
-# ... config lain
+
+app = Flask(__name__)
+app.secret_key = os.environ.get('SECRET_KEY', 'sjam-penilaian-secret-2024')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///sjam.db')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
+migrate = Migrate(app, db)
 
-with app.app_context():
-    db.create_all()  # <-- tambah ini doang
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
+@login_manager.user_loader
+def load_user(npk):
+    return Karyawan.query.get(npk)
 
 # ... route kamu dibawah
 
