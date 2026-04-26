@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Penilaian | SJAM</title>
+    <title>Penilaian {{ periode }} | SJAM</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <style>@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap'); body { font-family: 'Poppins', sans-serif; }</style>
@@ -18,9 +18,9 @@
             <div class="flex justify-between h-16 items-center">
                 <div class="flex items-center gap-2">
                     <i class="bi bi-pencil-square text-2xl text-indigo-600"></i>
-                    <h1 class="text-xl font-bold text-indigo-600">Form Penilaian</h1>
+                    <h1 class="text-xl font-bold text-indigo-600">Form Penilaian {{ periode }}</h1>
                 </div>
-                <a href="/dashboard" class="text-gray-600 hover:text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-100 transition">
+                <a href="{{ url_for('hrd') }}" class="text-gray-600 hover:text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-100 transition">
                     <i class="bi bi-arrow-left"></i> Kembali
                 </a>
             </div>
@@ -32,35 +32,46 @@
             <div class="mb-8">
                 <div class="flex items-center gap-4 mb-4">
                     <div class="bg-indigo-100 p-3 rounded-xl">
-                        <i class="bi {% if role=='kadiv' %}bi-person-badge{% else %}bi-person{% endif %} text-2xl text-indigo-600"></i>
+                        <i class="bi {% if karyawan.role=='kadiv' %}bi-person-badge{% else %}bi-person{% endif %} text-2xl text-indigo-600"></i>
                     </div>
                     <div>
-                        <h2 class="text-2xl font-bold text-gray-800">{{ nama }}</h2>
-                        <p class="text-gray-500">NPK: {{ npk }} | {{ role|upper }} | {{ divisi }} | {{ cabang }}</p>
+                        <h2 class="text-2xl font-bold text-gray-800">{{ karyawan.nama }}</h2>
+                        <p class="text-gray-500">NPK: {{ karyawan.npk }} | {{ karyawan.role|upper }} | {{ karyawan.divisi }} | {{ karyawan.cabang }}</p>
                     </div>
                 </div>
                 <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start gap-3">
                     <i class="bi bi-info-circle text-blue-600 text-xl"></i>
-                    <p class="text-sm text-blue-800">Beri nilai 1-100 untuk setiap KPI. Nilai akhir = rata-rata dari 8 KPI. Grade otomatis terhitung.</p>
+                    <div>
+                        <p class="text-sm text-blue-800 font-semibold">Periode: {{ periode }} - {{ tahun_ini if tahun_ini else '2026' }}</p>
+                        <p class="text-sm text-blue-800">Beri nilai 1-100 untuk setiap KPI. Nilai akhir = rata-rata dari 8 KPI. Grade otomatis terhitung.</p>
+                    </div>
                 </div>
             </div>
 
-            <form method="POST" action="/simpan_nilai" class="space-y-6">
-                <input type="hidden" name="npk" value="{{ npk }}">
-                <input type="hidden" name="divisi" value="{{ divisi }}">
+            {% if penilaian and penilaian.status == 'final' %}
+            <div class="bg-green-50 border border-green-200 rounded-xl p-4 mb-6 flex items-center gap-3">
+                <i class="bi bi-check-circle text-green-600 text-xl"></i>
+                <p class="text-sm text-green-800 font-semibold">Penilaian {{ periode }} sudah Final. Hubungi HRD untuk mengubah.</p>
+            </div>
+            {% endif %}
+
+            <form method="POST" action="/simpan_nilai/{{ karyawan.npk }}/{{ periode }}" class="space-y-6">
+                <input type="hidden" name="npk" value="{{ karyawan.npk }}">
+                <input type="hidden" name="divisi" value="{{ karyawan.divisi }}">
+                <input type="hidden" name="periode" value="{{ periode }}">
 
                 {% set kpi_list = [
-                    ('tanggung_jawab', 'Tanggung Jawab', 'Kemampuan menyelesaikan tugas sesuai target'),
-                    ('inisiatif', 'Inisiatif', 'Proaktif dalam mencari solusi dan perbaikan'),
-                    ('kerjasama', 'Kerjasama', 'Kemampuan bekerja dalam tim'),
-                    ('kedisiplinan', 'Kedisiplinan', 'Ketaatan terhadap aturan dan waktu'),
-                    ('kemampuan', 'Kemampuan Teknis', 'Penguasaan skill sesuai jobdesc'),
-                    ('target', 'Pencapaian Target', 'Hasil kerja vs target yang ditetapkan'),
-                    ('proses', 'Kualitas Proses', 'Ketepatan dan efisiensi dalam bekerja'),
-                    ('inovasi', 'Inovasi', 'Ide kreatif dan improvement')
+                    ('tanggung_jawab', 'Tanggung Jawab', 'Kemampuan menyelesaikan tugas sesuai target', penilaian.tanggung_jawab if penilaian else ''),
+                    ('inisiatif', 'Inisiatif', 'Proaktif dalam mencari solusi dan perbaikan', penilaian.inisiatif if penilaian else ''),
+                    ('kerjasama', 'Kerjasama', 'Kemampuan bekerja dalam tim', penilaian.kerjasama if penilaian else ''),
+                    ('kedisiplinan', 'Kedisiplinan', 'Ketaatan terhadap aturan dan waktu', penilaian.kedisiplinan if penilaian else ''),
+                    ('kemampuan', 'Kemampuan Teknis', 'Penguasaan skill sesuai jobdesc', penilaian.kemampuan if penilaian else ''),
+                    ('target', 'Pencapaian Target', 'Hasil kerja vs target yang ditetapkan', penilaian.target if penilaian else ''),
+                    ('proses', 'Kualitas Proses', 'Ketepatan dan efisiensi dalam bekerja', penilaian.proses if penilaian else ''),
+                    ('inovasi', 'Inovasi', 'Ide kreatif dan improvement', penilaian.inovasi if penilaian else '')
                 ] %}
 
-                {% for i, (key, title, desc) in enumerate(kpi_list, 1) %}
+                {% for i, (key, title, desc, val) in enumerate(kpi_list, 1) %}
                 <div class="bg-gray-50 rounded-xl p-5 border border-gray-100">
                     <div class="flex items-start justify-between mb-3">
                         <div class="flex-1">
@@ -76,19 +87,23 @@
                         min="1" 
                         max="100" 
                         required 
-                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition text-lg font-semibold text-center"
+                        value="{{ val }}"
+                        {% if penilaian and penilaian.status == 'final' %}disabled{% endif %}
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition text-lg font-semibold text-center disabled:bg-gray-100 disabled:text-gray-500"
                         placeholder="1-100"
                     >
                 </div>
                 {% endfor %}
 
                 <div class="flex gap-4 pt-4">
-                    <a href="/dashboard" class="flex-1 px-6 py-3 rounded-xl border border-gray-300 text-gray-700 font-semibold text-center hover:bg-gray-50 transition">
+                    <a href="{{ url_for('hrd') }}" class="flex-1 px-6 py-3 rounded-xl border border-gray-300 text-gray-700 font-semibold text-center hover:bg-gray-50 transition">
                         Batal
                     </a>
+                    {% if not (penilaian and penilaian.status == 'final') %}
                     <button type="submit" class="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-semibold transition shadow-lg shadow-indigo-500/30">
-                        <i class="bi bi-save"></i> Simpan Penilaian
+                        <i class="bi bi-save"></i> Simpan Penilaian {{ periode }}
                     </button>
+                    {% endif %}
                 </div>
             </form>
         </div>
