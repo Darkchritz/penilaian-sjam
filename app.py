@@ -544,7 +544,7 @@ with app.app_context():
 
     # Bikin user default
     users = [
-        Karyawan(npk=12345, nama='Admin', password=generate_password_hash('admin123'), role='admin', divisi='IT', cabang='Pusat'),
+        Karyawan(npk=123, nama='Admin', password=generate_password_hash('123456'), role='admin', divisi='HRD', cabang='PUSAT/MD'),
         Karyawan(npk=2018032349, nama='Wendy Wangsaharja', password=generate_password_hash('password123'), role='HRD', divisi='HRD', cabang='PUSAT/MD')
     ]
     db.session.add_all(users)
