@@ -40,7 +40,8 @@ class Penilaian(db.Model):
     proses = db.Column(db.Integer)
     inovasi = db.Column(db.Integer)
     status = db.Column(db.String(10), default='draft')
-    
+    tanggal_update = db.Column(db.DateTime, default=datetime.utcnow) # DITAMBAHIN
+
     # TAMBAHIN INI
     karyawan = db.relationship('Karyawan', backref='daftar_penilaian')
 
@@ -49,8 +50,8 @@ def load_user(user_id):
     try:
         return Karyawan.query.get(int(user_id))
     except (ValueError, TypeError):
-        return None  # Kalo user_id bukan angka, anggap aja logout
-    
+        return None # Kalo user_id bukan angka, anggap aja logout
+
 @app.route('/')
 def home():
     return redirect('/login')
@@ -61,22 +62,22 @@ def login():
         try:
             npk_input = request.form['npk']
             password_input = request.form['password']
-            
+
             # WAJIB cast ke int karena npk di DB Integer
             user = Karyawan.query.filter_by(npk=int(npk_input)).first()
-            
+
             if user and check_password_hash(user.password, password_input):
                 login_user(user)
                 return redirect(url_for('dashboard')) # ganti sesuai route lu
             else:
                 flash('NPK atau Password salah', 'danger')
-                
+
         except ValueError:
             flash('NPK harus angka', 'danger')
         except Exception as e:
             print(f"ERROR LOGIN: {e}") # biar muncul di log Railway
             flash('Terjadi error di server', 'danger')
-            
+
     return render_template('login.html')
 
 @app.route('/register', methods=['GET','POST'])
@@ -103,63 +104,67 @@ def register():
 @app.route('/hrd')
 @login_required
 def hrd():
-    if current_user.role != 'hrd':
+    if current_user.role!= 'hrd':
         return redirect(url_for('login'))
-    
+
     user = current_user
     page = int(request.args.get('page', 1))
     per_page = 20
     tahun_ini = datetime.now().year
     periode_aktif = request.args.get('periode', 'Q1')
-    
+
     # Master Karyawan - semua
-    pagination = Karyawan.query.filter(Karyawan.npk != user.npk).paginate(page=page, per_page=per_page, error_out=False)
+    pagination = Karyawan.query.filter(Karyawan.npk!= user.npk).paginate(page=page, per_page=per_page, error_out=False)
     semua_karyawan = pagination.items
     total_pages = pagination.pages
-    
+
     # Data buat tabel Penilaian - khusus divisi HRD aja
     karyawan_hrd = Karyawan.query.filter(
         Karyawan.divisi == user.divisi,
         Karyawan.cabang == user.cabang,
         Karyawan.role.in_(['karyawan','kadiv']),
-        Karyawan.npk != user.npk
+        Karyawan.npk!= user.npk
     ).order_by(Karyawan.role.desc(), Karyawan.nama).all()
-    
+
     penilaian_q1 = Penilaian.query.filter_by(tahun=tahun_ini, periode=periode_aktif).all()
-    penilaian_dict = {p.npk: p for p in penilaian_q1}
-    
-    sudah_dinilai_npk = [p.npk for p in penilaian_q1]
-    belum_dinilai = [k for k in karyawan_hrd if k.npk not in sudah_dinilai_npk]
-    
+    # DIUBAH: p.npk -> p.id_karyawan
+    penilaian_dict = {p.id_karyawan: p for p in penilaian_q1}
+
+    # DIUBAH: p.npk -> p.id_karyawan, k.npk -> k.id
+    sudah_dinilai_id = [p.id_karyawan for p in penilaian_q1]
+    belum_dinilai = [k for k in karyawan_hrd if k.id not in sudah_dinilai_id]
+
     # TAMBAHIN INI: buat tabel penilaian
     karyawan_untuk_dinilai = karyawan_hrd
-    
+
     return render_template('dashboard_hrd.html',
                          user=user,
                          karyawan=semua_karyawan,
                          karyawan_hrd=karyawan_hrd,
-                         karyawan_untuk_dinilai=karyawan_untuk_dinilai,  # <-- INI YANG PENTING
+                         karyawan_untuk_dinilai=karyawan_untuk_dinilai, # <-- INI YANG PENTING
                          belum_dinilai=belum_dinilai,
                          page=page,
                          total_pages=total_pages,
                          penilaian_dict=penilaian_dict,
-                         status_penilaian={p.npk: p.status for p in penilaian_q1},
+                         # DIUBAH: p.npk -> p.id_karyawan
+                         status_penilaian={p.id_karyawan: p.status for p in penilaian_q1},
                          periode_aktif=periode_aktif,
                          tahun_ini=tahun_ini)
 
 @app.route('/dashboard')
-@login_required  
+@login_required
 def dashboard():
     user = current_user
     tahun_ini = datetime.now().year
-    
+
     if user.role == 'hrd':
         return redirect(url_for('hrd'))
-    
+
     elif user.role == 'karyawan':
-        hasil = Penilaian.query.filter_by(npk=user.npk, tahun=tahun_ini, periode='Q1').first()
+        # DIUBAH: npk=user.npk -> id_karyawan=user.id
+        hasil = Penilaian.query.filter_by(id_karyawan=user.id, tahun=tahun_ini, periode='Q1').first()
         return render_template('dashboard_karyawan.html', user=user, hasil=hasil)
-    
+
     elif user.role == 'kadiv':
         karyawan = Karyawan.query.filter(
             Karyawan.divisi == user.divisi,
@@ -167,49 +172,50 @@ def dashboard():
             Karyawan.role.in_(['karyawan','kadiv']),
             Karyawan.npk!= user.npk
         ).order_by(Karyawan.role.desc(), Karyawan.nama).all()
-        
+
         draft = Penilaian.query.filter_by(penilai_npk=user.npk, status='draft').all()
         return render_template('dashboard_kadiv.html', user=user, karyawan=karyawan, draft=draft)
-    
+
     else:
-        hasil = Penilaian.query.filter_by(npk=user.npk, status='final', tahun=tahun_ini).order_by(Penilaian.tanggal_update.desc()).first()
+        # DIUBAH: npk=user.npk -> id_karyawan=user.id
+        hasil = Penilaian.query.filter_by(id_karyawan=user.id, status='final', tahun=tahun_ini).order_by(Penilaian.tanggal_update.desc()).first()
         return render_template('dashboard_karyawan.html', user=user, hasil=hasil)
 
-@app.route('/nilai/<int:id>')  # <-- balik ke id
+@app.route('/nilai/<int:id>') # <-- balik ke id
 @login_required
 def nilai(id):
-    if current_user.role != 'hrd':
+    if current_user.role!= 'hrd':
         return redirect(url_for('login'))
-    
+
     periode = request.args.get('periode', 'Q1')
     tahun_ini = datetime.now().year
-    
-    karyawan = Karyawan.query.get_or_404(id)  # <-- get by id
-    
+
+    karyawan = Karyawan.query.get_or_404(id) # <-- get by id
+
     penilaian = Penilaian.query.filter_by(
-        id_karyawan=karyawan.id,  # <-- pake id_karyawan
-        tahun=tahun_ini, 
+        id_karyawan=karyawan.id, # <-- pake id_karyawan
+        tahun=tahun_ini,
         periode=periode
     ).first()
-    
-    return render_template('nilai_form.html', 
-                         karyawan=karyawan, 
-                         periode=periode, 
+
+    return render_template('nilai_form.html',
+                         karyawan=karyawan,
+                         periode=periode,
                          penilaian=penilaian,
                          tahun_ini=tahun_ini)
-            
+
 @app.route('/penilaian/<npk>')
 @login_required
 def penilaian(npk):
     if current_user.role not in ['hrd', 'kadiv']:
         return "Akses ditolak", 403
-    
+
     karyawan = Karyawan.query.filter_by(npk=npk).first()
     if not karyawan:
         return "Karyawan tidak ditemukan", 404
-        
+
     draft = Penilaian.query.filter_by(npk=npk, penilai_npk=current_user.npk, status='draft').first()
-        
+
     return render_template('form_penilaian.html', user=current_user, karyawan=karyawan, draft=draft)
 
 @app.route('/submit_nilai', methods=['POST'])
@@ -318,21 +324,23 @@ def hapus_draft(id):
     db.session.commit()
     flash('Draft dihapus!', 'success')
     return redirect('/dashboard')
-    
+
 @app.route('/simpan_nilai/<npk>/<periode>', methods=['POST'])
 @login_required
 def simpan_nilai(npk, periode):
-    if current_user.role != 'hrd':
+    if current_user.role!= 'hrd':
         return redirect(url_for('login'))
-    
+
     karyawan = Karyawan.query.filter_by(npk=npk).first_or_404()
     tahun_ini = datetime.now().year
-    
+
     # Ambil/bikin record penilaian
-    p = Penilaian.query.filter_by(npk=npk, tahun=tahun_ini, periode=periode).first()
+    # DIUBAH: npk=npk -> id_karyawan=karyawan.id
+    p = Penilaian.query.filter_by(id_karyawan=karyawan.id, tahun=tahun_ini, periode=periode).first()
     if not p:
-        p = Penilaian(npk=npk, tahun=tahun_ini, periode=periode, penilai_npk=current_user.npk)
-    
+        # DIUBAH: npk=npk -> id_karyawan=karyawan.id
+        p = Penilaian(id_karyawan=karyawan.id, tahun=tahun_ini, periode=periode, penilai_npk=current_user.npk)
+
     # Simpan 8 KPI
     p.tanggung_jawab = int(request.form.get('kpi1', 0))
     p.inisiatif = int(request.form.get('kpi2', 0))
@@ -342,13 +350,14 @@ def simpan_nilai(npk, periode):
     p.target = int(request.form.get('kpi6', 0))
     p.proses = int(request.form.get('kpi7', 0))
     p.inovasi = int(request.form.get('kpi8', 0))
-    p.status = 'draft'  # atau 'final' kalo mau langsung final
-    
+    p.status = 'draft' # atau 'final' kalo mau langsung final
+    p.tanggal_update = datetime.utcnow() # DITAMBAHIN
+
     db.session.add(p)
     db.session.commit()
-    
+
     return redirect(url_for('hrd'))
-    
+
 @app.route('/hrd/tambah_karyawan', methods=['POST'])
 @login_required
 def tambah_karyawan():
@@ -390,7 +399,7 @@ def edit_karyawan(npk):
     password = request.form.get('password', '')
     if password:
         karyawan.password = generate_password_hash(password)
-    
+
     db.session.commit()
     flash('Data karyawan diupdate!', 'success')
     return redirect('/dashboard')
@@ -417,7 +426,7 @@ def download_karyawan():
 
     karyawan = Karyawan.query.filter(Karyawan.role.in_(['karyawan','kadiv'])).all()
     df = pd.DataFrame([{
-        'npk': k.npk, 'nama': k.nama, 'divisi': k.divisi, 
+        'npk': k.npk, 'nama': k.nama, 'divisi': k.divisi,
         'role': k.role, 'cabang': k.cabang, 'password': ''
     } for k in karyawan])
     df = df[['npk','nama','password','role','divisi','cabang']]
@@ -471,7 +480,7 @@ def upload_karyawan():
         existing_npk = set([k.npk for k in Karyawan.query.all()])
         data_batch = []
         skip = 0
-        
+
         for _, row in df.iterrows():
             if row['npk'] in existing_npk:
                 skip += 1
@@ -542,14 +551,14 @@ def logout():
     logout_user()
     session.clear()
     return redirect('/login')
-    
+
 from werkzeug.security import generate_password_hash
 
 with app.app_context():
     # Drop semua tabel terus bikin ulang biar bersih total
     db.drop_all()
     print("Semua tabel di-drop")
-    
+
     db.create_all()
     print("Tabel berhasil dibikin ulang")
 
@@ -561,6 +570,6 @@ with app.app_context():
     db.session.add_all(users)
     db.session.commit()
     print("User default dibikin")
-    
+
 if __name__ == '__main__':
     app.run()
