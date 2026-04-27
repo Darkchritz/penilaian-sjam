@@ -469,8 +469,8 @@ def upload_karyawan():
 
     try:
         df = pd.read_excel(file)
-        print(f"[UPLOAD] Jumlah baris Excel terbaca: {len(df)}")  # <-- PRINT 1
-        
+        print(f"[UPLOAD] Jumlah baris Excel terbaca: {len(df)}")
+
         required_cols = ['npk', 'nama', 'role', 'divisi', 'cabang']
         for col in required_cols:
             if col not in df.columns:
@@ -478,58 +478,67 @@ def upload_karyawan():
                 return redirect(url_for('hrd'))
 
         df = df.fillna('')
-        df['npk'] = df['npk'].apply(lambda x: int(float(x)) if str(x).strip() != '' else '')
-        
-        print(f"[UPLOAD] 5 NPK pertama setelah convert: {df['npk'].head(5).tolist()}")  # <-- PRINT 2
-        
+        df['npk'] = df['npk'].apply(lambda x: int(float(x)) if str(x).strip()!= '' else '')
+        print(f"[UPLOAD] 5 NPK pertama setelah convert: {df['npk'].head(5).tolist()}")
+
         df['nama'] = df['nama'].astype(str).str.strip()
         df['role'] = df['role'].astype(str).str.strip()
         df['divisi'] = df['divisi'].astype(str).str.strip()
         df['cabang'] = df['cabang'].astype(str).str.strip()
 
         df = df[(df['npk']!= '') & (df['nama']!= '') & (df['role']!= '') & (df['divisi']!= '') & (df['cabang']!= '')]
-        print(f"[UPLOAD] Baris valid setelah filter: {len(df)}")  # <-- PRINT 3
+        print(f"[UPLOAD] Baris valid setelah filter: {len(df)}")
 
         if df.empty:
             flash('Tidak ada data valid di Excel', 'error')
             return redirect(url_for('hrd'))
 
-        data_baru = 0
+        # FIX 1: Ambil semua NPK yang udah ada SEKALIGUS biar ga query di loop
+        npk_list = df['npk'].tolist()
+        existing_karyawan = Karyawan.query.filter(Karyawan.npk.in_(npk_list)).all()
+        existing_npk_dict = {k.npk: k for k in existing_karyawan}
+        print(f"[UPLOAD] NPK yang sudah ada di DB: {len(existing_npk_dict)}")
+
+        data_baru = []
         data_update = 0
 
-        for _, row in df.iterrows():
-            npk = row['npk']
-            password = str(row['password']).strip() if 'password' in df.columns and str(row['password']).strip()!= '' else '123456'
-            
-            existing = Karyawan.query.filter_by(npk=npk).first()
-            
-            if existing:
-                existing.nama = row['nama']
-                existing.password = generate_password_hash(password)
-                existing.role = row['role']
-                existing.divisi = row['divisi']
-                existing.cabang = row['cabang']
-                data_update += 1
-            else:
-                new_karyawan = Karyawan(
-                    npk=npk,
-                    nama=row['nama'],
-                    password=generate_password_hash(password),
-                    role=row['role'],
-                    divisi=row['divisi'],
-                    cabang=row['cabang']
-                )
-                db.session.add(new_karyawan)
-                data_baru += 1
-        
-        print(f"[UPLOAD] SEBELUM COMMIT - Baru: {data_baru}, Update: {data_update}")  # <-- PRINT 4
+        # FIX 2: Matikan autoflush selama loop
+        with db.session.no_autoflush:
+            for _, row in df.iterrows():
+                npk = row['npk']
+                password = str(row['password']).strip() if 'password' in df.columns and str(row['password']).strip()!= '' else '123456'
+
+                if npk in existing_npk_dict:
+                    # UPDATE
+                    existing = existing_npk_dict[npk]
+                    existing.nama = row['nama']
+                    existing.password = generate_password_hash(password)
+                    existing.role = row['role']
+                    existing.divisi = row['divisi']
+                    existing.cabang = row['cabang']
+                    data_update += 1
+                else:
+                    # INSERT
+                    data_baru.append(Karyawan(
+                        npk=npk,
+                        nama=row['nama'],
+                        password=generate_password_hash(password),
+                        role=row['role'],
+                        divisi=row['divisi'],
+                        cabang=row['cabang']
+                    ))
+
+        if data_baru:
+            db.session.add_all(data_baru)
+
+        print(f"[UPLOAD] SEBELUM COMMIT - Baru: {len(data_baru)}, Update: {data_update}")
         db.session.commit()
-        print(f"[UPLOAD] COMMIT BERHASIL")  # <-- PRINT 5
-        flash(f'Upload selesai! Data baru: {data_baru}, Data diupdate: {data_update}', 'success')
+        print(f"[UPLOAD] COMMIT BERHASIL")
+        flash(f'Upload selesai! Data baru: {len(data_baru)}, Data diupdate: {data_update}', 'success')
 
     except Exception as e:
         db.session.rollback()
-        print(f"[UPLOAD] ERROR: {str(e)}")  # <-- PRINT 6
+        print(f"[UPLOAD] ERROR: {str(e)}")
         flash(f'Error: {str(e)}', 'error')
 
     return redirect(url_for('hrd'))
