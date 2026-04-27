@@ -26,7 +26,7 @@ class Karyawan(UserMixin, db.Model):
     password = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(20), nullable=False)
     divisi = db.Column(db.String(50), nullable=False)
-    cabang = db.Column(db.String(50), nullable=False)
+    cabang = db.Column(db.String(100), nullable=False)
 
     # TAMBAHIN INI: biar session cuma simpen id doang
     def get_id(self):
@@ -533,6 +533,14 @@ def upload_karyawan():
         flash(f'Error: {str(e)}', 'error')
 
     return redirect(url_for('hrd'))
+
+@app.route('/cek_total')
+@login_required
+def cek_total():
+    if current_user.role != 'HRD': return 'Akses ditolak'
+    total = Karyawan.query.count()
+    npk_list = [k.npk for k in Karyawan.query.order_by(Karyawan.npk.desc()).limit(5).all()]
+    return f'Total DB: {total} <br> 5 NPK terakhir: {npk_list}'
     
 @app.route('/export_hrd')
 @login_required
