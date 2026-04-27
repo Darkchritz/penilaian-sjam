@@ -1,7 +1,7 @@
 import os
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file
 import io
 import pandas as pd
-from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -423,12 +423,12 @@ def hapus_karyawan(npk):
 @app.route('/hrd/download_karyawan')
 @login_required
 def download_karyawan():
-    if current_user.role!= 'HRD':
+    if current_user.role != 'HRD':
         return redirect('/')
 
     karyawan = Karyawan.query.filter(Karyawan.role.in_(['karyawan','kadiv'])).all()
     df = pd.DataFrame([{
-        'npk': k.npk, 'nama': k.nama, 'divisi': k.divisi,
+        'npk': k.npk, 'nama': k.nama, 'divisi': k.divisi, 
         'role': k.role, 'cabang': k.cabang, 'password': ''
     } for k in karyawan])
     df = df[['npk','nama','password','role','divisi','cabang']]
@@ -442,7 +442,7 @@ def download_karyawan():
                      mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                      as_attachment=True,
                      download_name='template_karyawan_sjam.xlsx')
-
+    
 @app.route('/hrd/upload_karyawan', methods=['POST'])
 @login_required
 def upload_karyawan():
