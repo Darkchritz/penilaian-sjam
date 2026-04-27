@@ -429,14 +429,20 @@ def hapus_karyawan(npk):
 @login_required
 def download_karyawan():
     if current_user.role != 'HRD':
+        flash('Akses ditolak', 'danger')
         return redirect('/')
 
     karyawan = Karyawan.query.filter(Karyawan.role.in_(['karyawan','kadiv'])).all()
-    df = pd.DataFrame([{
-        'npk': k.npk, 'nama': k.nama, 'divisi': k.divisi, 
-        'role': k.role, 'cabang': k.cabang, 'password': ''
-    } for k in karyawan])
-    df = df[['npk','nama','password','role','divisi','cabang']]
+    
+    # FIX: handle kalo data kosong
+    if not karyawan:
+        df = pd.DataFrame(columns=['npk','nama','password','role','divisi','cabang'])
+    else:
+        df = pd.DataFrame([{
+            'npk': k.npk, 'nama': k.nama, 'divisi': k.divisi, 
+            'role': k.role, 'cabang': k.cabang, 'password': ''
+        } for k in karyawan])
+        df = df[['npk','nama','password','role','divisi','cabang']]
 
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
@@ -562,21 +568,23 @@ def logout():
 from werkzeug.security import generate_password_hash
 
 with app.app_context():
-    # Drop semua tabel terus bikin ulang biar bersih total
-    db.drop_all()
-    print("Semua tabel di-drop")
+    # db.drop_all()  # HAPUS BARIS INI AJA
+    # print("Semua tabel di-drop")
 
     db.create_all()
-    print("Tabel berhasil dibikin ulang")
+    print("Tabel dicek/dibikin kalo belum ada")
 
-    # Bikin user default
-    users = [
-        Karyawan(npk=123, nama='Admin', password=generate_password_hash('123456'), role='HRD', divisi='HRD', cabang='PUSAT/MD'),
-        Karyawan(npk=2018032349, nama='Wendy Wangsaharja', password=generate_password_hash('123456'), role='HRD', divisi='HRD', cabang='PUSAT/MD')
-    ]
-    db.session.add_all(users)
+    # Bikin user default kalo belum ada
+    if not Karyawan.query.filter_by(npk=123).first():
+        admin = Karyawan(npk=123, nama='Admin', password=generate_password_hash('123456'), role='HRD', divisi='HRD', cabang='PUSAT/MD')
+        db.session.add(admin)
+    
+    if not Karyawan.query.filter_by(npk=2018032349).first():
+        wendy = Karyawan(npk=2018032349, nama='Wendy Wangsaharja', password=generate_password_hash('123456'), role='HRD', divisi='HRD', cabang='PUSAT/MD')
+        db.session.add(wendy)
+    
     db.session.commit()
-    print("User default dibikin")
+    print("User default dicek/dibikin")
 
 if __name__ == '__main__':
     app.run()
