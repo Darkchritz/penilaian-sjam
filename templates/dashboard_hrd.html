@@ -87,8 +87,8 @@
     </div>
 
     <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        <!-- Master Karyawan -->
-<div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <!-- Master Karyawan - Full Width -->
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
     <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
         <h3 class="font-bold text-gray-800 flex items-center gap-2">
             <i class="bi bi-people text-indigo-600"></i> Master Karyawan
@@ -98,7 +98,7 @@
         </span>
     </div>
     
-    <!-- TAMBAHAN: Form Search -->
+    <!-- Form Search -->
     <div class="px-6 py-3 border-b border-gray-100 bg-gray-50">
         <form method="GET" action="{{ url_for('hrd') }}" class="flex gap-2 items-center">
             <input type="hidden" name="periode" value="{{ periode_aktif }}">
@@ -179,7 +179,7 @@
                         </span>
                     </td>
                     <td class="px-6 py-4 text-sm">
-                        {% if status_penilaian.get(k.npk) == 'final' %}
+                        {% if status_penilaian.get(k.id) == 'final' %}
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                 <i class="bi bi-check-circle mr-1"></i> Sudah Dinilai
                             </span>
@@ -209,32 +209,24 @@
         </table>
     </div>
 
-            <!-- Pagination -->
-{% if total_pages > 1 %}
-<div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
-    <a href="/hrd?page={{ page - 1 }}"
-       class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 {% if page <= 1 %}pointer-events-none opacity-50{% endif %}">
-        <i class="bi bi-chevron-left"></i> Sebelumnya
-    </a>
-    <span class="text-sm text-gray-600">{{ page }} / {{ total_pages }}</span>
-    <a href="/hrd?page={{ page + 1 }}"
-       class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 {% if page >= total_pages %}pointer-events-none opacity-50{% endif %}">
-        Selanjutnya <i class="bi bi-chevron-right"></i>
-    </a>
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+    <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+        <a href="{{ url_for('hrd', page=page-1, search=search, sort=sort_by, order=order, periode=periode_aktif) }}"
+           class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 {% if page <= 1 %}pointer-events-none opacity-50{% endif %}">
+            <i class="bi bi-chevron-left"></i> Sebelumnya
+        </a>
+        <span class="text-sm text-gray-600">Halaman {{ page }} dari {{ total_pages }}</span>
+        <a href="{{ url_for('hrd', page=page+1, search=search, sort=sort_by, order=order, periode=periode_aktif) }}"
+           class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 {% if page >= total_pages %}pointer-events-none opacity-50{% endif %}">
+            Selanjutnya <i class="bi bi-chevron-right"></i>
+        </a>
+    </div>
+    {% endif %}
 </div>
-{% endif %}
-
-<div class="px-6 py-2">
-    <span class="text-sm text-gray-600">Total karyawan: {{ total_karyawan }}</span>
-</div>
-
-<!-- Buat nampilin total -->
-<div class="px-6 py-2">
-    <span class="text-sm text-gray-600">Total karyawan: {{ total_karyawan }}</span>
-</div>
-
+        
         <!-- Rekap Final - Hanya yang Belum Dinilai -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
             <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                 <h3 class="font-bold text-gray-800 flex items-center gap-2">
                     <i class="bi bi-exclamation-triangle text-orange-600"></i> Belum Dinilai Final
@@ -281,7 +273,7 @@
         </div>
 
         <!-- Penilaian Karyawan Divisi -->
-<div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden xl:col-span-2">
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
     <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
         <h3 class="font-bold text-gray-800 flex items-center gap-2">
             <i class="bi bi-clipboard-check text-green-600"></i> Penilaian Karyawan Divisi {{ user.divisi }}
