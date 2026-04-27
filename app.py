@@ -17,6 +17,7 @@ db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
+login_manager.session_protection = "strong"  # TAMBAHIN INI
 
 class Karyawan(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
