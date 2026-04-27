@@ -157,20 +157,24 @@
             </div>
 
             <!-- Pagination -->
-            {% if total_pages > 1 %}
-            <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
-                <a href="/dashboard?page={{ page - 1 }}"
-                   class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 {% if page <= 1 %}pointer-events-none opacity-50{% endif %}">
-                    <i class="bi bi-chevron-left"></i> Sebelumnya
-                </a>
-                <span class="text-sm text-gray-600">{{ page }} / {{ total_pages }}</span>
-                <a href="/dashboard?page={{ page + 1 }}"
-                   class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 {% if page >= total_pages %}pointer-events-none opacity-50{% endif %}">
-                    Selanjutnya <i class="bi bi-chevron-right"></i>
-                </a>
-            </div>
-            {% endif %}
-        </div>
+{% if total_pages > 1 %}
+<div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+    <a href="/hrd?page={{ page - 1 }}"  <!-- GANTI DARI /dashboard -->
+       class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 {% if page <= 1 %}pointer-events-none opacity-50{% endif %}">
+        <i class="bi bi-chevron-left"></i> Sebelumnya
+    </a>
+    <span class="text-sm text-gray-600">{{ page }} / {{ total_pages }}</span>
+    <a href="/hrd?page={{ page + 1 }}"  <!-- GANTI DARI /dashboard -->
+       class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 {% if page >= total_pages %}pointer-events-none opacity-50{% endif %}">
+        Selanjutnya <i class="bi bi-chevron-right"></i>
+    </a>
+</div>
+{% endif %}
+
+<!-- Buat nampilin total -->
+<div class="px-6 py-2">
+    <span class="text-sm text-gray-600">Total karyawan: {{ total_karyawan }}</span>
+</div>
 
         <!-- Rekap Final - Hanya yang Belum Dinilai -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
