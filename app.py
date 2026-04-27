@@ -60,8 +60,14 @@ def load_user(user_id):
         return None # Kalo user_id bukan angka, anggap aja logout
 
 @app.route('/')
-def home():
-    return redirect('/login')
+@login_required
+def index():
+    if current_user.role == 'HRD':
+        return redirect(url_for('hrd'))
+    elif current_user.role == 'Kepala Divisi':
+        return redirect(url_for('kadiv'))
+    else:
+        return redirect(url_for('karyawan'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -111,9 +117,9 @@ def register():
 @app.route('/hrd')
 @login_required
 def hrd():
-    if current_user.role != 'HRD':  # GANTI JADI HURUF BESAR
-        return redirect(url_for('login'))
-
+    if current_user.role != 'HRD':  # Cuma HRD yang lolos
+        return redirect(url_for('index'))  # lempar ke / biar dicek role lagi
+    
     user = current_user
     page = int(request.args.get('page', 1))
     per_page = 20
