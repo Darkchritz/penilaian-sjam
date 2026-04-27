@@ -465,7 +465,7 @@ def upload_karyawan():
     file = request.files['file']
     if file.filename == '':
         flash('Pilih file dulu', 'error')
-        return redirect('/dashboard')
+        return redirect(url_for('hrd'))
 
     try:
         df = pd.read_excel(file)
@@ -473,11 +473,11 @@ def upload_karyawan():
         for col in required_cols:
             if col not in df.columns:
                 flash(f'Kolom {col} tidak ditemukan. Header harus: npk, nama, password, role, divisi, cabang', 'error')
-                return redirect('/dashboard')
+                return redirect(url_for('hrd'))
 
         df = df.fillna('')
         
-        # FIX 1: Convert NPK ke int biar ga ada .0
+        # FIX NPK .0 dari Excel
         df['npk'] = df['npk'].apply(lambda x: int(float(x)) if str(x).strip() != '' else '')
         
         df['nama'] = df['nama'].astype(str).str.strip()
@@ -489,44 +489,51 @@ def upload_karyawan():
 
         if df.empty:
             flash('Tidak ada data valid di Excel', 'error')
-            return redirect('/dashboard')
+            return redirect(url_for('hrd'))
 
-        if len(df) > 500:
-            flash('Maksimal 500 baris per upload. Pecah file Excel jadi beberapa bagian', 'error')
-            return redirect('/dashboard')
+        # HAPUS LIMIT 500 KALO MAU UPLOAD 1000+
+        # if len(df) > 500:
+        #     flash('Maksimal 500 baris per upload. Pecah file Excel jadi beberapa bagian', 'error')
+        #     return redirect(url_for('hrd'))
 
-        existing_npk = set([k.npk for k in Karyawan.query.all()])
-        data_batch = []
-        skip = 0
+        data_baru = 0
+        data_update = 0
 
         for _, row in df.iterrows():
-            # FIX 2: NPK udah int sekarang, aman dibandingin
-            if row['npk'] in existing_npk:
-                skip += 1
-                continue
-
+            npk = row['npk']
             password = str(row['password']).strip() if 'password' in df.columns and str(row['password']).strip()!= '' else '123456'
-            data_batch.append(Karyawan(
-                npk=row['npk'],  # FIX 3: udah int, ga usah str lagi
-                nama=row['nama'],
-                password=generate_password_hash(password),
-                role=row['role'],
-                divisi=row['divisi'],
-                cabang=row['cabang']
-            ))
-            existing_npk.add(row['npk'])
-
-        if data_batch:
-            db.session.bulk_save_objects(data_batch)
-            db.session.commit()
-
-        flash(f'Upload selesai! Baru: {len(data_batch)}, Skip duplikat: {skip}', 'success')
+            
+            existing = Karyawan.query.filter_by(npk=npk).first()
+            
+            if existing:
+                # UPDATE KALO NPK UDAH ADA
+                existing.nama = row['nama']
+                existing.password = generate_password_hash(password)
+                existing.role = row['role']
+                existing.divisi = row['divisi']
+                existing.cabang = row['cabang']
+                data_update += 1
+            else:
+                # INSERT KALO NPK BARU
+                new_karyawan = Karyawan(
+                    npk=npk,
+                    nama=row['nama'],
+                    password=generate_password_hash(password),
+                    role=row['role'],
+                    divisi=row['divisi'],
+                    cabang=row['cabang']
+                )
+                db.session.add(new_karyawan)
+                data_baru += 1
+        
+        db.session.commit()
+        flash(f'Upload selesai! Data baru: {data_baru}, Data diupdate: {data_update}', 'success')
 
     except Exception as e:
         db.session.rollback()
         flash(f'Error: {str(e)}', 'error')
 
-    return redirect('/dashboard')
+    return redirect(url_for('hrd'))
 
 @app.route('/export_hrd')
 @login_required
