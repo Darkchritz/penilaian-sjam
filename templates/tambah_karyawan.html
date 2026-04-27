@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h3>Tambah Karyawan Baru</h3>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('tambah_karyawan') }}">
+        <div class="mb-3">
+            <label>NPK</label>
+            <input name="npk" type="number" class="form-control" required>
+        </div>
+        
+        <div class="mb-3">
+            <label>Nama</label>
+            <input name="nama" type="text" class="form-control" required>
+        </div>
+        
+        <div class="mb-3">
+            <label>Role</label>
+            <select name="role" class="form-control" required>
+                <option value="">Pilih Role</option>
+                <option value="karyawan">Karyawan</option>
+                <option value="kadiv">Kadiv</option>
+                <option value="hrd">HRD</option>
+            </select>
+        </div>
+        
+        <div class="mb-3">
+            <label>Divisi</label>
+            <input name="divisi" type="text" class="form-control" required>
+        </div>
+        
+        <div class="mb-3">
+            <label>Cabang</label>
+            <input name="cabang" type="text" class="form-control" required>
+        </div>
+        
+        <div class="mb-3">
+            <label>Password</label>
+            <input name="password" type="password" class="form-control" placeholder="Default: 123456">
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Simpan</button>
+        <a href="{{ url_for('hrd') }}" class="btn btn-secondary">Batal</a>
+    </form>
+</div>
+{% endblock %}
