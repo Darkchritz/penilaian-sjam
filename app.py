@@ -199,18 +199,40 @@ def hrd():
                          search=search,
                          sort_by=sort_by,
                          order=order)
+    
 @app.route('/kadiv')
 @login_required
 def kadiv():
-    print(f"[KADIV DEBUG] NPK:{current_user.npk} ROLE:'{current_user.role}'")
-    if current_user.role != 'Kepala Divisi':
+    # Fix: DB lu isinya 'kadiv' kecil, bukan 'Kepala Divisi'
+    if current_user.role.lower().strip() not in ['kadiv', 'kepala divisi']:
         return redirect(url_for('index'))
     
-    # Kosongin dulu, biar tau errornya di query atau di template
-    return render_template('kadiv.html', 
+    # Query asli dibalikin, jangan kosong
+    karyawan_divisi = Karyawan.query.filter(
+        Karyawan.divisi == current_user.divisi,
+        Karyawan.npk != current_user.npk
+    ).all()
+    
+    belum_dinilai = []
+    sudah_dinilai = []
+    
+    for k in karyawan_divisi:
+        nilai = Penilaian.query.filter_by(
+            karyawan_id=k.id, 
+            periode='Q1', 
+            tahun=2026,
+            status='final'
+        ).first()
+        
+        if nilai:
+            sudah_dinilai.append(k)
+        else:
+            belum_dinilai.append(k)
+    
+    return render_template('dashboard_kadiv.html', 
                            user=current_user,
-                           belum_dinilai=[],
-                           sudah_dinilai=[])
+                           belum_dinilai=belum_dinilai,
+                           sudah_dinilai=sudah_dinilai)
 
 @app.route('/dashboard')
 @login_required
