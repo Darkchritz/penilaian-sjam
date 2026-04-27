@@ -62,6 +62,7 @@ def load_user(user_id):
 @app.route('/')
 @login_required
 def index():
+    return f"ROLE GUE: '{current_user.role}'" 
     if current_user.role == 'HRD':
         return redirect(url_for('hrd'))
     elif current_user.role == 'Kepala Divisi':
@@ -169,6 +170,7 @@ def hrd():
 @app.route('/kadiv')
 @login_required
 def kadiv():
+    db.session.refresh(current_user)
     if current_user.role != 'Kepala Divisi':
         return redirect(url_for('index'))
     
