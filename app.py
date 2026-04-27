@@ -1,5 +1,7 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+import io
+import pandas as pd
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -421,7 +423,7 @@ def hapus_karyawan(npk):
 @app.route('/hrd/download_karyawan')
 @login_required
 def download_karyawan():
-    if current_user.role!= 'hrd':
+    if current_user.role!= 'HRD':
         return redirect('/')
 
     karyawan = Karyawan.query.filter(Karyawan.role.in_(['karyawan','kadiv'])).all()
@@ -444,7 +446,7 @@ def download_karyawan():
 @app.route('/hrd/upload_karyawan', methods=['POST'])
 @login_required
 def upload_karyawan():
-    if current_user.role!= 'hrd':
+    if current_user.role!= 'HRD':
         return redirect('/')
 
     file = request.files['file']
@@ -512,7 +514,7 @@ def upload_karyawan():
 @app.route('/export_hrd')
 @login_required
 def export_hrd():
-    if current_user.role!= 'hrd':
+    if current_user.role!= 'HRD':
         return redirect('/')
 
     penilaian = Penilaian.query.filter_by(status='final').all()
