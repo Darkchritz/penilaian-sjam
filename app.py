@@ -166,6 +166,52 @@ def hrd():
                          periode_aktif=periode_aktif,
                          tahun_ini=tahun_ini)
 
+@app.route('/kadiv')
+@login_required
+def kadiv():
+    if current_user.role != 'Kepala Divisi':
+        return redirect(url_for('index'))
+    
+    # Ambil semua karyawan yang harus dinilai sama Kadiv ini
+    if current_user.cabang.startswith('SJAM'):
+        # Kalo cabang SJAM, cuma nilai 1 cabang itu aja
+        karyawan_divisi = Karyawan.query.filter(
+            Karyawan.cabang == current_user.cabang,
+            Karyawan.npk != current_user.npk  # jangan nilai diri sendiri
+        ).all()
+    else:
+        # Kalo Pusat, nilai semua divisi yang sama
+        karyawan_divisi = Karyawan.query.filter(
+            Karyawan.divisi == current_user.divisi,
+            Karyawan.npk != current_user.npk
+        ).all()
+    
+    # Pisahin yang udah & belum dinilai periode Q1 tahun ini
+    tahun_ini = datetime.now().year
+    periode = 'Q1'
+    
+    sudah_dinilai = []
+    belum_dinilai = []
+    
+    for k in karyawan_divisi:
+        penilaian = Penilaian.query.filter_by(
+            npk_dinilai=k.npk, 
+            tahun=tahun_ini, 
+            periode=periode
+        ).first()
+        
+        if penilaian:
+            k.nilai_akhir = penilaian.nilai_akhir
+            k.grade = penilaian.grade
+            sudah_dinilai.append(k)
+        else:
+            belum_dinilai.append(k)
+    
+    return render_template('kadiv.html', 
+                           user=current_user,
+                           belum_dinilai=belum_dinilai,
+                           sudah_dinilai=sudah_dinilai)
+
 @app.route('/dashboard')
 @login_required
 def dashboard():
