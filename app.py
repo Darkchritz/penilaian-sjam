@@ -27,6 +27,10 @@ class Karyawan(UserMixin, db.Model):
     divisi = db.Column(db.String(50), nullable=False)
     cabang = db.Column(db.String(50), nullable=False)
 
+    # TAMBAHIN INI: biar session cuma simpen id doang
+    def get_id(self):
+        return str(self.id)
+
 class Penilaian(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     id_karyawan = db.Column(db.Integer, db.ForeignKey('karyawan.id')) # ini udah bener
