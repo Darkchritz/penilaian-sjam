@@ -150,7 +150,6 @@ def hrd():
         'nama': Karyawan.nama, 
         'divisi': Karyawan.divisi, 
         'cabang': Karyawan.cabang,
-        'jabatan': Karyawan.jabatan
     }
     kolom_sort = kolom_valid.get(sort_by, Karyawan.npk)
     
