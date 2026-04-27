@@ -62,6 +62,7 @@ def load_user(user_id):
 @app.route('/')
 @login_required
 def index():
+    return f"DEBUG: NPK={current_user.npk} ROLE={current_user.role}"
     if current_user.role == 'HRD':
         return redirect(url_for('hrd'))
     elif current_user.role == 'Kepala Divisi':
