@@ -62,13 +62,15 @@ def load_user(user_id):
 @app.route('/')
 @login_required
 def index():
-    return f"DEBUG: NPK={current_user.npk} ROLE={current_user.role}"
+    db.session.refresh(current_user)
     if current_user.role == 'HRD':
         return redirect(url_for('hrd'))
     elif current_user.role == 'Kepala Divisi':
         return redirect(url_for('kadiv'))
+    elif current_user.role == 'Admin':
+        return redirect(url_for('admin_dashboard'))
     else:
-        return redirect(url_for('karyawan'))
+        return redirect(url_for('dashboard_karyawan'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -149,7 +151,7 @@ def hrd():
         'npk': Karyawan.npk, 
         'nama': Karyawan.nama, 
         'divisi': Karyawan.divisi, 
-        'cabang': Karyawan.cabang,
+        'cabang': Karyawan.cabang
     }
     kolom_sort = kolom_valid.get(sort_by, Karyawan.npk)
     
