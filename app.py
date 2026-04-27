@@ -228,12 +228,14 @@ def dashboard_karyawan():
     hasil = Penilaian.query.filter_by(id_karyawan=user.id, status='final', tahun=tahun_ini).order_by(Penilaian.tanggal_update.desc()).first()
     return render_template('dashboard_karyawan.html', user=user, hasil=hasil)
 
-@app.route('/nilai/<int:id>')
-@login_required
+@app.route('/nilai/<int:id>', methods=['GET', 'POST'])
+@login_required  # <-- WAJIB ADA
 def nilai(id):
-    if current_user.role.lower()!= 'hrd':
-        return redirect(url_for('login'))
-
+    if current_user.role.lower() not in ['kadiv', 'hrd']:
+        flash('Akses ditolak', 'danger')
+        return redirect(url_for('index'))
+    
+    karyawan = Karyawan.query.get_or_404(id)
     periode = request.args.get('periode', 'Q1')
     tahun_ini = datetime.now().year
     karyawan = Karyawan.query.get_or_404(id)
