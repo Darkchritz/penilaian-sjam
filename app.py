@@ -63,10 +63,10 @@ def load_user(user_id):
 @login_required
 def index():
     db.session.refresh(current_user)
-    print(f"DEBUG: NPK={current_user.npk} ROLE='{current_user.role}'")  # <-- TAMBAH INI
+    role = current_user.role.lower().strip()  # <-- kuncinya di sini
     if current_user.role == 'HRD':
         return redirect(url_for('hrd'))
-    elif current_user.role == 'Kepala Divisi':
+    elif role in ['Kepala Divisi', 'kadiv']:  # <-- tangkep 2 variasi
         return redirect(url_for('kadiv'))
     elif current_user.role == 'Admin':
         return redirect(url_for('admin_dashboard'))
