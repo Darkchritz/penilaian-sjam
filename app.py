@@ -469,6 +469,8 @@ def upload_karyawan():
 
     try:
         df = pd.read_excel(file)
+        print(f"[UPLOAD] Jumlah baris Excel terbaca: {len(df)}")  # <-- PRINT 1
+        
         required_cols = ['npk', 'nama', 'role', 'divisi', 'cabang']
         for col in required_cols:
             if col not in df.columns:
@@ -476,9 +478,9 @@ def upload_karyawan():
                 return redirect(url_for('hrd'))
 
         df = df.fillna('')
-        
-        # FIX NPK .0 dari Excel
         df['npk'] = df['npk'].apply(lambda x: int(float(x)) if str(x).strip() != '' else '')
+        
+        print(f"[UPLOAD] 5 NPK pertama setelah convert: {df['npk'].head(5).tolist()}")  # <-- PRINT 2
         
         df['nama'] = df['nama'].astype(str).str.strip()
         df['role'] = df['role'].astype(str).str.strip()
@@ -486,15 +488,11 @@ def upload_karyawan():
         df['cabang'] = df['cabang'].astype(str).str.strip()
 
         df = df[(df['npk']!= '') & (df['nama']!= '') & (df['role']!= '') & (df['divisi']!= '') & (df['cabang']!= '')]
+        print(f"[UPLOAD] Baris valid setelah filter: {len(df)}")  # <-- PRINT 3
 
         if df.empty:
             flash('Tidak ada data valid di Excel', 'error')
             return redirect(url_for('hrd'))
-
-        # HAPUS LIMIT 500 KALO MAU UPLOAD 1000+
-        # if len(df) > 500:
-        #     flash('Maksimal 500 baris per upload. Pecah file Excel jadi beberapa bagian', 'error')
-        #     return redirect(url_for('hrd'))
 
         data_baru = 0
         data_update = 0
@@ -506,7 +504,6 @@ def upload_karyawan():
             existing = Karyawan.query.filter_by(npk=npk).first()
             
             if existing:
-                # UPDATE KALO NPK UDAH ADA
                 existing.nama = row['nama']
                 existing.password = generate_password_hash(password)
                 existing.role = row['role']
@@ -514,7 +511,6 @@ def upload_karyawan():
                 existing.cabang = row['cabang']
                 data_update += 1
             else:
-                # INSERT KALO NPK BARU
                 new_karyawan = Karyawan(
                     npk=npk,
                     nama=row['nama'],
@@ -526,15 +522,18 @@ def upload_karyawan():
                 db.session.add(new_karyawan)
                 data_baru += 1
         
+        print(f"[UPLOAD] SEBELUM COMMIT - Baru: {data_baru}, Update: {data_update}")  # <-- PRINT 4
         db.session.commit()
+        print(f"[UPLOAD] COMMIT BERHASIL")  # <-- PRINT 5
         flash(f'Upload selesai! Data baru: {data_baru}, Data diupdate: {data_update}', 'success')
 
     except Exception as e:
         db.session.rollback()
+        print(f"[UPLOAD] ERROR: {str(e)}")  # <-- PRINT 6
         flash(f'Error: {str(e)}', 'error')
 
     return redirect(url_for('hrd'))
-
+    
 @app.route('/export_hrd')
 @login_required
 def export_hrd():
