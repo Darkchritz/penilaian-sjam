@@ -127,11 +127,42 @@ def hrd():
     tahun_ini = datetime.now().year
     periode_aktif = request.args.get('periode', 'Q1')
 
+    # TAMBAHAN 1: Ambil parameter search & sort
+    search = request.args.get('search', '').strip()
+    sort_by = request.args.get('sort', 'npk')
+    order = request.args.get('order', 'asc')
+
     # Master Karyawan - semua
-    pagination = Karyawan.query.filter(Karyawan.npk!= user.npk).paginate(page=page, per_page=per_page, error_out=False)
+    query_karyawan = Karyawan.query.filter(Karyawan.npk!= user.npk)
+    
+    # TAMBAHAN 2: Filter search by nama atau npk
+    if search:
+        query_karyawan = query_karyawan.filter(
+            db.or_(
+                Karyawan.nama.ilike(f'%{search}%'),
+                Karyawan.npk.cast(db.String).ilike(f'%{search}%')
+            )
+        )
+    
+    # TAMBAHAN 3: Sort by kolom
+    kolom_valid = {
+        'npk': Karyawan.npk, 
+        'nama': Karyawan.nama, 
+        'divisi': Karyawan.divisi, 
+        'cabang': Karyawan.cabang,
+        'jabatan': Karyawan.jabatan
+    }
+    kolom_sort = kolom_valid.get(sort_by, Karyawan.npk)
+    
+    if order == 'desc':
+        query_karyawan = query_karyawan.order_by(kolom_sort.desc())
+    else:
+        query_karyawan = query_karyawan.order_by(kolom_sort.asc())
+
+    pagination = query_karyawan.paginate(page=page, per_page=per_page, error_out=False)
     semua_karyawan = pagination.items
     total_pages = pagination.pages
-    total_karyawan = pagination.total
+    total_karyawan = pagination.total  # INI TETAP 1, JANGAN BIKIN LAGI DI TEMPLATE
 
     # Data buat tabel Penilaian - khusus divisi HRD aja
     karyawan_hrd = Karyawan.query.filter(
@@ -142,30 +173,30 @@ def hrd():
     ).order_by(Karyawan.role.desc(), Karyawan.nama).all()
 
     penilaian_q1 = Penilaian.query.filter_by(tahun=tahun_ini, periode=periode_aktif).all()
-    # DIUBAH: p.npk -> p.id_karyawan
     penilaian_dict = {p.id_karyawan: p for p in penilaian_q1}
 
-    # DIUBAH: p.npk -> p.id_karyawan, k.npk -> k.id
     sudah_dinilai_id = [p.id_karyawan for p in penilaian_q1]
     belum_dinilai = [k for k in karyawan_hrd if k.id not in sudah_dinilai_id]
 
-    # TAMBAHIN INI: buat tabel penilaian
     karyawan_untuk_dinilai = karyawan_hrd
 
     return render_template('dashboard_hrd.html',
                          user=user,
                          karyawan=semua_karyawan,
                          karyawan_hrd=karyawan_hrd,
-                         karyawan_untuk_dinilai=karyawan_untuk_dinilai, # <-- INI YANG PENTING
+                         karyawan_untuk_dinilai=karyawan_untuk_dinilai,
                          belum_dinilai=belum_dinilai,
                          page=page,
                          total_pages=total_pages,
                          total_karyawan=total_karyawan,
                          penilaian_dict=penilaian_dict,
-                         # DIUBAH: p.npk -> p.id_karyawan
                          status_penilaian={p.id_karyawan: p.status for p in penilaian_q1},
                          periode_aktif=periode_aktif,
-                         tahun_ini=tahun_ini)
+                         tahun_ini=tahun_ini,
+                         # TAMBAHAN 4: Kirim variabel baru ke template
+                         search=search,
+                         sort_by=sort_by,
+                         order=order)
 
 @app.route('/kadiv')
 @login_required
