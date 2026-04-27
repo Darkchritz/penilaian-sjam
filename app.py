@@ -474,7 +474,10 @@ def upload_karyawan():
                 return redirect('/dashboard')
 
         df = df.fillna('')
-        df['npk'] = df['npk'].astype(str).str.strip()
+        
+        # FIX 1: Convert NPK ke int biar ga ada .0
+        df['npk'] = df['npk'].apply(lambda x: int(float(x)) if str(x).strip() != '' else '')
+        
         df['nama'] = df['nama'].astype(str).str.strip()
         df['role'] = df['role'].astype(str).str.strip()
         df['divisi'] = df['divisi'].astype(str).str.strip()
@@ -495,13 +498,14 @@ def upload_karyawan():
         skip = 0
 
         for _, row in df.iterrows():
+            # FIX 2: NPK udah int sekarang, aman dibandingin
             if row['npk'] in existing_npk:
                 skip += 1
                 continue
 
             password = str(row['password']).strip() if 'password' in df.columns and str(row['password']).strip()!= '' else '123456'
             data_batch.append(Karyawan(
-                npk=row['npk'],
+                npk=row['npk'],  # FIX 3: udah int, ga usah str lagi
                 nama=row['nama'],
                 password=generate_password_hash(password),
                 role=row['role'],
