@@ -124,6 +124,7 @@ def hrd():
     pagination = Karyawan.query.filter(Karyawan.npk!= user.npk).paginate(page=page, per_page=per_page, error_out=False)
     semua_karyawan = pagination.items
     total_pages = pagination.pages
+    total_karyawan = pagination.total
 
     # Data buat tabel Penilaian - khusus divisi HRD aja
     karyawan_hrd = Karyawan.query.filter(
@@ -152,6 +153,7 @@ def hrd():
                          belum_dinilai=belum_dinilai,
                          page=page,
                          total_pages=total_pages,
+                         total_karyawan=total_karyawan,
                          penilaian_dict=penilaian_dict,
                          # DIUBAH: p.npk -> p.id_karyawan
                          status_penilaian={p.id_karyawan: p.status for p in penilaian_q1},
