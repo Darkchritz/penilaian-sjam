@@ -159,10 +159,9 @@ def hrd():
     total_pages = pagination.pages
     total_karyawan = pagination.total
 
+    # FIX: Hapus filter cabang + role, HRD bisa nilai semua di divisi HRD
     karyawan_hrd = Karyawan.query.filter(
         Karyawan.divisi == user.divisi,
-        Karyawan.cabang == user.cabang,
-        Karyawan.role.in_(['karyawan','kadiv']),
         Karyawan.npk!= user.npk
     ).order_by(Karyawan.role.desc(), Karyawan.nama).all()
 
