@@ -683,10 +683,6 @@ with app.app_context():
         admin = Karyawan(npk=123, nama='Admin', password=generate_password_hash('123456'), role='HRD', divisi='HRD', cabang='PUSAT/MD')
         db.session.add(admin)
     
-    if not Karyawan.query.filter_by(npk=2018032349).first():
-        wendy = Karyawan(npk=2018032349, nama='Wendy Wangsaharja', password=generate_password_hash('123456'), role='HRD', divisi='HRD', cabang='PUSAT/MD')
-        db.session.add(wendy)
-    
     db.session.commit()
     print("User default dicek/dibikin")
 
