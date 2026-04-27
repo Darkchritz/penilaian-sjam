@@ -445,25 +445,26 @@ def tambah_karyawan():
 @app.route('/hrd/edit_karyawan/<npk>', methods=['POST'])
 @login_required
 def edit_karyawan(npk):
-    if current_user.role!= 'hrd':
+    if current_user.role.lower() != 'hrd':  # <-- fix 1: lowercase
         return redirect('/')
 
     karyawan = Karyawan.query.filter_by(npk=npk).first()
     if not karyawan:
         flash('Karyawan tidak ditemukan', 'error')
-        return redirect('/dashboard')
+        return redirect(url_for('hrd'))  # <-- fix 2: ke /hrd bukan /dashboard
 
     karyawan.nama = request.form['nama']
     karyawan.role = request.form['role']
     karyawan.divisi = request.form['divisi']
     karyawan.cabang = request.form['cabang']
-    password = request.form.get('password', '')
-    if password:
+    
+    password = request.form.get('password', '').strip()
+    if password:  # cuma update kalo diisi
         karyawan.password = generate_password_hash(password)
 
     db.session.commit()
     flash('Data karyawan diupdate!', 'success')
-    return redirect('/dashboard')
+    return redirect(url_for('hrd'))  # <-- fix 3: balik ke hrd
 
 @app.route('/hrd/hapus_karyawan/<npk>', methods=['POST'])
 @login_required
