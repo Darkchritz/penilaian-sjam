@@ -198,7 +198,6 @@ def hrd():
                          search=search,
                          sort_by=sort_by,
                          order=order)
-
 @app.route('/kadiv')
 @login_required
 def kadiv():
