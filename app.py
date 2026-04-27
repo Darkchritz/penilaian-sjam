@@ -63,6 +63,7 @@ def load_user(user_id):
 @login_required
 def index():
     db.session.refresh(current_user)
+    print(f"DEBUG: NPK={current_user.npk} ROLE='{current_user.role}'")  # <-- TAMBAH INI
     if current_user.role == 'HRD':
         return redirect(url_for('hrd'))
     elif current_user.role == 'Kepala Divisi':
