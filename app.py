@@ -3,6 +3,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 import io
 import pandas as pd
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import IntegrityError
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
@@ -441,28 +442,34 @@ def simpan_nilai(npk, periode):
 
     return redirect(url_for('hrd'))
 
-@app.route('/hrd/tambah_karyawan', methods=['POST'])
-@login_required
+@app.route('/tambah-karyawan', methods=['POST'])
 def tambah_karyawan():
-    if current_user.role!= 'hrd':
-        return redirect('/')
-
-    npk = request.form['npk']
-    nama = request.form['nama']
-    password = generate_password_hash(request.form['password'])
-    role = request.form['role']
-    divisi = request.form['divisi']
-    cabang = request.form['cabang']
-
     try:
-        user_baru = Karyawan(npk=npk, nama=nama, password=password, role=role, divisi=divisi, cabang=cabang)
-        db.session.add(user_baru)
+        npk = request.form['npk']
+        
+        # Cek duplikat manual
+        if Karyawan.query.filter_by(npk=npk).first():
+            flash(f'NPK {npk} sudah terdaftar', 'danger')
+            return redirect(url_for('form_tambah_karyawan'))
+
+        karyawan = Karyawan(
+            npk=npk,
+            nama=request.form['nama'],
+            role=request.form['role'].lower(),  # pastiin lowercase
+            divisi=request.form['divisi']
+        )
+        db.session.add(karyawan)
         db.session.commit()
-        flash('Karyawan berhasil ditambahkan!', 'success')
-    except:
+        flash('Karyawan berhasil ditambah', 'success')
+        
+    except IntegrityError:
         db.session.rollback()
-        flash('NPK sudah terdaftar!', 'error')
-    return redirect('/dashboard')
+        flash('Gagal: NPK sudah ada atau ada data kosong', 'danger')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error: {str(e)}', 'danger')
+        
+    return redirect(url_for('daftar_karyawan'))
 
 @app.route('/hrd/edit_karyawan/<npk>', methods=['POST'])
 @login_required
