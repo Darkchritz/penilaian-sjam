@@ -20,7 +20,7 @@
                     <i class="bi bi-pencil-square text-2xl text-indigo-600"></i>
                     <h1 class="text-xl font-bold text-indigo-600">Form Penilaian {{ periode }}</h1>
                 </div>
-                <a href="{{ url_for('hrd') }}" class="text-gray-600 hover:text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-100 transition">
+                <a href="{{ url_for('hrd') if current_user.role.lower() == 'hrd' else url_for('kadiv') }}" class="text-gray-600 hover:text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-100 transition">
                     <i class="bi bi-arrow-left"></i> Kembali
                 </a>
             </div>
@@ -42,8 +42,8 @@
                 <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start gap-3">
                     <i class="bi bi-info-circle text-blue-600 text-xl"></i>
                     <div>
-                        <p class="text-sm text-blue-800 font-semibold">Periode: {{ periode }} - {{ tahun_ini if tahun_ini else '2026' }}</p>
-                        <p class="text-sm text-blue-800">Beri nilai 1-100 untuk setiap KPI. Nilai akhir = rata-rata dari 8 KPI. Grade otomatis terhitung.</p>
+                        <p class="text-sm text-blue-800 font-semibold">Periode: {{ periode }} - {{ tahun }}</p>
+                        <p class="text-sm text-blue-800">Pilih nilai 0-5 untuk setiap indikator. Nilai 0=Buruk, 5=Sangat Baik. Total nilai akhir otomatis terhitung.</p>
                     </div>
                 </div>
             </div>
@@ -55,56 +55,261 @@
             </div>
             {% endif %}
 
-            <form method="POST" action="/simpan_nilai/{{ karyawan.npk }}/{{ periode }}" class="space-y-6">
-                <input type="hidden" name="npk" value="{{ karyawan.npk }}">
-                <input type="hidden" name="divisi" value="{{ karyawan.divisi }}">
+            <form method="POST" class="space-y-6">
+                <input type="hidden" name="id" value="{{ karyawan.id }}">
                 <input type="hidden" name="periode" value="{{ periode }}">
+                <input type="hidden" name="tahun" value="{{ tahun }}">
 
-                {% set kpi_list = [
-                    ('tanggung_jawab', 'Tanggung Jawab', 'Kemampuan menyelesaikan tugas sesuai target', penilaian.tanggung_jawab if penilaian else ''),
-                    ('inisiatif', 'Inisiatif', 'Proaktif dalam mencari solusi dan perbaikan', penilaian.inisiatif if penilaian else ''),
-                    ('kerjasama', 'Kerjasama', 'Kemampuan bekerja dalam tim', penilaian.kerjasama if penilaian else ''),
-                    ('kedisiplinan', 'Kedisiplinan', 'Ketaatan terhadap aturan dan waktu', penilaian.kedisiplinan if penilaian else ''),
-                    ('kemampuan', 'Kemampuan Teknis', 'Penguasaan skill sesuai jobdesc', penilaian.kemampuan if penilaian else ''),
-                    ('target', 'Pencapaian Target', 'Hasil kerja vs target yang ditetapkan', penilaian.target if penilaian else ''),
-                    ('proses', 'Kualitas Proses', 'Ketepatan dan efisiensi dalam bekerja', penilaian.proses if penilaian else ''),
-                    ('inovasi', 'Inovasi', 'Ide kreatif dan improvement', penilaian.inovasi if penilaian else '')
-                ] %}
+                <!-- KEDISIPLINAN 20% -->
+                <div class="bg-white rounded-xl shadow-sm border p-6">
+                    <h3 class="text-lg font-bold text-indigo-700 mb-4">KEDISIPLINAN (20%)</h3>
+                    {% set kpi_list = [
+                        ('kpi1', 'Kehadiran dan Ketepatan Waktu (DI ISI OLEH HRD)', '4.00%'),
+                        ('kpi2', 'Kepatuhan terhadap Aturan dan Kebijakan Perusahaan (DI ISI OLEH HRD)', '4.00%'),
+                        ('kpi3', 'Konsistensi dalam pelaporan dan penyelesaian tugas', '4.00%'),
+                        ('kpi4', 'Kepatuhan terhadap penggunaan seragam atau identitas kerja', '4.00%'),
+                        ('kpi5', 'Disiplin dalam Menjaga Kebersihan dan Kerapian Tempat Kerja', '4.00%')
+                    ] %}
+                    {% for key, title, bobot in kpi_list %}
+                        {% set val = penilaian[key] if penilaian else None %}
+                        <div class="mb-5 pb-5 border-b last:border-0">
+                            <p class="font-semibold text-gray-800 mb-1">{{ loop.index }}. {{ title }}</p>
+                            <p class="text-xs text-gray-500 mb-3">Bobot: {{ bobot }}</p>
+                            <div class="flex gap-2">
+                                {% for n in range(6) %}
+                                <label class="flex-1">
+                                    <input type="radio" name="{{ key }}" value="{{ n }}" required
+                                           {% if val == n %}checked{% endif %}
+                                           {% if penilaian and penilaian.status == 'final' %}disabled{% endif %}
+                                           class="peer hidden">
+                                    <div class="text-center py-3 rounded-lg border-2 cursor-pointer transition font-bold
+                                                peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600
+                                                border-gray-200 hover:border-indigo-400
+                                                disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
+                                        {{ n }}
+                                    </div>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
 
-                {% for key, title, desc, val in kpi_list %}
-    {% set i = loop.index %}
-    <div class="bg-gray-50 rounded-xl p-5 border border-gray-100">
-        <div class="flex items-start justify-between mb-3">
-            <div class="flex-1">
-                <label class="block text-base font-semibold text-gray-800 mb-1">
-                    {{ i }}. {{ title }}
-                </label>
-                <p class="text-sm text-gray-500">{{ desc }}</p>
-            </div>
-        </div>
-        <input 
-            type="number" 
-            name="kpi{{ i }}" 
-            min="1" 
-            max="100" 
-            required 
-            value="{{ val }}"
-            {% if penilaian and penilaian.status == 'final' %}disabled{% endif %}
-            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition text-lg font-semibold text-center disabled:bg-gray-100 disabled:text-gray-500"
-            placeholder="1-100"
-        >
-    </div>
-{% endfor %}
+                <!-- PRODUKTIVITAS KERJA 20% -->
+                <div class="bg-white rounded-xl shadow-sm border p-6">
+                    <h3 class="text-lg font-bold text-indigo-700 mb-4">PRODUKTIVITAS KERJA (20%)</h3>
+                    {% set kpi_list = [
+                        ('kpi6', 'Efisiensi dalam Penyelesaian Tugas yang diberikan', '4.00%'),
+                        ('kpi7', 'Kemampuan memprioritaskan tugas pokok', '4.00%'),
+                        ('kpi8', 'Inovasi dan Kreativitas dalam pekerjaan', '4.00%'),
+                        ('kpi9', 'Kemampuan multitasking', '4.00%'),
+                        ('kpi10', 'Peningkatan kinerja secara berkelanjutan', '4.00%')
+                    ] %}
+                    {% for key, title, bobot in kpi_list %}
+                        {% set val = penilaian[key] if penilaian else None %}
+                        <div class="mb-5 pb-5 border-b last:border-0">
+                            <p class="font-semibold text-gray-800 mb-1">{{ loop.index }}. {{ title }}</p>
+                            <p class="text-xs text-gray-500 mb-3">Bobot: {{ bobot }}</p>
+                            <div class="flex gap-2">
+                                {% for n in range(6) %}
+                                <label class="flex-1">
+                                    <input type="radio" name="{{ key }}" value="{{ n }}" required
+                                           {% if val == n %}checked{% endif %}
+                                           {% if penilaian and penilaian.status == 'final' %}disabled{% endif %}
+                                           class="peer hidden">
+                                    <div class="text-center py-3 rounded-lg border-2 cursor-pointer transition font-bold
+                                                peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600
+                                                border-gray-200 hover:border-indigo-400">
+                                        {{ n }}
+                                    </div>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
 
-                <div class="flex gap-4 pt-4">
-                    <a href="{{ url_for('hrd') }}" class="flex-1 px-6 py-3 rounded-xl border border-gray-300 text-gray-700 font-semibold text-center hover:bg-gray-50 transition">
-                        Batal
-                    </a>
-                    {% if not (penilaian and penilaian.status == 'final') %}
-                    <button type="submit" class="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-semibold transition shadow-lg shadow-indigo-500/30">
-                        <i class="bi bi-save"></i> Simpan Penilaian {{ periode }}
-                    </button>
-                    {% endif %}
+                <!-- KEHANDALAN 15% -->
+                <div class="bg-white rounded-xl shadow-sm border p-6">
+                    <h3 class="text-lg font-bold text-indigo-700 mb-4">KEHANDALAN (15%)</h3>
+                    {% set kpi_list = [
+                        ('kpi11', 'Terampil dan jarang melakukan kesalahan', '3.00%'),
+                        ('kpi12', 'Kemampuan pengambilan keputusan cepat dan tepat', '3.00%'),
+                        ('kpi13', 'Inisiatif dan Proaktif', '3.00%'),
+                        ('kpi14', 'Kemampuan penyelesaian masalah', '3.00%'),
+                        ('kpi15', 'Responsif terhadap tugas yang mendadak', '3.00%')
+                    ] %}
+                    {% for key, title, bobot in kpi_list %}
+                        {% set val = penilaian[key] if penilaian else None %}
+                        <div class="mb-5 pb-5 border-b last:border-0">
+                            <p class="font-semibold text-gray-800 mb-1">{{ loop.index }}. {{ title }}</p>
+                            <p class="text-xs text-gray-500 mb-3">Bobot: {{ bobot }}</p>
+                            <div class="flex gap-2">
+                                {% for n in range(6) %}
+                                <label class="flex-1">
+                                    <input type="radio" name="{{ key }}" value="{{ n }}" required
+                                           {% if val == n %}checked{% endif %}
+                                           {% if penilaian and penilaian.status == 'final' %}disabled{% endif %}
+                                           class="peer hidden">
+                                    <div class="text-center py-3 rounded-lg border-2 cursor-pointer transition font-bold
+                                                peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600
+                                                border-gray-200 hover:border-indigo-400">
+                                        {{ n }}
+                                    </div>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- KERJASAMA 10% -->
+                <div class="bg-white rounded-xl shadow-sm border p-6">
+                    <h3 class="text-lg font-bold text-indigo-700 mb-4">KERJASAMA (10%)</h3>
+                    {% set kpi_list = [
+                        ('kpi16', 'Menanggapi secara positif kritik, saran, ide dan tugas baru', '2.00%'),
+                        ('kpi17', 'Koordinasi dan Kolaborasi dengan teman kerja', '2.00%'),
+                        ('kpi18', 'Memiliki sikap positif dan kemampuan kerjasama dengan Team', '2.00%'),
+                        ('kpi19', 'Tidak ada komplain / masalah dengan sesama karyawan dan atau Atasan.', '2.00%'),
+                        ('kpi20', 'Sikap Profesional dalam Interaksi Team', '2.00%')
+                    ] %}
+                    {% for key, title, bobot in kpi_list %}
+                        {% set val = penilaian[key] if penilaian else None %}
+                        <div class="mb-5 pb-5 border-b last:border-0">
+                            <p class="font-semibold text-gray-800 mb-1">{{ loop.index }}. {{ title }}</p>
+                            <p class="text-xs text-gray-500 mb-3">Bobot: {{ bobot }}</p>
+                            <div class="flex gap-2">
+                                {% for n in range(6) %}
+                                <label class="flex-1">
+                                    <input type="radio" name="{{ key }}" value="{{ n }}" required
+                                           {% if val == n %}checked{% endif %}
+                                           {% if penilaian and penilaian.status == 'final' %}disabled{% endif %}
+                                           class="peer hidden">
+                                    <div class="text-center py-3 rounded-lg border-2 cursor-pointer transition font-bold
+                                                peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600
+                                                border-gray-200 hover:border-indigo-400">
+                                        {{ n }}
+                                    </div>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- TANGGUNG JAWAB 15% -->
+                <div class="bg-white rounded-xl shadow-sm border p-6">
+                    <h3 class="text-lg font-bold text-indigo-700 mb-4">TANGGUNG JAWAB (15%)</h3>
+                    {% set kpi_list = [
+                        ('kpi21', 'Memiliki tanggung jawab terhadap pekerjaan', '3.00%'),
+                        ('kpi22', 'Menerima dan mengakui kesalahan', '3.00%'),
+                        ('kpi23', 'Menjaga inventaris kantor yang digunakan dalam pekerjaan', '3.00%'),
+                        ('kpi24', 'Penyelesaian Tugas Tanpa Pengawasan Atasan.', '3.00%'),
+                        ('kpi25', 'Mengelola dan Mengatur Prioritas Kerja', '3.00%')
+                    ] %}
+                    {% for key, title, bobot in kpi_list %}
+                        {% set val = penilaian[key] if penilaian else None %}
+                        <div class="mb-5 pb-5 border-b last:border-0">
+                            <p class="font-semibold text-gray-800 mb-1">{{ loop.index }}. {{ title }}</p>
+                            <p class="text-xs text-gray-500 mb-3">Bobot: {{ bobot }}</p>
+                            <div class="flex gap-2">
+                                {% for n in range(6) %}
+                                <label class="flex-1">
+                                    <input type="radio" name="{{ key }}" value="{{ n }}" required
+                                           {% if val == n %}checked{% endif %}
+                                           {% if penilaian and penilaian.status == 'final' %}disabled{% endif %}
+                                           class="peer hidden">
+                                    <div class="text-center py-3 rounded-lg border-2 cursor-pointer transition font-bold
+                                                peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600
+                                                border-gray-200 hover:border-indigo-400">
+                                        {{ n }}
+                                    </div>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- KEMAMPUAN BERADAPTASI 10% -->
+                <div class="bg-white rounded-xl shadow-sm border p-6">
+                    <h3 class="text-lg font-bold text-indigo-700 mb-4">KEMAMPUAN BERADAPTASI (10%)</h3>
+                    {% set kpi_list = [
+                        ('kpi26', 'Kesiapan untuk belajar dan beradaptasi dengan cepat', '2.00%'),
+                        ('kpi27', 'Keahlian dalam menyesuaikan strategi kerja', '2.00%'),
+                        ('kpi28', 'Kemampuan menghadapi tantangan baru', '2.00%'),
+                        ('kpi29', 'Kesediaan untuk merubah cara kerja agar lebih efisien', '2.00%'),
+                        ('kpi30', 'Proaktif dalam Mencari Solusi Alternatif', '2.00%')
+                    ] %}
+                    {% for key, title, bobot in kpi_list %}
+                        {% set val = penilaian[key] if penilaian else None %}
+                        <div class="mb-5 pb-5 border-b last:border-0">
+                            <p class="font-semibold text-gray-800 mb-1">{{ loop.index }}. {{ title }}</p>
+                            <p class="text-xs text-gray-500 mb-3">Bobot: {{ bobot }}</p>
+                            <div class="flex gap-2">
+                                {% for n in range(6) %}
+                                <label class="flex-1">
+                                    <input type="radio" name="{{ key }}" value="{{ n }}" required
+                                           {% if val == n %}checked{% endif %}
+                                           {% if penilaian and penilaian.status == 'final' %}disabled{% endif %}
+                                           class="peer hidden">
+                                    <div class="text-center py-3 rounded-lg border-2 cursor-pointer transition font-bold
+                                                peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600
+                                                border-gray-200 hover:border-indigo-400">
+                                        {{ n }}
+                                    </div>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- KOMUNIKASI 10% -->
+                <div class="bg-white rounded-xl shadow-sm border p-6">
+                    <h3 class="text-lg font-bold text-indigo-700 mb-4">KOMUNIKASI (10%)</h3>
+                    {% set kpi_list = [
+                        ('kpi31', 'Keramahan komunikasi dengan karyawan dan Atasan', '2.00%'),
+                        ('kpi32', 'Kejelasan dalam penyampaian informasi', '2.00%'),
+                        ('kpi33', 'Responsif terhadap pertanyaan dan masukan', '2.00%'),
+                        ('kpi34', 'Menyampaikan hal-hal yang dianggap melanggar SOP kepada Atasan.', '2.00%'),
+                        ('kpi35', 'Keterbukaan dalam berkomunikasi', '2.00%')
+                    ] %}
+                    {% for key, title, bobot in kpi_list %}
+                        {% set val = penilaian[key] if penilaian else None %}
+                        <div class="mb-5 pb-5 border-b last:border-0">
+                            <p class="font-semibold text-gray-800 mb-1">{{ loop.index }}. {{ title }}</p>
+                            <p class="text-xs text-gray-500 mb-3">Bobot: {{ bobot }}</p>
+                            <div class="flex gap-2">
+                                {% for n in range(6) %}
+                                <label class="flex-1">
+                                    <input type="radio" name="{{ key }}" value="{{ n }}" required
+                                           {% if val == n %}checked{% endif %}
+                                           {% if penilaian and penilaian.status == 'final' %}disabled{% endif %}
+                                           class="peer hidden">
+                                    <div class="text-center py-3 rounded-lg border-2 cursor-pointer transition font-bold
+                                                peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600
+                                                border-gray-200 hover:border-indigo-400">
+                                        {{ n }}
+                                    </div>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="sticky bottom-4">
+                    <div class="flex gap-4">
+                        <a href="{{ url_for('hrd') if current_user.role.lower() == 'hrd' else url_for('kadiv') }}" class="flex-1 px-6 py-4 rounded-xl border border-gray-300 text-gray-700 font-semibold text-center hover:bg-gray-50 transition">
+                            Batal
+                        </a>
+                        {% if not (penilaian and penilaian.status == 'final') %}
+                        <button type="submit" class="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-6 py-4 rounded-xl font-bold text-lg transition shadow-lg shadow-indigo-500/30">
+                            <i class="bi bi-save"></i> Simpan Penilaian {{ periode }}
+                        </button>
+                        {% endif %}
+                    </div>
                 </div>
             </form>
         </div>
