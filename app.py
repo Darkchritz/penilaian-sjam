@@ -571,8 +571,5 @@ with app.app_context():
 
 if __name__ == '__main__':
     with app.app_context():
-        # HATI-HATI: Ini hapus semua data penilaian lama
-        db.drop_all() 
         db.create_all()
-        print("Database reset selesai")
     app.run(debug=True)
