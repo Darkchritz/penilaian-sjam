@@ -24,7 +24,7 @@
       }
     </script>
 </head>
-<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen" x-data="{showFinal: false}">
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen" x-data>
     <nav class="bg-white/80 backdrop-blur-md shadow-sm border-b sticky top-0 z-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
@@ -76,6 +76,7 @@
                             <p class="text-sm text-gray-500">{{ belum_dinilai|length }} orang</p>
                         </div>
                     </div>
+                </div>
                 <div class="p-6">
                     {% if belum_dinilai %}
                         <div class="space-y-3">
@@ -89,24 +90,25 @@
                                         <p class="font-semibold text-gray-800">{{ k.nama }}</p>
                                         <p class="text-sm text-gray-500">{{ k.npk }} | {{ k.role|upper }}</p>
                                     </div>
-                                <div class="relative inline-block text-left" x-data="{open: false}">
-                                    <button @click="open = !open"
-                                            type="button"
-                                            class="inline-flex items-center gap-1 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm">
-                                        <i class="bi bi-pencil"></i> Nilai <i class="bi bi-chevron-down text-xs"></i>
-                                    </button>
-                                    <div x-show="open"
-                                         @click.away="open = false"
-                                         x-transition
-                                         class="origin-top-right absolute right-0 mt-2 w-36 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-20">
-                                        <div class="py-1">
-                                            <a href="{{ url_for('nilai', id=k.id, periode='Q1') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Nilai Q1</a>
-                                            <a href="{{ url_for('nilai', id=k.id, periode='Q2') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Nilai Q2</a>
-                                            <a href="{{ url_for('nilai', id=k.id, periode='Q3') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Nilai Q3</a>
-                                            <a href="{{ url_for('nilai', id=k.id, periode='Q4') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Nilai Q4</a>
-                                        </div>
-                                    </div>
                                 </div>
+                                <div class="relative inline-block text-left" x-data="{open: false}">
+    <button @click="open = !open"
+            type="button"
+            class="inline-flex items-center gap-1 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm">
+        <i class="bi bi-pencil"></i> Nilai <i class="bi bi-chevron-down text-xs"></i>
+    </button>
+    <div x-show="open"
+         @click.away="open = false"
+         x-transition
+         class="origin-top-right absolute right-0 mt-2 w-36 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-20">
+        <div class="py-1">
+            <a href="{{ url_for('nilai', id=k.id, periode='Q1') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Nilai Q1</a>
+            <a href="{{ url_for('nilai', id=k.id, periode='Q2') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Nilai Q2</a>
+            <a href="{{ url_for('nilai', id=k.id, periode='Q3') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Nilai Q3</a>
+            <a href="{{ url_for('nilai', id=k.id, periode='Q4') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Nilai Q4</a>
+        </div>
+    </div>
+</div>
                             </div>
                             {% endfor %}
                         </div>
@@ -159,24 +161,24 @@
                                         <p class="text-xs text-gray-500">Grade {{ k.grade }}</p>
                                     </div>
                                     <div class="relative inline-block text-left" x-data="{open: false}">
-                                        <button @click="open = !open"
-                                                type="button"
-                                                class="text-amber-600 hover:text-amber-800 p-2 hover:bg-amber-50 rounded-lg transition"
-                                                title="Edit">
-                                            <i class="bi bi-pencil-square"></i>
-                                        </button>
-                                        <div x-show="open"
-                                             @click.away="open = false"
-                                             x-transition
-                                             class="origin-top-right absolute right-0 mt-2 w-36 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-20">
-                                            <div class="py-1">
-                                                <a href="{{ url_for('nilai', id=k.id, periode='Q1') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit Q1</a>
-                                                <a href="{{ url_for('nilai', id=k.id, periode='Q2') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit Q2</a>
-                                                <a href="{{ url_for('nilai', id=k.id, periode='Q3') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit Q3</a>
-                                                <a href="{{ url_for('nilai', id=k.id, periode='Q4') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit Q4</a>
-                                            </div>
-                                        </div>
-                                    </div>
+    <button @click="open = !open"
+            type="button"
+            class="text-amber-600 hover:text-amber-800 p-2 hover:bg-amber-50 rounded-lg transition"
+            title="Edit">
+        <i class="bi bi-pencil-square"></i>
+    </button>
+    <div x-show="open"
+         @click.away="open = false"
+         x-transition
+         class="origin-top-right absolute right-0 mt-2 w-36 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-20">
+        <div class="py-1">
+            <a href="{{ url_for('nilai', id=k.id, periode='Q1') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit Q1</a>
+            <a href="{{ url_for('nilai', id=k.id, periode='Q2') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit Q2</a>
+            <a href="{{ url_for('nilai', id=k.id, periode='Q3') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit Q3</a>
+            <a href="{{ url_for('nilai', id=k.id, periode='Q4') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit Q4</a>
+        </div>
+    </div>
+</div>
                                 </div>
                             </div>
                             {% endfor %}
