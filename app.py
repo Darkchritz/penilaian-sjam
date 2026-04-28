@@ -34,22 +34,58 @@ class Karyawan(UserMixin, db.Model):
 
 class Penilaian(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    id_karyawan = db.Column(db.Integer, db.ForeignKey('karyawan.id'))
-    tahun = db.Column(db.Integer)
-    periode = db.Column(db.String(2))
-    penilai_npk = db.Column(db.Integer)
-    tanggung_jawab = db.Column(db.Integer)
-    inisiatif = db.Column(db.Integer)
-    kerjasama = db.Column(db.Integer)
-    kedisiplinan = db.Column(db.Integer)
-    kemampuan = db.Column(db.Integer)
-    target = db.Column(db.Integer)
-    proses = db.Column(db.Integer)
-    inovasi = db.Column(db.Integer)
-    status = db.Column(db.String(10), default='draft')
-    tanggal_update = db.Column(db.DateTime, default=datetime.utcnow)
-
-    karyawan = db.relationship('Karyawan', backref='daftar_penilaian')
+    id_karyawan = db.Column(db.Integer, db.ForeignKey('karyawan.id'), nullable=False)
+    periode = db.Column(db.String(2), nullable=False)  # Q1, Q2, Q3, Q4
+    tahun = db.Column(db.Integer, nullable=False)
+    status = db.Column(db.String(10), default='draft')  # draft / final
+    
+    # 35 KPI sesuai Excel - semua skala 0-5
+    kpi1 = db.Column(db.Integer, default=0)   # KEDISIPLINAN
+    kpi2 = db.Column(db.Integer, default=0)
+    kpi3 = db.Column(db.Integer, default=0)
+    kpi4 = db.Column(db.Integer, default=0)
+    kpi5 = db.Column(db.Integer, default=0)
+    
+    kpi6 = db.Column(db.Integer, default=0)   # PRODUKTIVITAS
+    kpi7 = db.Column(db.Integer, default=0)
+    kpi8 = db.Column(db.Integer, default=0)
+    kpi9 = db.Column(db.Integer, default=0)
+    kpi10 = db.Column(db.Integer, default=0)
+    
+    kpi11 = db.Column(db.Integer, default=0)  # KEHANDALAN
+    kpi12 = db.Column(db.Integer, default=0)
+    kpi13 = db.Column(db.Integer, default=0)
+    kpi14 = db.Column(db.Integer, default=0)
+    kpi15 = db.Column(db.Integer, default=0)
+    
+    kpi16 = db.Column(db.Integer, default=0)  # KERJASAMA
+    kpi17 = db.Column(db.Integer, default=0)
+    kpi18 = db.Column(db.Integer, default=0)
+    kpi19 = db.Column(db.Integer, default=0)
+    kpi20 = db.Column(db.Integer, default=0)
+    
+    kpi21 = db.Column(db.Integer, default=0)  # TANGGUNG JAWAB
+    kpi22 = db.Column(db.Integer, default=0)
+    kpi23 = db.Column(db.Integer, default=0)
+    kpi24 = db.Column(db.Integer, default=0)
+    kpi25 = db.Column(db.Integer, default=0)
+    
+    kpi26 = db.Column(db.Integer, default=0)  # ADAPTASI
+    kpi27 = db.Column(db.Integer, default=0)
+    kpi28 = db.Column(db.Integer, default=0)
+    kpi29 = db.Column(db.Integer, default=0)
+    kpi30 = db.Column(db.Integer, default=0)
+    
+    kpi31 = db.Column(db.Integer, default=0)  # KOMUNIKASI
+    kpi32 = db.Column(db.Integer, default=0)
+    kpi33 = db.Column(db.Integer, default=0)
+    kpi34 = db.Column(db.Integer, default=0)
+    kpi35 = db.Column(db.Integer, default=0)
+    
+    nilai_akhir = db.Column(db.Float, default=0)  # 0-100
+    grade = db.Column(db.String(2))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 @login_manager.user_loader
 def load_user(user_id):
