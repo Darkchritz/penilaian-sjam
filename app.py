@@ -570,7 +570,8 @@ with app.app_context():
         db.session.commit()
 
 if __name__ == '__main__':
-    @login_required
     with app.app_context():
+        db.drop_all()
         db.create_all()
+        print("DB reset done")
     app.run(debug=True)
