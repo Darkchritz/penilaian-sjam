@@ -281,7 +281,7 @@ def kadiv():
 def dashboard_karyawan():
     user = current_user
     tahun_ini = datetime.now().year
-    hasil = Penilaian.query.filter_by(id_karyawan=user.id, status='final', tahun=tahun_ini).order_by(Penilaian.tanggal_update.desc()).first()
+    hasil = Penilaian.query.filter_by(id_karyawan=user.id, status='final', tahun=tahun_ini).order_by(Penilaian.updated_at.desc()).first()
     return render_template('dashboard_karyawan.html', user=user, hasil=hasil)
 
 @app.route('/nilai/<int:id>', methods=['GET', 'POST'])
