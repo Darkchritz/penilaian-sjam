@@ -571,5 +571,7 @@ with app.app_context():
 
 if __name__ == '__main__':
     with app.app_context():
-        db.create_all()
+        db.drop_all()  # HAPUS SEMUA TABEL
+        db.create_all() # BIKIN ULANG
+        print("Database udah direset")
     app.run(debug=True)
