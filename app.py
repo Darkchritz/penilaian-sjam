@@ -13,6 +13,18 @@ app.secret_key = os.environ.get('SECRET_KEY', 'sjam-penilaian-secret-2026')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+def hitung_grade(nilai):
+    if nilai <= 20: return 'E'
+    elif nilai <= 30: return 'E+'
+    elif nilai <= 40: return 'D'
+    elif nilai <= 50: return 'D+'
+    elif nilai <= 60: return 'C'
+    elif nilai <= 70: return 'C+'
+    elif nilai <= 80: return 'B'
+    elif nilai <= 85: return 'B+'
+    elif nilai <= 90: return 'A'
+    else: return 'A+'  # 91-100
+
 db = SQLAlchemy(app)
 
 login_manager = LoginManager()
@@ -265,28 +277,63 @@ def dashboard_karyawan():
     return render_template('dashboard_karyawan.html', user=user, hasil=hasil)
 
 @app.route('/nilai/<int:id>', methods=['GET', 'POST'])
-@login_required  # <-- WAJIB ADA
+@login_required
 def nilai(id):
     if current_user.role.lower() not in ['kadiv', 'hrd']:
         flash('Akses ditolak', 'danger')
         return redirect(url_for('index'))
     
     karyawan = Karyawan.query.get_or_404(id)
-    periode = request.args.get('periode', 'Q1')
-    tahun_ini = datetime.now().year
-    karyawan = Karyawan.query.get_or_404(id)
-
+    periode = request.args.get('periode', request.form.get('periode', 'Q1'))
+    tahun = int(request.args.get('tahun', request.form.get('tahun', datetime.now().year)))
+    
+    # Ambil data penilaian existing buat periode ini
     penilaian = Penilaian.query.filter_by(
-        id_karyawan=karyawan.id,
-        tahun=tahun_ini,
-        periode=periode
+        id_karyawan=karyawan.id, 
+        periode=periode, 
+        tahun=tahun
     ).first()
 
-    return render_template('nilai_form.html',
-                         karyawan=karyawan,
-                         periode=periode,
+    if request.method == 'POST':
+        if penilaian and penilaian.status == 'final':
+            flash('Penilaian sudah final, tidak bisa diubah', 'error')
+            return redirect(url_for('nilai', id=id, periode=periode, tahun=tahun))
+        
+        if not penilaian:
+            penilaian = Penilaian(
+                id_karyawan=karyawan.id,
+                periode=periode,
+                tahun=tahun
+            )
+            db.session.add(penilaian)
+        
+        # Simpan semua KPI 1-35
+        total_skor = 0
+        for i in range(1, 36):
+            val = int(request.form.get(f'kpi{i}', 0))
+            setattr(penilaian, f'kpi{i}', val)
+            total_skor += val
+        
+        # Hitung nilai akhir: total 35 KPI * 5 = 175 poin max = 100%
+        # Rumus: total_skor / 175 * 100
+        penilaian.nilai_akhir = round(total_skor / 175 * 100, 2)
+        penilaian.grade = hitung_grade(penilaian.nilai_akhir)
+        penilaian.updated_at = datetime.utcnow()
+        
+        db.session.commit()
+        flash(f'Penilaian {karyawan.nama} {periode} berhasil disimpan. Nilai: {penilaian.nilai_akhir} - Grade {penilaian.grade}', 'success')
+        
+        # Balik ke dashboard sesuai role
+        if current_user.role.lower() == 'hrd':
+            return redirect(url_for('hrd'))
+        else:
+            return redirect(url_for('kadiv'))
+
+    return render_template('nilai_form.html', 
+                         karyawan=karyawan, 
                          penilaian=penilaian,
-                         tahun_ini=tahun_ini)
+                         periode=periode,
+                         tahun=tahun)
 
 @app.route('/simpan_nilai/<int:id_karyawan>/<periode>', methods=['POST'])
 @login_required
