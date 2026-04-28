@@ -299,18 +299,18 @@
                     {% endfor %}
                 </div>
 
-                <div class="sticky bottom-4">
-                    <div class="flex gap-4">
-                        <a href="{{ url_for('hrd') if current_user.role.lower() == 'hrd' else url_for('kadiv') }}" class="flex-1 px-6 py-4 rounded-xl border border-gray-300 text-gray-700 font-semibold text-center hover:bg-gray-50 transition">
-                            Batal
-                        </a>
-                        {% if not (penilaian and penilaian.status == 'final') %}
-                        <button type="submit" class="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-6 py-4 rounded-xl font-bold text-lg transition shadow-lg shadow-indigo-500/30">
-                            <i class="bi bi-save"></i> Simpan Penilaian {{ periode }}
-                        </button>
-                        {% endif %}
-                    </div>
-                </div>
+                <div class="pt-8">
+    <div class="flex gap-4">
+        <a href="{{ url_for('hrd') if current_user.role.lower() == 'hrd' else url_for('kadiv') }}" class="flex-1 px-6 py-4 rounded-xl border border-gray-300 text-gray-700 font-semibold text-center hover:bg-gray-50 transition">
+            Batal
+        </a>
+        {% if not (penilaian and penilaian.status == 'final') %}
+        <button type="submit" class="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-6 py-4 rounded-xl font-bold text-lg transition shadow-lg shadow-indigo-500/30">
+            <i class="bi bi-save"></i> Simpan Penilaian {{ periode }}
+        </button>
+        {% endif %}
+    </div>
+</div>
             </form>
         </div>
     </main>
