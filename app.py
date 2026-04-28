@@ -303,32 +303,38 @@ def nilai(id):
     ).first()
 
     if request.method == 'POST':
-        if penilaian and penilaian.status == 'final':
-            flash('Penilaian sudah final, tidak bisa diubah', 'error')
-            return redirect(url_for('nilai', id=id, periode=periode, tahun=tahun))
-        
-        if not penilaian:
-            penilaian = Penilaian(
-                id_karyawan=karyawan.id,
-                periode=periode,
-                tahun=tahun
-            )
-            db.session.add(penilaian)
-        
-        # Simpan semua KPI 1-35
-        total_skor = 0
-        for i in range(1, 36):
-            val = int(request.form.get(f'kpi{i}', 0))
-            setattr(penilaian, f'kpi{i}', val)
-            total_skor += val
-        
-        # Hitung nilai akhir: total 35 KPI * 5 = 175 poin max = 100%
-        # Rumus: total_skor / 175 * 100
-        penilaian.nilai_akhir = round(total_skor / 175 * 100, 2)
-        penilaian.grade = hitung_grade(penilaian.nilai_akhir)
-        penilaian.updated_at = datetime.utcnow()
-        
-        db.session.commit()
+    if penilaian and penilaian.status == 'final':
+        flash('Penilaian sudah final, tidak bisa diubah', 'error')
+        return redirect(url_for('nilai', id=id, periode=periode, tahun=tahun))
+    
+    if not penilaian:
+        penilaian = Penilaian(
+            id_karyawan=karyawan.id,
+            periode=periode,
+            tahun=tahun
+        )
+        db.session.add(penilaian)
+    
+    # Simpan semua KPI 1-35
+    total_skor = 0
+    for i in range(1, 36):
+        val = int(request.form.get(f'kpi{i}', 0))
+        setattr(penilaian, f'kpi{i}', val)
+        total_skor += val
+    
+    penilaian.nilai_akhir = round(total_skor / 175 * 100, 2)
+    penilaian.grade = hitung_grade(penilaian.nilai_akhir)
+    penilaian.updated_at = datetime.utcnow()
+    
+    # Cek kalo ada tombol "Simpan Final" 
+    if request.form.get('action') == 'final':
+        penilaian.status = 'final'
+        flash(f'Penilaian {karyawan.nama} difinalisasi. Nilai: {penilaian.nilai_akhir} - Grade {penilaian.grade}', 'success')
+    else:
+        penilaian.status = 'draft'
+        flash(f'Draft penilaian {karyawan.nama} disimpan', 'success')
+    
+    db.session.commit()
         flash(f'Penilaian {karyawan.nama} {periode} berhasil disimpan. Nilai: {penilaian.nilai_akhir} - Grade {penilaian.grade}', 'success')
         
         # Balik ke dashboard sesuai role
