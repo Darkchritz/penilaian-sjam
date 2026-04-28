@@ -242,23 +242,31 @@ def kadiv():
     if current_user.role.lower().strip() not in ['kadiv', 'kepala divisi']:
         return redirect(url_for('index'))
 
+    tahun_ini = datetime.now().year
+    
     karyawan_divisi = Karyawan.query.filter(
         Karyawan.divisi == current_user.divisi,
-        Karyawan.npk!= current_user.npk
+        Karyawan.npk != current_user.npk
     ).all()
 
     belum_dinilai = []
     sudah_dinilai = []
 
     for k in karyawan_divisi:
+        # Ambil nilai Q1 terbaru, mau draft atau final
         nilai = Penilaian.query.filter_by(
             id_karyawan=k.id,
             periode='Q1',
-            tahun=2026,
-            status='final'
+            tahun=tahun_ini
         ).first()
 
-        if nilai:
+        # Buat ditampilin di tabel dashboard
+        k.nilai_akhir = nilai.nilai_akhir if nilai else 0
+        k.grade = nilai.grade if nilai else '-'
+        k.status_nilai = nilai.status if nilai else None
+
+        # Pisahin yg udah final vs belum
+        if nilai and nilai.status == 'final':
             sudah_dinilai.append(k)
         else:
             belum_dinilai.append(k)
