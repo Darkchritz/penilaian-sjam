@@ -71,29 +71,30 @@
                     ('inovasi', 'Inovasi', 'Ide kreatif dan improvement', penilaian.inovasi if penilaian else '')
                 ] %}
 
-                {% for i, (key, title, desc, val) in enumerate(kpi_list, 1) %}
-                <div class="bg-gray-50 rounded-xl p-5 border border-gray-100">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="flex-1">
-                            <label class="block text-base font-semibold text-gray-800 mb-1">
-                                {{ i }}. {{ title }}
-                            </label>
-                            <p class="text-sm text-gray-500">{{ desc }}</p>
-                        </div>
-                    </div>
-                    <input 
-                        type="number" 
-                        name="kpi{{ i }}" 
-                        min="1" 
-                        max="100" 
-                        required 
-                        value="{{ val }}"
-                        {% if penilaian and penilaian.status == 'final' %}disabled{% endif %}
-                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition text-lg font-semibold text-center disabled:bg-gray-100 disabled:text-gray-500"
-                        placeholder="1-100"
-                    >
-                </div>
-                {% endfor %}
+                {% for key, title, desc, val in kpi_list %}
+    {% set i = loop.index %}
+    <div class="bg-gray-50 rounded-xl p-5 border border-gray-100">
+        <div class="flex items-start justify-between mb-3">
+            <div class="flex-1">
+                <label class="block text-base font-semibold text-gray-800 mb-1">
+                    {{ i }}. {{ title }}
+                </label>
+                <p class="text-sm text-gray-500">{{ desc }}</p>
+            </div>
+        </div>
+        <input 
+            type="number" 
+            name="kpi{{ i }}" 
+            min="1" 
+            max="100" 
+            required 
+            value="{{ val }}"
+            {% if penilaian and penilaian.status == 'final' %}disabled{% endif %}
+            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition text-lg font-semibold text-center disabled:bg-gray-100 disabled:text-gray-500"
+            placeholder="1-100"
+        >
+    </div>
+{% endfor %}
 
                 <div class="flex gap-4 pt-4">
                     <a href="{{ url_for('hrd') }}" class="flex-1 px-6 py-3 rounded-xl border border-gray-300 text-gray-700 font-semibold text-center hover:bg-gray-50 transition">
