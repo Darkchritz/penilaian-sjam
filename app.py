@@ -570,8 +570,7 @@ with app.app_context():
         db.session.commit()
 
 if __name__ == '__main__':
+    @login_required
     with app.app_context():
-        db.drop_all()  # HAPUS SEMUA TABEL
-        db.create_all() # BIKIN ULANG
-        print("Database udah direset")
+        db.create_all()
     app.run(debug=True)
