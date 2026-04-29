@@ -195,6 +195,7 @@ async function hapusAkses(id_kadiv, divisi, cabang) {
     formData.append('id_kadiv', id_kadiv)
     formData.append('divisi_target', divisi)
     formData.append('cabang_target', cabang)
+    formData.append('id_karyawan_target', id_karyawan_target)
 
     const res = await fetch('/hrd/hapus_akses_kadiv', {method: 'POST', body: formData})
     const data = await res.json()
