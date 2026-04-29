@@ -105,12 +105,14 @@ class AksesPenilaian(db.Model):
     id_kadiv = db.Column(db.Integer, db.ForeignKey('karyawan.id'), nullable=False)
     divisi_target = db.Column(db.String(50), nullable=False)
     cabang_target = db.Column(db.String(50), nullable=False)
+    id_karyawan_target = db.Column(db.Integer, db.ForeignKey('karyawan.id'), nullable=True)
     assigned_by = db.Column(db.Integer, db.ForeignKey('karyawan.id'), nullable=False)
     tanggal_assign = db.Column(db.DateTime, default=datetime.utcnow)
     is_active = db.Column(db.Boolean, default=True)
     
     kadiv = db.relationship('Karyawan', foreign_keys=[id_kadiv], backref='akses_diberikan')
     admin_hrd = db.relationship('Karyawan', foreign_keys=[assigned_by])
+    karyawan_target = db.relationship('Karyawan', foreign_keys=[id_karyawan_target])
 
     __table_args__ = (db.UniqueConstraint('id_kadiv', 'divisi_target', 'cabang_target', name='uq_kadiv_divisi_cabang'),)
 
