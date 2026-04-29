@@ -296,7 +296,7 @@ def kelola_akses_kadiv():
     semua_karyawan = Karyawan.query.filter_by(role='karyawan').all()
     semua_akses = AksesPenilaian.query.filter_by(is_active=True).all()
 
-    return render_template('kelola_akses_kadiv.html',
+    return render_template('kelola-akses-kadiv.html',
                            semua_kadiv=semua_kadiv,
                            semua_divisi=[d[0] for d in semua_divisi],
                            semua_cabang=[c[0] for c in semua_cabang],
