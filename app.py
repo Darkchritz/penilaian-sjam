@@ -329,7 +329,7 @@ def tambah_akses_kadiv():
         id_kadiv=id_kadiv, 
         divisi_target=divisi_target, 
         cabang_target=cabang_target,
-        id_karyawan_target=id_karyawan if id_karyawan else None,
+        id_karyawan_target=id_karyawan_target,
         is_active=True
     ).first()
     
@@ -340,7 +340,7 @@ def tambah_akses_kadiv():
         id_kadiv=id_kadiv,
         divisi_target=divisi_target,
         cabang_target=cabang_target,
-        id_karyawan_target=id_karyawan if id_karyawan else None,
+        id_karyawan_target=id_karyawan_target,
         assigned_by=current_user.id
     )
     db.session.add(akses_baru)
