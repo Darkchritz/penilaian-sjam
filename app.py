@@ -251,6 +251,92 @@ def hrd():
                          sort_by=sort_by,
                          order=order)
 
+@app.route('/hrd/kelola_akses_kadiv')
+@login_required
+def kelola_akses_kadiv():
+    if current_user.role.lower()!= 'hrd':
+        flash('Akses ditolak', 'danger')
+        return redirect(url_for('index'))
+    
+    # Ambil semua kadiv
+    list_kadiv = User.query.filter(User.role.in_(['Kepala Divisi', 'Super Kadiv'])).order_by(User.nama).all()
+    
+    # Ambil semua divisi & cabang unik dari tabel user
+    list_divisi = db.session.query(User.divisi).distinct().all()
+    list_cabang = db.session.query(User.cabang).distinct().all()
+    
+    # Ambil data akses yang udah ada
+    semua_akses = AksesPenilaian.query.filter_by(is_active=True).all()
+    
+    # Grouping akses per kadiv biar gampang di template
+    akses_per_kadiv = {}
+    for akses in semua_akses:
+        if akses.id_kadiv not in akses_per_kadiv:
+            akses_per_kadiv[akses.id_kadiv] = []
+        akses_per_kadiv[akses.id_kadiv].append(f"{akses.divisi_target} - {akses.cabang_target}")
+    
+    return render_template('hrd_kelola_akses.html', 
+                         list_kadiv=list_kadiv,
+                         list_divisi=[d[0] for d in list_divisi],
+                         list_cabang=[c[0] for c in list_cabang],
+                         akses_per_kadiv=akses_per_kadiv)
+
+@app.route('/hrd/tambah_akses_kadiv', methods=['POST'])
+@login_required
+def tambah_akses_kadiv():
+    if current_user.role.lower()!= 'hrd':
+        return jsonify({'status': 'error', 'message': 'Akses ditolak'}), 403
+    
+    id_kadiv = request.form.get('id_kadiv')
+    divisi_target = request.form.get('divisi_target')
+    cabang_target = request.form.get('cabang_target')
+    
+    # Cek udah ada belum
+    existing = AksesPenilaian.query.filter_by(
+        id_kadiv=id_kadiv, 
+        divisi_target=divisi_target, 
+        cabang_target=cabang_target,
+        is_active=True
+    ).first()
+    
+    if existing:
+        return jsonify({'status': 'error', 'message': 'Akses sudah ada'}), 400
+    
+    akses_baru = AksesPenilaian(
+        id_kadiv=id_kadiv,
+        divisi_target=divisi_target,
+        cabang_target=cabang_target,
+        assigned_by=current_user.id
+    )
+    db.session.add(akses_baru)
+    db.session.commit()
+    
+    return jsonify({'status': 'success', 'message': 'Akses berhasil ditambahkan'})
+
+@app.route('/hrd/hapus_akses_kadiv', methods=['POST'])
+@login_required
+def hapus_akses_kadiv():
+    if current_user.role.lower()!= 'hrd':
+        return jsonify({'status': 'error', 'message': 'Akses ditolak'}), 403
+    
+    id_kadiv = request.form.get('id_kadiv')
+    divisi_target = request.form.get('divisi_target')
+    cabang_target = request.form.get('cabang_target')
+    
+    akses = AksesPenilaian.query.filter_by(
+        id_kadiv=id_kadiv, 
+        divisi_target=divisi_target, 
+        cabang_target=cabang_target,
+        is_active=True
+    ).first()
+    
+    if akses:
+        akses.is_active = False # Soft delete biar ada audit trail
+        db.session.commit()
+        return jsonify({'status': 'success', 'message': 'Akses berhasil dihapus'})
+    
+    return jsonify({'status': 'error', 'message': 'Akses tidak ditemukan'}), 404
+
 @app.route('/kadiv')
 @login_required
 def kadiv():
