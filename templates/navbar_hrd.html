@@ -1,0 +1,27 @@
+<nav class="bg-white/80 backdrop-blur-md shadow-sm border-b sticky top-0 z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16 items-center">
+            <div class="flex items-center gap-2">
+                <a href="{{ url_for('hrd') }}" class="flex items-center gap-2">
+                    <i class="bi bi-shield-check text-2xl text-indigo-600"></i>
+                    <h1 class="text-xl font-bold text-indigo-600">SJAM HRD</h1>
+                </a>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="{{ url_for('hrd') }}" class="text-sm font-medium text-gray-700 hover:text-indigo-600">
+                    Dashboard
+                </a>
+                <a href="{{ url_for('kelola_akses_kadiv') }}" class="text-sm font-medium text-indigo-600">
+                    Kelola Akses
+                </a>
+                <div class="text-right hidden sm:block">
+                    <p class="text-sm font-medium text-gray-700">{{ current_user.nama }}</p>
+                    <p class="text-xs text-gray-500">{{ current_user.divisi }} | {{ current_user.cabang }}</p>
+                </div>
+                <a href="/logout" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
