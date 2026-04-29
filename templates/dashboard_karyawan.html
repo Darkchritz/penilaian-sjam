@@ -44,95 +44,100 @@
         </div>
     </nav>
 
-    <main class="max-w-4xl mx-auto p-4 sm:p-6">
+    <main class="max-w-6xl mx-auto p-4 sm:p-6">
     <div class="text-center mb-8">
-        <h2 class="text-3xl font-bold text-gray-800 mb-2">Hasil Penilaian</h2>
+        <h2 class="text-3xl font-bold text-gray-800 mb-2">Hasil Penilaian {{ tahun }}</h2>
         <p class="text-gray-500">{{ user.nama }} - {{ user.npk }}</p>
         <p class="text-sm text-gray-400">{{ user.divisi }} | {{ user.cabang }}</p>
     </div>
 
-    {% if hasil %}
-    {% if hasil.nilai_akhir <= 20 %}
-        {% set color = 'text-red-600' %}
-        {% set bg_color = 'bg-red-50' %}
-        {% set border_color = 'border-red-200' %}
-    {% elif hasil.nilai_akhir <= 30 %}
-        {% set color = 'text-red-500' %}
-        {% set bg_color = 'bg-red-50' %}
-        {% set border_color = 'border-red-200' %}
-    {% elif hasil.nilai_akhir <= 40 %}
-        {% set color = 'text-orange-600' %}
-        {% set bg_color = 'bg-orange-50' %}
-        {% set border_color = 'border-orange-200' %}
-    {% elif hasil.nilai_akhir <= 50 %}
-        {% set color = 'text-orange-500' %}
-        {% set bg_color = 'bg-orange-50' %}
-        {% set border_color = 'border-orange-200' %}
-    {% elif hasil.nilai_akhir <= 60 %}
-        {% set color = 'text-yellow-600' %}
-        {% set bg_color = 'bg-yellow-50' %}
-        {% set border_color = 'border-yellow-200' %}
-    {% elif hasil.nilai_akhir <= 70 %}
-        {% set color = 'text-yellow-500' %}
-        {% set bg_color = 'bg-yellow-50' %}
-        {% set border_color = 'border-yellow-200' %}
-    {% elif hasil.nilai_akhir <= 80 %}
-        {% set color = 'text-blue-600' %}
-        {% set bg_color = 'bg-blue-50' %}
-        {% set border_color = 'border-blue-200' %}
-    {% elif hasil.nilai_akhir <= 85 %}
-        {% set color = 'text-blue-500' %}
-        {% set bg_color = 'bg-blue-50' %}
-        {% set border_color = 'border-blue-200' %}
-    {% elif hasil.nilai_akhir <= 90 %}
-        {% set color = 'text-green-600' %}
-        {% set bg_color = 'bg-green-50' %}
-        {% set border_color = 'border-green-200' %}
-    {% else %}
-        {% set color = 'text-green-500' %}
-        {% set bg_color = 'bg-green-50' %}
-        {% set border_color = 'border-green-200' %}
-    {% endif %}
-
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden max-w-lg mx-auto">
-        <div class="bg-gradient-to-r from-indigo-50 to-purple-50 p-6 border-b border-gray-100">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-gray-600">Periode Penilaian</p>
-                    <p class="text-lg font-bold text-gray-800">
-                        {% if hasil.periode == 'Q1' %}Januari - Maret
-                        {% elif hasil.periode == 'Q2' %}April - Juni
-                        {% elif hasil.periode == 'Q3' %}Juli - September
-                        {% else %}Oktober - Desember{% endif %}
-                        {{ hasil.tahun }}
-                    </p>
-                </div>
-                <span class="px-4 py-2 bg-indigo-600 text-white rounded-full text-sm font-bold shadow-sm">
-                    <i class="bi bi-calendar3"></i> {{ hasil.periode }}
-                </span>
-            </div>
-        </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {% for q, hasil, periode_text in [
+            ('Q1', hasil_q1, 'Januari - Maret'),
+            ('Q2', hasil_q2, 'April - Juni'),
+            ('Q3', hasil_q3, 'Juli - September'),
+            ('Q4', hasil_q4, 'Oktober - Desember')
+        ] %}
         
-        <div class="p-10 text-center">
-    <div class="inline-flex items-center justify-center w-48 h-48 rounded-full {{ bg_color }} border-4 {{ border_color }} mb-4">
-        <div>
-            <p class="text-7xl font-bold {{ color }}">{{ "%.0f"|format(hasil.nilai_akhir) }}%</p>
-            <p class="text-3xl font-bold text-gray-700 mt-2">Grade {{ hasil.grade }}</p>
+        {% if hasil %}
+            {% if hasil.nilai_akhir <= 20 %}
+                {% set color = 'text-red-600' %}
+                {% set bg_color = 'bg-red-50' %}
+                {% set border_color = 'border-red-200' %}
+            {% elif hasil.nilai_akhir <= 30 %}
+                {% set color = 'text-red-500' %}
+                {% set bg_color = 'bg-red-50' %}
+                {% set border_color = 'border-red-200' %}
+            {% elif hasil.nilai_akhir <= 40 %}
+                {% set color = 'text-orange-600' %}
+                {% set bg_color = 'bg-orange-50' %}
+                {% set border_color = 'border-orange-200' %}
+            {% elif hasil.nilai_akhir <= 50 %}
+                {% set color = 'text-orange-500' %}
+                {% set bg_color = 'bg-orange-50' %}
+                {% set border_color = 'border-orange-200' %}
+            {% elif hasil.nilai_akhir <= 60 %}
+                {% set color = 'text-yellow-600' %}
+                {% set bg_color = 'bg-yellow-50' %}
+                {% set border_color = 'border-yellow-200' %}
+            {% elif hasil.nilai_akhir <= 70 %}
+                {% set color = 'text-yellow-500' %}
+                {% set bg_color = 'bg-yellow-50' %}
+                {% set border_color = 'border-yellow-200' %}
+            {% elif hasil.nilai_akhir <= 80 %}
+                {% set color = 'text-blue-600' %}
+                {% set bg_color = 'bg-blue-50' %}
+                {% set border_color = 'border-blue-200' %}
+            {% elif hasil.nilai_akhir <= 85 %}
+                {% set color = 'text-blue-500' %}
+                {% set bg_color = 'bg-blue-50' %}
+                {% set border_color = 'border-blue-200' %}
+            {% elif hasil.nilai_akhir <= 90 %}
+                {% set color = 'text-green-600' %}
+                {% set bg_color = 'bg-green-50' %}
+                {% set border_color = 'border-green-200' %}
+            {% else %}
+                {% set color = 'text-green-500' %}
+                {% set bg_color = 'bg-green-50' %}
+                {% set border_color = 'border-green-200' %}
+            {% endif %}
+        {% endif %}
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 border-b border-gray-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-gray-600">Periode</p>
+                        <p class="text-sm font-bold text-gray-800">{{ periode_text }} {{ tahun }}</p>
+                    </div>
+                    <span class="px-3 py-1 bg-indigo-600 text-white rounded-full text-xs font-bold">
+                        {{ q }}
+                    </span>
+                </div>
+            </div>
+            
+            {% if hasil %}
+            <div class="p-6 text-center">
+                <div class="inline-flex items-center justify-center w-32 h-32 rounded-full {{ bg_color }} border-4 {{ border_color }} mb-3">
+                    <div>
+                        <p class="text-4xl font-bold {{ color }}">{{ "%.0f"|format(hasil.nilai_akhir) }}%</p>
+                        <p class="text-xl font-bold text-gray-700 mt-1">Grade {{ hasil.grade }}</p>
+                    </div>
+                <p class="text-xs text-gray-500">
+                    <i class="bi bi-clock-history"></i> {{ hasil.updated_at.strftime('%d %b %Y') if hasil.updated_at else '-' }}
+                </p>
+            </div>
+            {% else %}
+            <div class="p-6 text-center">
+                <div class="w-32 h-32 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-3 border-4 border-gray-100">
+                    <i class="bi bi-hourglass-split text-3xl text-gray-300"></i>
+                </div>
+                <p class="text-sm text-gray-400 font-medium">Belum dinilai</p>
+            </div>
+            {% endif %}
         </div>
+        {% endfor %}
     </div>
-    <p class="text-sm text-gray-500">
-        <i class="bi bi-clock-history"></i> Terakhir diperbarui: {{ hasil.updated_at.strftime('%d %B %Y') if hasil.updated_at else '-' }}
-    </p>
-</div>
-    {% else %}
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center max-w-lg mx-auto">
-        <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <i class="bi bi-hourglass-split text-4xl text-gray-400"></i>
-        </div>
-        <p class="text-gray-800 font-semibold text-lg mb-2">Belum Ada Penilaian</p>
-        <p class="text-sm text-gray-500 leading-relaxed">Penilaian Q1 tahun ini belum tersedia.<br>Silakan hubungi Kepala Divisi untuk informasi lebih lanjut</p>
-    </div>
-    {% endif %}
 </main>
 </body>
 </html>
