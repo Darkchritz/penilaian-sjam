@@ -114,7 +114,8 @@ class AksesPenilaian(db.Model):
     admin_hrd = db.relationship('Karyawan', foreign_keys=[assigned_by])
     karyawan_target = db.relationship('Karyawan', foreign_keys=[id_karyawan_target])
 
-    __table_args__ = (db.UniqueConstraint('id_kadiv', 'divisi_target', 'cabang_target', name='uq_kadiv_divisi_cabang'),)
+    # TAMBAH id_karyawan_target KE CONSTRAINT
+    __table_args__ = (db.UniqueConstraint('id_kadiv', 'divisi_target', 'cabang_target', 'id_karyawan_target', name='uq_kadiv_divisi_cabang_karyawan'),)
 
 @login_manager.user_loader
 def load_user(user_id):
