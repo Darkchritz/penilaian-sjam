@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Akses Kadiv | SJAM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body class="bg-gray-50">
+    {% include 'navbar_hrd.html' %}
+    
+    <main class="max-w-7xl mx-auto p-6">
+        <div class="mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">Kelola Akses Penilaian Kadiv</h1>
+            <p class="text-gray-500">Atur divisi mana saja yang bisa dinilai oleh tiap Kepala Divisi</p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border p-6 mb-6">
+            <h2 class="text-lg font-semibold mb-4">Tambah Akses Baru</h2>
+            <form id="formTambahAkses" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Pilih Kadiv</label>
+                    <select name="id_kadiv" class="w-full border rounded-lg px-3 py-2" required>
+                        <option value="">-- Pilih Kadiv --</option>
+                        {% for kadiv in list_kadiv %}
+                        <option value="{{ kadiv.id }}">{{ kadiv.nama }} - {{ kadiv.divisi }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Divisi Target</label>
+                    <select name="divisi_target" class="w-full border rounded-lg px-3 py-2" required>
+                        <option value="">-- Pilih Divisi --</option>
+                        {% for divisi in list_divisi %}
+                        <option value="{{ divisi }}">{{ divisi }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Cabang Target</label>
+                    <select name="cabang_target" class="w-full border rounded-lg px-3 py-2" required>
+                        <option value="">-- Pilih Cabang --</option>
+                        {% for cabang in list_cabang %}
+                        <option value="{{ cabang }}">{{ cabang }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="flex items-end">
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium">
+                        <i class="bi bi-plus-circle"></i> Tambah Akses
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Nama Kadiv</th>
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Divisi Asal</th>
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Divisi yang Bisa Dinilai</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y">
+                    {% for kadiv in list_kadiv %}
+                    <tr>
+                        <td class="px-6 py-4 font-medium text-gray-800">{{ kadiv.nama }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-600">{{ kadiv.divisi }} - {{ kadiv.cabang }}</td>
+                        <td class="px-6 py-4">
+                            <div class="flex flex-wrap gap-2" id="akses-{{ kadiv.id }}">
+                                {% if akses_per_kadiv[kadiv.id] %}
+                                    {% for akses in akses_per_kadiv[kadiv.id] %}
+                                    <span class="inline-flex items-center gap-1 bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm">
+                                        {{ akses }}
+                                        <button onclick="hapusAkses({{ kadiv.id }}, '{{ akses.split(' - ')[0] }}', '{{ akses.split(' - ')[1] }}')" 
+                                                class="hover:text-red-600">
+                                            <i class="bi bi-x-circle-fill"></i>
+                                        </button>
+                                    </span>
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="text-gray-400 text-sm">Belum ada akses</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+<script>
+$('#formTambahAkses').on('submit', function(e) {
+    e.preventDefault();
+    $.ajax({
+        url: '/hrd/tambah_akses_kadiv',
+        type: 'POST',
+        data: $(this).serialize(),
+        success: function(res) {
+            alert(res.message);
+            location.reload();
+        },
+        error: function(xhr) {
+            alert(xhr.responseJSON.message);
+        }
+    });
+});
+
+function hapusAkses(id_kadiv, divisi, cabang) {
+    if (!confirm(`Hapus akses ${divisi} - ${cabang}?`)) return;
+    
+    $.ajax({
+        url: '/hrd/hapus_akses_kadiv',
+        type: 'POST',
+        data: {id_kadiv: id_kadiv, divisi_target: divisi, cabang_target: cabang},
+        success: function(res) {
+            alert(res.message);
+            location.reload();
+        },
+        error: function(xhr) {
+            alert(xhr.responseJSON.message);
+        }
+    });
+}
+</script>
+</body>
+</html>
