@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Akses Kadiv | SJAM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap'); body { font-family: 'Poppins', sans-serif; }</style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen" x-data="{toast: false, toastMsg: ''}">
+    <nav class="bg-white/80 backdrop-blur-md shadow-sm border-b sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-2">
+                    <a href="{{ url_for('hrd') }}" class="flex items-center gap-2">
+                        <i class="bi bi-shield-check text-2xl text-indigo-600"></i>
+                        <h1 class="text-xl font-bold text-indigo-600">SJAM HRD</h1>
+                    </a>
+                </div>
+                <div class="flex items-center gap-4">
+                    <a href="{{ url_for('hrd') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                        <i class="bi bi-arrow-left"></i> Kembali ke Dashboard
+                    </a>
+                    <a href="/logout" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto p-4 sm:p-6">
+        <div class="mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">Kelola Akses Penilaian Kadiv</h2>
+            <p class="text-gray-500">Atur divisi & cabang mana yang bisa dinilai oleh tiap Kepala Divisi</p>
+        </div>
+
+        <!-- Form Tambah Akses -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+            <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <i class="bi bi-person-plus text-indigo-600"></i> Tambah Akses Baru
+            </h3>
+            <form id="formTambah" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Pilih Kadiv</label>
+                    <select id="id_kadiv" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500">
+                        <option value="">-- Pilih Kadiv --</option>
+                        {% for kadiv in list_kadiv %}
+                        <option value="{{ kadiv.id }}">{{ kadiv.nama }} - {{ kadiv.divisi }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Divisi Target</label>
+                    <select id="divisi_target" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500">
+                        <option value="">-- Pilih Divisi --</option>
+                        {% for divisi in list_divisi %}
+                        <option value="{{ divisi }}">{{ divisi }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Cabang Target</label>
+                    <select id="cabang_target" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500">
+                        <option value="">-- Pilih Cabang --</option>
+                        {% for cabang in list_cabang %}
+                        <option value="{{ cabang }}">{{ cabang }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Karyawan Spesifik</label>
+                    <select id="id_karyawan_target" class="w-full px-4 py-2 rounded-lg border border-gray-300">
+                        <option value="">-- Semua Karyawan --</option>
+                    </select>
+                </div>
+                <div class="flex items-end">
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-semibold">
+                        <i class="bi bi-plus-lg"></i> Tambah Akses
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tabel Akses Existing -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100">
+                <h3 class="font-bold text-gray-800">Daftar Akses Aktif</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Nama Kadiv</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Divisi Asal</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Akses Penilaian</th>
+                            <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        {% for kadiv in list_kadiv %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ kadiv.nama }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-700">{{ kadiv.divisi }} - {{ kadiv.cabang }}</td>
+                            <td class="px-6 py-4 text-sm">
+                                {% if akses_per_kadiv.get(kadiv.id) %}
+                                    {% for akses in akses_per_kadiv[kadiv.id] %}
+                                    <div class="flex items-center justify-between bg-indigo-50 px-3 py-1 rounded-lg mb-1">
+                                        <span class="text-indigo-700 text-xs font-medium">
+                                            {{ akses.divisi_target }} - {{ akses.cabang_target }}
+                                            {% if akses.karyawan_target %}
+                                                <span class="block text-indigo-500 font-normal">→ {{ akses.karyawan_target.nama }}</span>
+                                            {% else %}
+                                                <span class="block text-indigo-500 font-normal">→ Semua Karyawan</span>
+                                            {% endif %}
+                                        </span>
+                                        <button onclick="hapusAkses({{ kadiv.id }}, '{{ akses.divisi_target }}', '{{ akses.cabang_target }}', '{{ akses.id_karyawan_target or '' }}')"
+                                                class="text-red-500 hover:text-red-700 ml-2">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="text-gray-400 text-xs">Belum ada akses</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 text-center text-sm text-gray-400">-</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast -->
+    <div x-show="toast" x-transition class="fixed bottom-4 right-4 bg-gray-900 text-white px-6 py-3 rounded-lg shadow-lg" style="display: none;">
+        <span x-text="toastMsg"></span>
+    </div>
+
+<script>
+document.getElementById('divisi_target').addEventListener('change', loadKaryawan)
+document.getElementById('cabang_target').addEventListener('change', loadKaryawan)
+
+async function loadKaryawan() {
+    const divisi = document.getElementById('divisi_target').value
+    const cabang = document.getElementById('cabang_target').value
+    const selectKaryawan = document.getElementById('id_karyawan_target')
+    
+    selectKaryawan.innerHTML = '<option value="">-- Semua Karyawan --</option>'
+    
+    if(!divisi || !cabang) return
+    
+    const res = await fetch(`/api/karyawan?divisi=${divisi}&cabang=${cabang}`)
+    const data = await res.json()
+    
+    data.forEach(k => {
+        selectKaryawan.innerHTML += `<option value="${k.id}">${k.nama} - ${k.npk}</option>`
+    })
+}
+
+function showToast(msg) {
+    const el = document.querySelector('[x-data]').__x.$data
+    el.toast = true
+    el.toastMsg = msg
+    setTimeout(() => el.toast = false, 3000)
+}
+
+document.getElementById('formTambah').addEventListener('submit', async (e) => {
+    e.preventDefault()
+    const formData = new FormData()
+    formData.append('id_kadiv', document.getElementById('id_kadiv').value)
+    formData.append('divisi_target', document.getElementById('divisi_target').value)
+    formData.append('cabang_target', document.getElementById('cabang_target').value)
+    formData.append('id_karyawan_target', document.getElementById('id_karyawan_target').value)
+
+    const res = await fetch('/hrd/tambah_akses_kadiv', {method: 'POST', body: formData})
+    const data = await res.json()
+
+    if(data.status === 'success') {
+        showToast(data.message)
+        setTimeout(() => location.reload(), 1000)
+    } else {
+        showToast(data.message)
+    }
+})
+
+async function hapusAkses(id_kadiv, divisi, cabang, id_karyawan_target) {
+    if(!confirm(`Hapus akses ${divisi} - ${cabang}?`)) return
+
+    const formData = new FormData()
+    formData.append('id_kadiv', id_kadiv)
+    formData.append('divisi_target', divisi)
+    formData.append('cabang_target', cabang)
+    formData.append('id_karyawan_target', id_karyawan_target)
+
+    const res = await fetch('/hrd/hapus_akses_kadiv', {method: 'POST', body: formData})
+    const data = await res.json()
+
+    showToast(data.message)
+    if(data.status === 'success') {
+        setTimeout(() => location.reload(), 1000)
+    }
+}
+</script>
+</body>
+</html>
