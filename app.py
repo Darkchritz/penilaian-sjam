@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+from flask import ..., jsonify
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'sjam-penilaian-secret-2026')
@@ -276,6 +277,17 @@ def kelola_akses_kadiv():
                          list_divisi=[d[0] for d in list_divisi],
                          list_cabang=[c[0] for c in list_cabang],
                          akses_per_kadiv=akses_per_kadiv)
+    
+@app.route('/api/karyawan')
+@login_required
+def api_karyawan():
+    divisi = request.args.get('divisi')
+    cabang = request.args.get('cabang')
+    if current_user.role.lower() != 'hrd':
+        return jsonify([])
+    
+    karyawan = Karyawan.query.filter_by(divisi=divisi, cabang=cabang, role='karyawan').all()
+    return jsonify([{'id': k.id, 'nama': k.nama, 'npk': k.npk} for k in karyawan])
 
 @app.route('/hrd/tambah_akses_kadiv', methods=['POST'])
 @login_required
