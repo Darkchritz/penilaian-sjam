@@ -42,7 +42,7 @@
             <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
                 <i class="bi bi-person-plus text-indigo-600"></i> Tambah Akses Baru
             </h3>
-            <form id="formTambah" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <form id="formTambah" class="grid grid-cols-1 md:grid-cols-5 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Pilih Kadiv</label>
                     <select id="id_kadiv" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500">
@@ -70,13 +70,39 @@
                         {% endfor %}
                     </select>
                 </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Karyawan Spesifik</label>
+                    <select id="id_karyawan_target" class="w-full px-4 py-2 rounded-lg border border-gray-300">
+                        <option value="">-- Semua Karyawan --</option>
+                    </select>
+                </div>
                 <div class="flex items-end">
                     <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-semibold">
                         <i class="bi bi-plus-lg"></i> Tambah Akses
                     </button>
                 </div>
             </form>
-        </div>
+        <script>
+document.getElementById('divisi_target').addEventListener('change', loadKaryawan)
+document.getElementById('cabang_target').addEventListener('change', loadKaryawan)
+
+async function loadKaryawan() {
+    const divisi = document.getElementById('divisi_target').value
+    const cabang = document.getElementById('cabang_target').value
+    const selectKaryawan = document.getElementById('id_karyawan_target')
+    
+    selectKaryawan.innerHTML = '<option value="">-- Semua Karyawan --</option>'
+    
+    if(!divisi || !cabang) return
+    
+    const res = await fetch(`/api/karyawan?divisi=${divisi}&cabang=${cabang}`)
+    const data = await res.json()
+    
+    data.forEach(k => {
+        selectKaryawan.innerHTML += `<option value="${k.id}">${k.nama} - ${k.npk}</option>`
+    })
+}
+</script>
 
         <!-- Tabel Akses Existing -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
