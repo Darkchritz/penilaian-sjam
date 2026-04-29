@@ -368,7 +368,7 @@ def kadiv():
             filter_or = []
             for a in akses:
                 if a.id_karyawan_target:
-                filter_or.append(Karyawan.id == a.id_karyawan_target)
+                filter_or.append(Karyawan.id == a.id_karyawan_target)    
             else:
                 filter_or.append(db.and_(Karyawan.divisi == a.divisi_target, Karyawan.cabang == a.cabang_target))
             
