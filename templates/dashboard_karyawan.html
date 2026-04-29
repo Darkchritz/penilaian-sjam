@@ -51,7 +51,7 @@
         <p class="text-sm text-gray-400">{{ user.divisi }} | {{ user.cabang }}</p>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
         {% for q, hasil, periode_text in [
             ('Q1', hasil_q1, 'Januari - Maret'),
             ('Q2', hasil_q2, 'April - Juni'),
