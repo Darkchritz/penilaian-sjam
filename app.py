@@ -254,29 +254,54 @@ def hrd():
                          sort_by=sort_by,
                          order=order)
 
-@app.route('/hrd/kelola_akses_kadiv')
+@app.route('/hrd/kelola_akses_kadiv', methods=['GET', 'POST'])
 @login_required
 def kelola_akses_kadiv():
-    if current_user.role.lower()!= 'hrd':
-        flash('Akses ditolak', 'danger')
-        return redirect(url_for('index'))
-    
-    list_kadiv = Karyawan.query.filter(Karyawan.role.in_(['kepala divisi', 'kadiv', 'super kadiv'])).order_by(Karyawan.nama).all()
-    list_divisi = db.session.query(Karyawan.divisi).distinct().all()
-    list_cabang = db.session.query(Karyawan.cabang).distinct().all()
+    if current_user.role!= 'hrd':
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        id_kadiv = request.form.get('id_kadiv')
+        divisi_target = request.form.get('divisi_target')
+        cabang_target = request.form.get('cabang_target')
+        id_karyawan_target = request.form.get('id_karyawan_target') or None # None kalo kosong
+
+        # Cek duplikat
+        existing = AksesPenilaian.query.filter_by(
+            id_kadiv=id_kadiv,
+            divisi_target=divisi_target,
+            cabang_target=cabang_target,
+            id_karyawan_target=id_karyawan_target,
+            is_active=True
+        ).first()
+
+        if not existing:
+            akses_baru = AksesPenilaian(
+                id_kadiv=id_kadiv,
+                divisi_target=divisi_target,
+                cabang_target=cabang_target,
+                id_karyawan_target=id_karyawan_target,
+                assigned_by=current_user.id
+            )
+            db.session.add(akses_baru)
+            db.session.commit()
+            flash('Akses berhasil ditambahkan', 'success')
+        else:
+            flash('Akses sudah ada', 'warning')
+        return redirect(url_for('kelola_akses_kadiv'))
+
+    semua_kadiv = Karyawan.query.filter_by(role='kadiv').all()
+    semua_divisi = db.session.query(Karyawan.divisi).distinct().all()
+    semua_cabang = db.session.query(Karyawan.cabang).distinct().all()
+    semua_karyawan = Karyawan.query.filter_by(role='karyawan').all()
     semua_akses = AksesPenilaian.query.filter_by(is_active=True).all()
-    
-    akses_per_kadiv = {}
-    for akses in semua_akses:
-        if akses.id_kadiv not in akses_per_kadiv:
-            akses_per_kadiv[akses.id_kadiv] = []
-        akses_per_kadiv[akses.id_kadiv].append(f"{akses.divisi_target} - {akses.cabang_target}")
-    
-    return render_template('hrd_kelola_akses.html', 
-                         list_kadiv=list_kadiv,
-                         list_divisi=[d[0] for d in list_divisi],
-                         list_cabang=[c[0] for c in list_cabang],
-                         akses_per_kadiv=akses_per_kadiv)
+
+    return render_template('kelola_akses_kadiv.html',
+                           semua_kadiv=semua_kadiv,
+                           semua_divisi=[d[0] for d in semua_divisi],
+                           semua_cabang=[c[0] for c in semua_cabang],
+                           semua_karyawan=semua_karyawan,
+                           semua_akses=semua_akses)
     
 @app.route('/api/karyawan')
 @login_required
