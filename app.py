@@ -102,15 +102,15 @@ class Penilaian(db.Model):
 class AksesPenilaian(db.Model):
     __tablename__ = 'akses_penilaian'
     id = db.Column(db.Integer, primary_key=True)
-    id_kadiv = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    id_kadiv = db.Column(db.Integer, db.ForeignKey('karyawan.id'), nullable=False)
     divisi_target = db.Column(db.String(50), nullable=False)
     cabang_target = db.Column(db.String(50), nullable=False)
-    assigned_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    assigned_by = db.Column(db.Integer, db.ForeignKey('karyawan.id'), nullable=False)
     tanggal_assign = db.Column(db.DateTime, default=datetime.utcnow)
     is_active = db.Column(db.Boolean, default=True)
     
-    kadiv = db.relationship('User', foreign_keys=[id_kadiv], backref='akses_diberikan')
-    admin_hrd = db.relationship('User', foreign_keys=[assigned_by])
+    kadiv = db.relationship('Karyawan', foreign_keys=[id_kadiv], backref='akses_diberikan')
+    admin_hrd = db.relationship('Karyawan', foreign_keys=[assigned_by])
 
     __table_args__ = (db.UniqueConstraint('id_kadiv', 'divisi_target', 'cabang_target', name='uq_kadiv_divisi_cabang'),)
 
