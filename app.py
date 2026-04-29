@@ -356,11 +356,11 @@ def kadiv():
     tahun_ini = datetime.now().year
     
     ### CEK AKSES DARI TABEL AKSES_PENILAIAN
-    if current_user.role.lower().strip() == 'super kadiv':
+        if current_user.role.lower().strip() == 'super kadiv':
         karyawan_divisi = Karyawan.query.filter(
             Karyawan.role == 'karyawan'
         ).all()
-        else:
+    else:
         akses = AksesPenilaian.query.filter_by(id_kadiv=current_user.id, is_active=True).all()
         if not akses:
             karyawan_divisi = []
