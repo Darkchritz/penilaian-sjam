@@ -188,14 +188,14 @@ document.getElementById('formTambah').addEventListener('submit', async (e) => {
     }
 })
 
-async function hapusAkses(id_kadiv, divisi, cabang) {
+async function hapusAkses(id_kadiv, divisi, cabang, id_karyawan_target) { // <-- TAMBAH parameter ke-4
     if(!confirm(`Hapus akses ${divisi} - ${cabang}?`)) return
 
     const formData = new FormData()
     formData.append('id_kadiv', id_kadiv)
     formData.append('divisi_target', divisi)
     formData.append('cabang_target', cabang)
-    formData.append('id_karyawan_target', id_karyawan_target)
+    formData.append('id_karyawan_target', id_karyawan_target) // <-- sekarang udah ke-define
 
     const res = await fetch('/hrd/hapus_akses_kadiv', {method: 'POST', body: formData})
     const data = await res.json()
