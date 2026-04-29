@@ -360,11 +360,11 @@ def kadiv():
         karyawan_divisi = Karyawan.query.filter(
             Karyawan.role == 'karyawan'
         ).all()
-    else:
+        else:
         akses = AksesPenilaian.query.filter_by(id_kadiv=current_user.id, is_active=True).all()
         if not akses:
             karyawan_divisi = []
-                else:
+        else:
             filter_or = []
             for a in akses:
                 if a.id_karyawan_target:
