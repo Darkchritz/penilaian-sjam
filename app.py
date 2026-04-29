@@ -298,11 +298,13 @@ def tambah_akses_kadiv():
     id_kadiv = request.form.get('id_kadiv')
     divisi_target = request.form.get('divisi_target')
     cabang_target = request.form.get('cabang_target')
+    id_karyawan = request.form.get('id_karyawan_target')
     
     existing = AksesPenilaian.query.filter_by(
         id_kadiv=id_kadiv, 
         divisi_target=divisi_target, 
         cabang_target=cabang_target,
+        id_karyawan_target=id_karyawan if id_karyawan else None,
         is_active=True
     ).first()
     
@@ -313,6 +315,7 @@ def tambah_akses_kadiv():
         id_kadiv=id_kadiv,
         divisi_target=divisi_target,
         cabang_target=cabang_target,
+        id_karyawan_target=id_karyawan if id_karyawan else None,
         assigned_by=current_user.id
     )
     db.session.add(akses_baru)
@@ -365,6 +368,9 @@ def kadiv():
         else:
             filter_or = []
             for a in akses:
+                if a.id_karyawan_target:
+                filter_or.append(Karyawan.id == a.id_karyawan_target)
+            else:
                 filter_or.append(db.and_(Karyawan.divisi == a.divisi_target, Karyawan.cabang == a.cabang_target))
             
             karyawan_divisi = Karyawan.query.filter(
