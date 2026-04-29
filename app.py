@@ -307,6 +307,7 @@ def dashboard_karyawan():
                          hasil_q2=hasil_q2,
                          hasil_q3=hasil_q3,
                          hasil_q4=hasil_q4,
+                         hasil_list=hasil_list,  # <-- TAMBAH INI
                          nilai_total=nilai_total,
                          grade_total=grade_total,
                          tahun=tahun_ini)
