@@ -279,10 +279,25 @@ def kadiv():
 @app.route('/dashboard_karyawan')
 @login_required
 def dashboard_karyawan():
+    if current_user.role.lower() != 'karyawan':
+        return redirect(url_for('index'))
+    
     user = current_user
     tahun_ini = datetime.now().year
-    hasil = Penilaian.query.filter_by(id_karyawan=user.id, status='final', tahun=tahun_ini).order_by(Penilaian.updated_at.desc()).first()
-    return render_template('dashboard_karyawan.html', user=user, hasil=hasil)
+    
+    # Ambil semua penilaian Q1-Q4 tahun ini
+    hasil_q1 = Penilaian.query.filter_by(id_karyawan=user.id, status='final', tahun=tahun_ini, periode='Q1').first()
+    hasil_q2 = Penilaian.query.filter_by(id_karyawan=user.id, status='final', tahun=tahun_ini, periode='Q2').first()
+    hasil_q3 = Penilaian.query.filter_by(id_karyawan=user.id, status='final', tahun=tahun_ini, periode='Q3').first()
+    hasil_q4 = Penilaian.query.filter_by(id_karyawan=user.id, status='final', tahun=tahun_ini, periode='Q4').first()
+    
+    return render_template('dashboard_karyawan.html', 
+                         user=user, 
+                         hasil_q1=hasil_q1,
+                         hasil_q2=hasil_q2,
+                         hasil_q3=hasil_q3,
+                         hasil_q4=hasil_q4,
+                         tahun=tahun_ini)
 
 @app.route('/nilai/<int:id>', methods=['GET', 'POST'])
 @login_required
