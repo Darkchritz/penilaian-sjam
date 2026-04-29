@@ -125,20 +125,27 @@ async function loadKaryawan() {
                             <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ kadiv.nama }}</td>
                             <td class="px-6 py-4 text-sm text-gray-700">{{ kadiv.divisi }} - {{ kadiv.cabang }}</td>
                             <td class="px-6 py-4 text-sm">
-                                {% if akses_per_kadiv.get(kadiv.id) %}
-                                    {% for akses in akses_per_kadiv[kadiv.id] %}
-                                    <div class="flex items-center justify-between bg-indigo-50 px-3 py-1 rounded-lg mb-1">
-                                        <span class="text-indigo-700 text-xs font-medium">{{ akses }}</span>
-                                        <button onclick="hapusAkses({{ kadiv.id }}, '{{ akses.split(' - ')[0] }}', '{{ akses.split(' - ')[1] }}')"
-                                                class="text-red-500 hover:text-red-700 ml-2">
-                                            <i class="bi bi-x-lg"></i>
-                                        </button>
-                                    </div>
-                                    {% endfor %}
-                                {% else %}
-                                    <span class="text-gray-400 text-xs">Belum ada akses</span>
-                                {% endif %}
-                            </td>
+    {% if akses_per_kadiv.get(kadiv.id) %}
+        {% for akses in akses_per_kadiv[kadiv.id] %}
+        <div class="flex items-center justify-between bg-indigo-50 px-3 py-1 rounded-lg mb-1">
+            <span class="text-indigo-700 text-xs font-medium">
+                {{ akses.divisi_target }} - {{ akses.cabang_target }}
+                {% if akses.karyawan_target %}
+                    <span class="block text-indigo-500 font-normal">→ {{ akses.karyawan_target.nama }}</span>
+                {% else %}
+                    <span class="block text-indigo-500 font-normal">→ Semua Karyawan</span>
+                {% endif %}
+            </span>
+            <button onclick="hapusAkses({{ kadiv.id }}, '{{ akses.divisi_target }}', '{{ akses.cabang_target }}', '{{ akses.id_karyawan_target or '' }}')"
+                    class="text-red-500 hover:text-red-700 ml-2">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        {% endfor %}
+    {% else %}
+        <span class="text-gray-400 text-xs">Belum ada akses</span>
+    {% endif %}
+</td>
                             <td class="px-6 py-4 text-center text-sm text-gray-400">-</td>
                         </tr>
                         {% endfor %}
@@ -168,6 +175,7 @@ document.getElementById('formTambah').addEventListener('submit', async (e) => {
     formData.append('id_kadiv', document.getElementById('id_kadiv').value)
     formData.append('divisi_target', document.getElementById('divisi_target').value)
     formData.append('cabang_target', document.getElementById('cabang_target').value)
+    formData.append('id_karyawan_target', document.getElementById('id_karyawan_target').value)
 
     const res = await fetch('/hrd/tambah_akses_kadiv', {method: 'POST', body: formData})
     const data = await res.json()
