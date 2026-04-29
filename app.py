@@ -346,7 +346,6 @@ def hapus_akses_kadiv():
     
     return jsonify({'status': 'error', 'message': 'Akses tidak ditemukan'}), 404
 
-### EDIT - UPDATE ROUTE KADIV
 @app.route('/kadiv')
 @login_required
 def kadiv():
@@ -355,8 +354,7 @@ def kadiv():
 
     tahun_ini = datetime.now().year
     
-    ### CEK AKSES DARI TABEL AKSES_PENILAIAN
-        if current_user.role.lower().strip() == 'super kadiv':
+    if current_user.role.lower().strip() == 'super kadiv':
         karyawan_divisi = Karyawan.query.filter(
             Karyawan.role == 'karyawan'
         ).all()
@@ -376,7 +374,6 @@ def kadiv():
                 Karyawan.role=='karyawan', 
                 db.or_(*filter_or)
             ).all()
-    ### END CEK AKSES
 
     belum_dinilai = []
     sudah_dinilai = []
