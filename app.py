@@ -291,12 +291,24 @@ def dashboard_karyawan():
     hasil_q3 = Penilaian.query.filter_by(id_karyawan=user.id, status='final', tahun=tahun_ini, periode='Q3').first()
     hasil_q4 = Penilaian.query.filter_by(id_karyawan=user.id, status='final', tahun=tahun_ini, periode='Q4').first()
     
+    # Hitung total grade tahunan
+    hasil_list = [h for h in [hasil_q1, hasil_q2, hasil_q3, hasil_q4] if h]
+    if hasil_list:
+        total_nilai = sum([h.nilai_akhir for h in hasil_list])
+        nilai_total = round(total_nilai / len(hasil_list), 2)
+        grade_total = hitung_grade(nilai_total)
+    else:
+        nilai_total = None
+        grade_total = None
+    
     return render_template('dashboard_karyawan.html', 
                          user=user, 
                          hasil_q1=hasil_q1,
                          hasil_q2=hasil_q2,
                          hasil_q3=hasil_q3,
                          hasil_q4=hasil_q4,
+                         nilai_total=nilai_total,
+                         grade_total=grade_total,
                          tahun=tahun_ini)
 
 @app.route('/nilai/<int:id>', methods=['GET', 'POST'])
