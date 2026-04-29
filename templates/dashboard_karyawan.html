@@ -119,6 +119,7 @@
             <p class="text-7xl font-bold {{ color }}">{{ "%.0f"|format(hasil.nilai_akhir) }}%</p>
             <p class="text-3xl font-bold text-gray-700 mt-2">Grade {{ hasil.grade }}</p>
         </div>
+    </div>
     <p class="text-sm text-gray-500">
         <i class="bi bi-clock-history"></i> Terakhir diperbarui: {{ hasil.updated_at.strftime('%d %B %Y') if hasil.updated_at else '-' }}
     </p>
