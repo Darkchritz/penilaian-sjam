@@ -114,16 +114,15 @@
         </div>
         
         <div class="p-10 text-center">
-            <div class="inline-flex items-center justify-center w-40 h-40 rounded-full {{ bg_color }} border-4 {{ border_color }} mb-6">
-                <div>
-                    <p class="text-6xl font-bold {{ color }}">{{ "%.0f"|format(hasil.nilai_akhir) }}%</p>
-                    <p class="text-2xl font-bold text-gray-700 mt-1">Grade {{ hasil.grade }}</p>
-                </div>
-            <p class="text-xs text-gray-500">
-                <i class="bi bi-clock-history"></i> Terakhir diperbarui: {{ hasil.updated_at.strftime('%d %B %Y') if hasil.updated_at else '-' }}
-            </p>
+    <div class="inline-flex items-center justify-center w-48 h-48 rounded-full {{ bg_color }} border-4 {{ border_color }} mb-4">
+        <div>
+            <p class="text-7xl font-bold {{ color }}">{{ "%.0f"|format(hasil.nilai_akhir) }}%</p>
+            <p class="text-3xl font-bold text-gray-700 mt-2">Grade {{ hasil.grade }}</p>
         </div>
-    </div>
+    <p class="text-sm text-gray-500">
+        <i class="bi bi-clock-history"></i> Terakhir diperbarui: {{ hasil.updated_at.strftime('%d %B %Y') if hasil.updated_at else '-' }}
+    </p>
+</div>
     {% else %}
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center max-w-lg mx-auto">
         <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
