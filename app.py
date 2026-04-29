@@ -258,17 +258,11 @@ def kelola_akses_kadiv():
         flash('Akses ditolak', 'danger')
         return redirect(url_for('index'))
     
-    # Ambil semua kadiv
-    list_kadiv = User.query.filter(User.role.in_(['Kepala Divisi', 'Super Kadiv'])).order_by(User.nama).all()
-    
-    # Ambil semua divisi & cabang unik dari tabel user
-    list_divisi = db.session.query(User.divisi).distinct().all()
-    list_cabang = db.session.query(User.cabang).distinct().all()
-    
-    # Ambil data akses yang udah ada
+    list_kadiv = Karyawan.query.filter(Karyawan.role.in_(['kepala divisi', 'kadiv', 'super kadiv'])).order_by(Karyawan.nama).all()
+    list_divisi = db.session.query(Karyawan.divisi).distinct().all()
+    list_cabang = db.session.query(Karyawan.cabang).distinct().all()
     semua_akses = AksesPenilaian.query.filter_by(is_active=True).all()
     
-    # Grouping akses per kadiv biar gampang di template
     akses_per_kadiv = {}
     for akses in semua_akses:
         if akses.id_kadiv not in akses_per_kadiv:
@@ -291,7 +285,6 @@ def tambah_akses_kadiv():
     divisi_target = request.form.get('divisi_target')
     cabang_target = request.form.get('cabang_target')
     
-    # Cek udah ada belum
     existing = AksesPenilaian.query.filter_by(
         id_kadiv=id_kadiv, 
         divisi_target=divisi_target, 
@@ -331,42 +324,55 @@ def hapus_akses_kadiv():
     ).first()
     
     if akses:
-        akses.is_active = False # Soft delete biar ada audit trail
+        akses.is_active = False
         db.session.commit()
         return jsonify({'status': 'success', 'message': 'Akses berhasil dihapus'})
     
     return jsonify({'status': 'error', 'message': 'Akses tidak ditemukan'}), 404
 
+### EDIT - UPDATE ROUTE KADIV
 @app.route('/kadiv')
 @login_required
 def kadiv():
-    if current_user.role.lower().strip() not in ['kadiv', 'kepala divisi']:
+    if current_user.role.lower().strip() not in ['kadiv', 'kepala divisi', 'super kadiv']:
         return redirect(url_for('index'))
 
     tahun_ini = datetime.now().year
     
-    karyawan_divisi = Karyawan.query.filter(
-        Karyawan.divisi == current_user.divisi,
-        Karyawan.npk != current_user.npk
-    ).all()
+    ### CEK AKSES DARI TABEL AKSES_PENILAIAN
+    if current_user.role.lower().strip() == 'super kadiv':
+        karyawan_divisi = Karyawan.query.filter(
+            Karyawan.role == 'karyawan'
+        ).all()
+    else:
+        akses = AksesPenilaian.query.filter_by(id_kadiv=current_user.id, is_active=True).all()
+        if not akses:
+            karyawan_divisi = []
+        else:
+            filter_or = []
+            for a in akses:
+                filter_or.append(db.and_(Karyawan.divisi == a.divisi_target, Karyawan.cabang == a.cabang_target))
+            
+            karyawan_divisi = Karyawan.query.filter(
+                Karyawan.role=='karyawan', 
+                db.or_(*filter_or)
+            ).all()
+    ### END CEK AKSES
 
     belum_dinilai = []
     sudah_dinilai = []
 
     for k in karyawan_divisi:
-        # Ambil nilai Q1 terbaru, mau draft atau final
         nilai = Penilaian.query.filter_by(
             id_karyawan=k.id,
             periode='Q1',
             tahun=tahun_ini
         ).first()
 
-        # Buat ditampilin di tabel dashboard
         k.nilai_akhir = nilai.nilai_akhir if nilai else 0
         k.grade = nilai.grade if nilai else '-'
         k.status_nilai = nilai.status if nilai else None
 
-        # Pisahin yg udah final vs belum
         if nilai and nilai.status == 'final':
             sudah_dinilai.append(k)
         else:
@@ -416,11 +422,22 @@ def dashboard_karyawan():
 @app.route('/nilai/<int:id>', methods=['GET', 'POST'])
 @login_required
 def nilai(id):
-    if current_user.role.lower() not in ['kadiv', 'hrd']:
+    if current_user.role.lower() not in ['kadiv', 'kepala divisi', 'hrd', 'super kadiv']:
         flash('Akses ditolak', 'danger')
         return redirect(url_for('index'))
     
     karyawan = Karyawan.query.get_or_404(id)
+    if current_user.role.lower().strip() in ['kadiv', 'kepala divisi']:
+        punya_akses = AksesPenilaian.query.filter_by(
+            id_kadiv=current_user.id,
+            divisi_target=karyawan.divisi,
+            cabang_target=karyawan.cabang,
+            is_active=True
+        ).first()
+        
+        if not punya_akses:
+            flash(f'Anda tidak memiliki akses untuk menilai {karyawan.nama}', 'danger')
+            return redirect(url_for('kadiv'))
     periode = request.args.get('periode', request.form.get('periode', 'Q1'))
     tahun = int(request.args.get('tahun', request.form.get('tahun', datetime.now().year)))
     
