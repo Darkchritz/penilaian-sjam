@@ -293,10 +293,12 @@ def kelola_akses_kadiv():
     list_kadiv = Karyawan.query.filter_by(role='kadiv').all()
 
     list_divisi = db.session.query(Karyawan.divisi).distinct().all()
-    list_divisi = [d[0] for d in list_divisi if d[0]]
+    list_divisi = [d[0] if d[0] else '-' for d in list_divisi]
+    list_divisi = sorted(list(set(list_divisi)))
 
     list_cabang = db.session.query(Karyawan.cabang).distinct().all()
-    list_cabang = [c[0] for c in list_cabang if c[0]]
+    list_cabang = [c[0] if c[0] else '-' for c in list_cabang]
+    list_cabang = sorted(list(set(list_cabang)))
 
     akses_per_kadiv = {}
     for kadiv in list_kadiv:
