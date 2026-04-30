@@ -290,7 +290,7 @@ def kelola_akses_kadiv():
         return redirect(url_for('kelola_akses_kadiv'))
 
     # GET
-    list_kadiv = Karyawan.query.filter_by(jabatan='Kepala Divisi').all()
+    list_kadiv = Karyawan.query.filter_by(role='kadiv').all()
 
     list_divisi = db.session.query(Karyawan.divisi).distinct().all()
     list_divisi = [d[0] for d in list_divisi if d[0]]
