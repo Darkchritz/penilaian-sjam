@@ -300,6 +300,8 @@ def kelola_akses_kadiv():
     list_cabang = [c[0] if c[0] else '-' for c in list_cabang]
     list_cabang = sorted(list(set(list_cabang)))
 
+    list_karyawan = Karyawan.query.filter_by(is_active=True).order_by(Karyawan.nama).all()
+
     akses_per_kadiv = {}
     for kadiv in list_kadiv:
         akses_per_kadiv[kadiv.id] = AksesPenilaian.query.filter_by(
@@ -311,6 +313,7 @@ def kelola_akses_kadiv():
                            list_kadiv=list_kadiv,
                            list_divisi=list_divisi,
                            list_cabang=list_cabang,
+                           list_karyawan=list_karyawan,
                            akses_per_kadiv=akses_per_kadiv)
     
 @app.route('/api/karyawan')
