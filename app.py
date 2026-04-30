@@ -301,7 +301,7 @@ def kelola_akses_kadiv():
     list_cabang = sorted(list(set(list_cabang)))
 
     list_karyawan = Karyawan.query.filter_by(is_active=True).order_by(Karyawan.nama).all()
-
+    
     akses_per_kadiv = {}
     for kadiv in list_kadiv:
         akses_per_kadiv[kadiv.id] = AksesPenilaian.query.filter_by(
