@@ -45,7 +45,7 @@
             <form id="formTambah" class="grid grid-cols-1 md:grid-cols-5 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Pilih Kadiv</label>
-                    <select id="id_kadiv" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500">
+                    <select name="id_kadiv" id="id_kadiv" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500">
                         <option value="">-- Pilih Kadiv --</option>
                         {% for kadiv in list_kadiv %}
                         <option value="{{ kadiv.id }}">{{ kadiv.nama }} - {{ kadiv.divisi }}</option>
@@ -54,7 +54,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Divisi Target</label>
-                    <select id="divisi_target" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500">
+                    <select name="divisi_target" id="divisi_target" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500">
                         <option value="">-- Pilih Divisi --</option>
                         {% for divisi in list_divisi %}
                         <option value="{{ divisi }}">{{ divisi }}</option>
@@ -63,7 +63,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Cabang Target</label>
-                    <select id="cabang_target" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500">
+                    <select name="cabang_target" id="cabang_target" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500">
                         <option value="">-- Pilih Cabang --</option>
                         {% for cabang in list_cabang %}
                         <option value="{{ cabang }}">{{ cabang }}</option>
@@ -72,8 +72,13 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Karyawan Spesifik</label>
-                    <select id="id_karyawan_target" class="w-full px-4 py-2 rounded-lg border border-gray-300">
+                    <select name="id_karyawan_target" id="id_karyawan_target" class="w-full px-4 py-2 rounded-lg border border-gray-300">
                         <option value="">-- Semua Karyawan --</option>
+                        {% for k in list_karyawan %}
+                        <option value="{{ k.id }}" data-divisi="{{ k.divisi or '-' }}" data-cabang="{{ k.cabang or '-' }}">
+                        {{ k.nama }} - {{ k.nik }} [{{ k.role|upper }}]
+                        </option>
+                        {% endfor %}
                     </select>
                 </div>
                 <div class="flex items-end">
@@ -82,27 +87,29 @@
                     </button>
                 </div>
             </form>
+        </div>
         <script>
-document.getElementById('divisi_target').addEventListener('change', loadKaryawan)
-document.getElementById('cabang_target').addEventListener('change', loadKaryawan)
+        document.getElementById('divisi_target').addEventListener('change', filterKaryawan)
+        document.getElementById('cabang_target').addEventListener('change', filterKaryawan)
 
-async function loadKaryawan() {
-    const divisi = document.getElementById('divisi_target').value
-    const cabang = document.getElementById('cabang_target').value
-    const selectKaryawan = document.getElementById('id_karyawan_target')
-    
-    selectKaryawan.innerHTML = '<option value="">-- Semua Karyawan --</option>'
-    
-    if(!divisi || !cabang) return
-    
-    const res = await fetch(`/api/karyawan?divisi=${divisi}&cabang=${cabang}`)
-    const data = await res.json()
-    
-    data.forEach(k => {
-        selectKaryawan.innerHTML += `<option value="${k.id}">${k.nama} - ${k.npk}</option>`
-    })
-}
-</script>
+            function filterKaryawan() {
+            const divisi = document.getElementById('divisi_target').value
+            const cabang = document.getElementById('cabang_target').value
+            const selectKaryawan = document.getElementById('id_karyawan_target')
+            const options = selectKaryawan.querySelectorAll('option')
+            
+            options.forEach(opt => {
+                if(opt.value === '') {
+                    opt.style.display = 'block'
+                    return
+                }
+                const matchDivisi = !divisi || opt.dataset.divisi === divisi
+                const matchCabang = !cabang || opt.dataset.cabang === cabang
+                opt.style.display = (matchDivisi && matchCabang) ? 'block' : 'none'
+            })
+            selectKaryawan.value = ''
+        }
+        </script>
 
         <!-- Tabel Akses Existing -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
