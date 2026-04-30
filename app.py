@@ -264,9 +264,8 @@ def kelola_akses_kadiv():
         id_kadiv = request.form.get('id_kadiv')
         divisi_target = request.form.get('divisi_target')
         cabang_target = request.form.get('cabang_target')
-        id_karyawan_target = request.form.get('id_karyawan_target') or None # None kalo kosong
+        id_karyawan_target = request.form.get('id_karyawan_target') or None
 
-        # Cek duplikat
         existing = AksesPenilaian.query.filter_by(
             id_kadiv=id_kadiv,
             divisi_target=divisi_target,
@@ -290,13 +289,15 @@ def kelola_akses_kadiv():
             flash('Akses sudah ada', 'warning')
         return redirect(url_for('kelola_akses_kadiv'))
 
-    list_kadiv = Karyawan.query.filter_by(role='kadiv').all()
+    # GET
+    list_kadiv = Karyawan.query.filter_by(role='kadiv', is_active=True).all()
+
     list_divisi = db.session.query(Karyawan.divisi).distinct().all()
     list_divisi = [d[0] for d in list_divisi if d[0]]
+
     list_cabang = db.session.query(Karyawan.cabang).distinct().all()
     list_cabang = [c[0] for c in list_cabang if c[0]]
 
-        # Buat mapping akses per kadiv biar tabel jalan
     akses_per_kadiv = {}
     for kadiv in list_kadiv:
         akses_per_kadiv[kadiv.id] = AksesPenilaian.query.filter_by(
@@ -305,11 +306,10 @@ def kelola_akses_kadiv():
         ).all()
 
     return render_template('hrd_kelola_akses.html',
-                           semua_kadiv=semua_kadiv,
-                           semua_divisi=[d[0] for d in semua_divisi],
-                           semua_cabang=[c[0] for c in semua_cabang],
-                           semua_karyawan=semua_karyawan,
-                           semua_akses=semua_akses)
+                           list_kadiv=list_kadiv,
+                           list_divisi=list_divisi,
+                           list_cabang=list_cabang,
+                           akses_per_kadiv=akses_per_kadiv)
     
 @app.route('/api/karyawan')
 @login_required
