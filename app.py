@@ -290,11 +290,19 @@ def kelola_akses_kadiv():
             flash('Akses sudah ada', 'warning')
         return redirect(url_for('kelola_akses_kadiv'))
 
-    semua_kadiv = Karyawan.query.filter_by(role='kadiv').all()
-    semua_divisi = db.session.query(Karyawan.divisi).distinct().all()
-    semua_cabang = db.session.query(Karyawan.cabang).distinct().all()
-    semua_karyawan = Karyawan.query.filter_by(role='karyawan').all()
-    semua_akses = AksesPenilaian.query.filter_by(is_active=True).all()
+    list_kadiv = Karyawan.query.filter_by(role='kadiv').all()
+    list_divisi = db.session.query(Karyawan.divisi).distinct().all()
+    list_divisi = [d[0] for d in list_divisi if d[0]]
+    list_cabang = db.session.query(Karyawan.cabang).distinct().all()
+    list_cabang = [c[0] for c in list_cabang if c[0]]
+
+        # Buat mapping akses per kadiv biar tabel jalan
+    akses_per_kadiv = {}
+    for kadiv in list_kadiv:
+        akses_per_kadiv[kadiv.id] = AksesPenilaian.query.filter_by(
+            id_kadiv=kadiv.id,
+            is_active=True
+        ).all()
 
     return render_template('hrd_kelola_akses.html',
                            semua_kadiv=semua_kadiv,
