@@ -74,6 +74,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">Karyawan Spesifik</label>
                     <select name="id_karyawan_target" id="id_karyawan_target" class="w-full px-4 py-2 rounded-lg border border-gray-300">
                         <option value="">-- Semua Karyawan --</option>
+                        <!-- UBAH INI: LOOP list_karyawan -->
                         {% for k in list_karyawan %}
                         <option value="{{ k.id }}" data-divisi="{{ k.divisi or '-' }}" data-cabang="{{ k.cabang or '-' }}">
                         {{ k.nama }} - {{ k.nik }} [{{ k.role|upper }}]
