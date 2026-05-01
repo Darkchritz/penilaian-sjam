@@ -425,7 +425,7 @@ def kadiv():
         print(f"Super Kadiv: Total karyawan = {len(karyawan_divisi)}")
     else:
         # Cek apakah Kadiv HO/PUSAT
-        is_pusat = current_user.cabang.strip().upper() in ['HO', 'PUSAT MD', 'SJAM HO']
+        is_pusat = current_user.cabang.strip().upper() in ['PUSAT / MD', 'GUDANG PART', 'GUDANG UNIT', 'STOCKPOINT PALOPO']
         print(f"Is Pusat/HO: {is_pusat}")
 
         if is_pusat:
