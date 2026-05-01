@@ -442,6 +442,7 @@ def kadiv():
     for k in karyawan_divisi:
         nilai = Penilaian.query.filter_by(
             id_karyawan=k.id,
+            id_penilai=current_user.id,
             periode='Q1',
             tahun=tahun_ini
         ).first()
