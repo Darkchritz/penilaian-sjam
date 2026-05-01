@@ -804,7 +804,7 @@ def cek_user():
     semua = Karyawan.query.filter(Karyawan.nama.ilike('%Wendy%')).all()
     hasil = ""
     for u in semua:
-        hasil += f"ID: {u.id} | NPK: {u.npk} | Role: {u.role} | Email: {u.email}<br>"
+        hasil += f"ID: {u.id} | NPK: {u.npk} | Nama: {u.nama} | Role: {u.role} | Divisi: {u.divisi} | Cabang: {u.cabang}<br>"
     return hasil
 
 @app.route('/fix-id-wendy')
