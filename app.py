@@ -469,6 +469,8 @@ def kadiv():
         k.nilai_akhir = nilai.nilai_akhir if nilai else 0
         k.grade = nilai.grade if nilai else '-'
         k.status_nilai = nilai.status if nilai else None
+        k.penilaian_status = nilai.status if nilai else None
+        k.penilaian_id = nilai.id if nilai else None
 
         if nilai and nilai.status == 'final':
             sudah_dinilai.append(k)
