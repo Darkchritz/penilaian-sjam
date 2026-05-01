@@ -263,41 +263,53 @@ def kelola_akses_kadiv():
         return redirect(url_for('index'))
 
     if request.method == 'POST':
-        id_kadiv = request.form.get('id_kadiv')
-        divisi_target = request.form.get('divisi_target')
-        cabang_target = request.form.get('cabang_target')
-        id_karyawan_target = request.form.get('id_karyawan_target') or None
+        try:
+            id_kadiv = request.form.get('id_kadiv')
+            divisi_target = request.form.get('divisi_target')
+            cabang_target = request.form.get('cabang_target')
+            id_karyawan_target = request.form.get('id_karyawan_target')
 
-        if id_karyawan_target == '':
-            id_karyawan_target = None
+            if not id_kadiv:
+                return jsonify({'status': 'error', 'message': 'Pilih Kadiv dulu'}), 400
 
-                cek = AksesPenilaian.query.filter_by(
-            id_kadiv=id_kadiv,
-            divisi_target=divisi_target,
-            cabang_target=cabang_target,
-            id_karyawan_target=id_karyawan_target
-        ).first()
-
-        if cek:
-            if not cek.is_active:
-                cek.is_active = True
-                db.session.commit()
-                return jsonify({'status': 'success', 'message': 'Akses berhasil diaktifkan kembali'})
+            id_kadiv = int(id_kadiv)
+            if id_karyawan_target == '' or id_karyawan_target is None:
+                id_karyawan_target = None
             else:
-                return jsonify({'status': 'error', 'message': 'Akses sudah ada'})
-        else:
-            akses_baru = AksesPenilaian(
+                id_karyawan_target = int(id_karyawan_target)
+
+            cek = AksesPenilaian.query.filter_by(
                 id_kadiv=id_kadiv,
                 divisi_target=divisi_target,
                 cabang_target=cabang_target,
-                id_karyawan_target=id_karyawan_target,
-                is_active=True
-            )
-            db.session.add(akses_baru)
-            db.session.commit()
-            return jsonify({'status': 'success', 'message': 'Akses berhasil ditambahkan'})
+                id_karyawan_target=id_karyawan_target
+            ).first()
 
-    # GET - SEMUA DI DALAM DEF, INDENT 4 SPASI
+            if cek:
+                if not cek.is_active:
+                    cek.is_active = True
+                    db.session.commit()
+                    return jsonify({'status': 'success', 'message': 'Akses berhasil diaktifkan kembali'})
+                else:
+                    return jsonify({'status': 'error', 'message': 'Akses sudah ada'})
+            else:
+                akses_baru = AksesPenilaian(
+                    id_kadiv=id_kadiv,
+                    divisi_target=divisi_target,
+                    cabang_target=cabang_target,
+                    id_karyawan_target=id_karyawan_target,
+                    is_active=True
+                )
+                db.session.add(akses_baru)
+                db.session.commit()
+                return jsonify({'status': 'success', 'message': 'Akses berhasil ditambahkan'})
+
+        except Exception as e:
+            print(f"ERROR POST AKSES: {e}")
+            db.session.rollback()
+            return jsonify({'status': 'error', 'message': f'Server error: {str(e)}'}), 500
+
+    # GET
     list_kadiv = Karyawan.query.filter_by(role='kadiv').all()
 
     list_divisi = db.session.query(Karyawan.divisi).distinct().all()
@@ -316,13 +328,6 @@ def kelola_akses_kadiv():
             id_kadiv=kadiv.id,
             is_active=True
         ).all()
-
-    # DEBUG - HARUS RATA SAMA BARIS DI ATASNYA
-    print("=== DEBUG KARYAWAN ===")
-    print("Jumlah karyawan:", len(list_karyawan))
-    for k in list_karyawan[:5]:
-        print(f"Nama: {k.nama}, Divisi: {k.divisi}, Cabang: {k.cabang}, Role: {k.role}")
-    print("======================")
 
     return render_template('hrd_kelola_akses.html',
                            list_kadiv=list_kadiv,
