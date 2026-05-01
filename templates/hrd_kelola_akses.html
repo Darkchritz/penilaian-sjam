@@ -169,10 +169,13 @@
 
 <script>
 function showToast(msg) {
-    const el = document.querySelector('[x-data]').__x.$data
-    el.toastMsg = msg
-    el.toast = true
-    setTimeout(() => el.toast = false, 3000)
+    const toast = document.getElementById('toast')
+    const toastMsg = document.getElementById('toastMsg')
+    toastMsg.textContent = msg
+    toast.classList.remove('hidden')
+    setTimeout(() => {
+        toast.classList.add('hidden')
+    }, 3000)
 }
 
 document.getElementById('formTambah')?.addEventListener('submit', async (e) => {
