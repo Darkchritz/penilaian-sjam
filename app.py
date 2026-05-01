@@ -798,6 +798,22 @@ def upload_karyawan():
 
     return redirect(url_for('hrd'))
 
+@app.route('/cek-user')
+@login_required
+def cek_user():
+    semua = Karyawan.query.filter(Karyawan.nama.ilike('%Wendy%')).all()
+    hasil = ""
+    for u in semua:
+        hasil += f"ID: {u.id} | NPK: {u.npk} | Role: {u.role} | Email: {u.email}<br>"
+    return hasil
+
+@app.route('/fix-id-wendy')
+@login_required
+def fix_id_wendy():
+    Penilaian.query.filter_by(id_penilai=1).update({Penilaian.id_penilai: 2})
+    db.session.commit()
+    return "ID Wendy udah dibenerin dari 1 ke 2"
+
 @app.route('/reset-kadiv/<int:npk>')
 @login_required
 def reset_kadiv(npk):
