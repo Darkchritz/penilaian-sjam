@@ -231,6 +231,18 @@ def reset_satu(npk):
     except Exception as e:
         db.session.rollback()
         return f"Gagal reset {npk}: {str(e)}"
+
+@app.route('/list-npk')
+@login_required
+def list_npk():
+    if current_user.role.lower() != 'hrd': 
+        return "Akses ditolak", 403
+    
+    semua = Karyawan.query.with_entities(Karyawan.npk, Karyawan.nama).order_by(Karyawan.nama).all()
+    hasil = ["<h3>Klik NPK buat reset ke 123456:</h3>"]
+    for npk, nama in semua:
+        hasil.append(f"<a href='/reset-satu/{npk}' target='_blank'>{npk} - {nama}</a>")
+    return "<br>".join(hasil)
     
 @app.route('/register', methods=['GET','POST'])
 def register():
