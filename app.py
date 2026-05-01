@@ -146,15 +146,23 @@ def login():
         try:
             npk_input = request.form['npk']
             password_input = request.form['password']
+            
+            print(f"DEBUG NPK DARI FORM: '{npk_input}'") # cek ada spasi ga
+            
             user = Karyawan.query.filter_by(npk=npk_input.strip()).first()
-
-            if user and check_password_hash(user.password, password_input):
-                login_user(user)
-                return redirect(url_for('index'))
-            else:
-                flash('NPK atau Password salah', 'danger')
-        except ValueError:
-            flash('NPK harus angka', 'danger')
+            
+            print(f"DEBUG USER KETEMU: {user}") # kalau None berarti query gagal
+            
+            if user:
+                print(f"DEBUG HASH DI DB: {user.password}")
+                cek = check_password_hash(user.password, password_input)
+                print(f"DEBUG HASIL CHECK_PASSWORD: {cek}")
+                
+                if cek:
+                    login_user(user)
+                    return redirect(url_for('index'))
+            
+            flash('NPK atau Password salah', 'danger')
         except Exception as e:
             print(f"ERROR LOGIN: {e}")
             flash('Terjadi error di server', 'danger')
