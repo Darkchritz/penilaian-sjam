@@ -308,6 +308,12 @@ def kelola_akses_kadiv():
             id_kadiv=kadiv.id,
             is_active=True
         ).all()
+        
+        print("=== DEBUG KARYAWAN ===")
+print("Jumlah karyawan:", len(list_karyawan))
+for k in list_karyawan[:5]: # print 5 nama pertama aja
+    print(f"Nama: {k.nama}, Divisi: {k.divisi}, Cabang: {k.cabang}, Role: {k.role}")
+print("======================")
 
     return render_template('hrd_kelola_akses.html',
                            list_kadiv=list_kadiv,
