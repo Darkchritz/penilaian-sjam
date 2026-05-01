@@ -146,7 +146,7 @@ def login():
         try:
             npk_input = request.form['npk']
             password_input = request.form['password']
-            user = Karyawan.query.filter_by(npk=int(npk_input)).first()
+            user = Karyawan.query.filter_by(npk=npk_input.strip()).first()
 
             if user and check_password_hash(user.password, password_input):
                 login_user(user)
