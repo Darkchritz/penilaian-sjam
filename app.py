@@ -290,37 +290,38 @@ def kelola_akses_kadiv():
         return redirect(url_for('kelola_akses_kadiv'))
 
     # GET
-    list_kadiv = Karyawan.query.filter_by(role='kadiv').all()
+list_kadiv = Karyawan.query.filter_by(role='kadiv').all()
 
-    list_divisi = db.session.query(Karyawan.divisi).distinct().all()
-    list_divisi = [d[0] if d[0] else '-' for d in list_divisi]
-    list_divisi = sorted(list(set(list_divisi)))
+list_divisi = db.session.query(Karyawan.divisi).distinct().all()
+list_divisi = [d[0] if d[0] else '-' for d in list_divisi]
+list_divisi = sorted(list(set(list_divisi)))
 
-    list_cabang = db.session.query(Karyawan.cabang).distinct().all()
-    list_cabang = [c[0] if c[0] else '-' for c in list_cabang]
-    list_cabang = sorted(list(set(list_cabang)))
+list_cabang = db.session.query(Karyawan.cabang).distinct().all()
+list_cabang = [c[0] if c[0] else '-' for c in list_cabang]
+list_cabang = sorted(list(set(list_cabang)))
 
-    list_karyawan = Karyawan.query.order_by(Karyawan.nama).all()
-    
-    akses_per_kadiv = {}
-    for kadiv in list_kadiv:
-        akses_per_kadiv[kadiv.id] = AksesPenilaian.query.filter_by(
-            id_kadiv=kadiv.id,
-            is_active=True
-        ).all()
-        
-    print("=== DEBUG KARYAWAN ===")
-    print("Jumlah karyawan:", len(list_karyawan))
-    for k in list_karyawan[:5]: # print 5 nama pertama aja
-    print(f"Nama: {k.nama}, Divisi: {k.divisi}, Cabang: {k.cabang}, Role: {k.role}")
-    print("======================")
+list_karyawan = Karyawan.query.order_by(Karyawan.nama).all()
 
-    return render_template('hrd_kelola_akses.html',
-                           list_kadiv=list_kadiv,
-                           list_divisi=list_divisi,
-                           list_cabang=list_cabang,
-                           list_karyawan=list_karyawan,
-                           akses_per_kadiv=akses_per_kadiv)
+akses_per_kadiv = {}
+for kadiv in list_kadiv:
+    akses_per_kadiv[kadiv.id] = AksesPenilaian.query.filter_by(
+        id_kadiv=kadiv.id,
+        is_active=True
+    ).all()
+
+# DEBUG - PASTIKAN INDENT 4 SPASI
+print("=== DEBUG KARYAWAN ===")
+print("Jumlah karyawan:", len(list_karyawan))
+for k in list_karyawan[:5]:
+    print(f"Nama: {k.nama}, Divisi: {k.divisi}, Cabang: {k.cabang}, Role: {k.role}") # <-- HARUS INDENT
+print("======================")
+
+return render_template('hrd_kelola_akses.html',
+                       list_kadiv=list_kadiv,
+                       list_divisi=list_divisi,
+                       list_cabang=list_cabang,
+                       list_karyawan=list_karyawan,
+                       akses_per_kadiv=akses_per_kadiv)
     
 @app.route('/api/karyawan')
 @login_required
