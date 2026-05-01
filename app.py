@@ -288,6 +288,7 @@ def kelola_akses_kadiv():
             if cek:
                 if not cek.is_active:
                     cek.is_active = True
+                    cek.assigned_by = current_user.id
                     db.session.commit()
                     return jsonify({'status': 'success', 'message': 'Akses berhasil diaktifkan kembali'})
                 else:
@@ -298,6 +299,7 @@ def kelola_akses_kadiv():
                     divisi_target=divisi_target,
                     cabang_target=cabang_target,
                     id_karyawan_target=id_karyawan_target,
+                    assigned_by=current_user.id,
                     is_active=True
                 )
                 db.session.add(akses_baru)
