@@ -416,7 +416,7 @@ def kadiv():
 
     tahun_ini = datetime.now().year
     print(f"=== DEBUG KADIV ===")
-    print(f"Login sebagai: {current_user.nama} | ID: {current_user.id} | Role: {current_user.role} | Cabang: {current_user.cabang}")
+    print(f"Login sebagai: {current_user.nama} | ID: {current_user.id} | Role: {current_user.role} | Divisi: {current_user.divisi} | Cabang: {current_user.cabang}")
     
     if current_user.role.lower().strip() == 'super kadiv':
         karyawan_divisi = Karyawan.query.filter(
@@ -424,13 +424,13 @@ def kadiv():
         ).all()
         print(f"Super Kadiv: Total karyawan = {len(karyawan_divisi)}")
     else:
-        # Cek apakah Kadiv HO/PUSAT - INI YANG BENER
+        # Cek apakah Kadiv HO/PUSAT
         list_pusat = ['HO', 'PUSAT MD', 'SJAM HO', 'PUSAT / MD']
         is_pusat = current_user.cabang.strip().upper() in list_pusat
         print(f"Is Pusat/HO: {is_pusat}")
 
         if is_pusat:
-            # Kadiv HO bisa nilai semua karyawan 1 divisi di semua cabang pusat
+            # Kadiv HO: tetap 1 divisi doang, tapi semua cabang HO
             karyawan_divisi = Karyawan.query.filter(
                 Karyawan.divisi == current_user.divisi,
                 Karyawan.cabang.in_(list_pusat),
@@ -438,13 +438,12 @@ def kadiv():
             ).all()
             print(f"Kadiv HO: Total bawahan 1 divisi = {len(karyawan_divisi)}")
         else:
-            # Kadiv Cabang: langsung filter divisi + cabang, ga pake AksesPenilaian
+            # KADIV CABANG: HAPUS FILTER DIVISI, KUNCI CABANG AJA
             karyawan_divisi = Karyawan.query.filter(
-                Karyawan.divisi == current_user.divisi,
                 Karyawan.cabang == current_user.cabang,
                 Karyawan.id != current_user.id
             ).all()
-            print(f"Kadiv Cabang: Total bawahan = {len(karyawan_divisi)} orang")
+            print(f"Kadiv Cabang: Total bawahan semua divisi = {len(karyawan_divisi)} orang")
             for k in karyawan_divisi:
                 print(f" - {k.nama} | {k.divisi} | {k.cabang} | role={k.role}")
 
