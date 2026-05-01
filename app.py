@@ -424,42 +424,29 @@ def kadiv():
         ).all()
         print(f"Super Kadiv: Total karyawan = {len(karyawan_divisi)}")
     else:
-        # Cek apakah Kadiv HO/PUSAT
-        is_pusat = current_user.cabang.strip().upper() in ['PUSAT / MD', 'GUDANG PART', 'GUDANG UNIT', 'STOCKPOINT PALOPO']
+        # Cek apakah Kadiv HO/PUSAT - INI YANG BENER
+        list_pusat = ['HO', 'PUSAT MD', 'SJAM HO', 'PUSAT / MD']
+        is_pusat = current_user.cabang.strip().upper() in list_pusat
         print(f"Is Pusat/HO: {is_pusat}")
 
         if is_pusat:
-            # Kadiv HO bisa nilai semua karyawan 1 divisi di HO/PUSAT
+            # Kadiv HO bisa nilai semua karyawan 1 divisi di semua cabang pusat
             karyawan_divisi = Karyawan.query.filter(
                 Karyawan.divisi == current_user.divisi,
-                Karyawan.cabang.in_(['HO', 'PUSAT MD', 'SJAM HO']),
+                Karyawan.cabang.in_(list_pusat),
                 Karyawan.id != current_user.id
             ).all()
             print(f"Kadiv HO: Total bawahan 1 divisi = {len(karyawan_divisi)}")
         else:
-            # Kadiv Cabang pake AksesPenilaian
-            akses = AksesPenilaian.query.filter_by(id_kadiv=current_user.id, is_active=True).all()
-            print(f"Jumlah akses aktif: {len(akses)}")
-            for a in akses:
-                print(f" - Akses: divisi={a.divisi_target}, cabang={a.cabang_target}, id_karyawan_target={a.id_karyawan_target}")
-            
-            if not akses:
-                karyawan_divisi = []
-            else:
-                filter_or = []
-                for a in akses:
-                    if a.id_karyawan_target:
-                        filter_or.append(Karyawan.id == a.id_karyawan_target)
-                    else:
-                        filter_or.append(db.and_(Karyawan.divisi == a.divisi_target, Karyawan.cabang == a.cabang_target))
-                
-                # HAPUS Karyawan.role=='karyawan' DARI SINI
-                karyawan_divisi = Karyawan.query.filter(
-                    db.or_(*filter_or)
-                ).all()
-                print(f"Hasil query karyawan_divisi: {len(karyawan_divisi)} orang")
-                for k in karyawan_divisi:
-                    print(f" - {k.nama} | {k.divisi} | {k.cabang} | role={k.role}")
+            # Kadiv Cabang: langsung filter divisi + cabang, ga pake AksesPenilaian
+            karyawan_divisi = Karyawan.query.filter(
+                Karyawan.divisi == current_user.divisi,
+                Karyawan.cabang == current_user.cabang,
+                Karyawan.id != current_user.id
+            ).all()
+            print(f"Kadiv Cabang: Total bawahan = {len(karyawan_divisi)} orang")
+            for k in karyawan_divisi:
+                print(f" - {k.nama} | {k.divisi} | {k.cabang} | role={k.role}")
 
     belum_dinilai = []
     sudah_dinilai = []
