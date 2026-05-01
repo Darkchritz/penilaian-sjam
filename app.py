@@ -597,23 +597,6 @@ def nilai(id):
                          periode=periode,
                          tahun=tahun)
 
-@app.route('/fix-password-onetime-jangan-lupa-hapus')
-@login_required
-def fix_password():
-    if current_user.role.lower() != 'hrd': 
-        return "Akses ditolak. Cuma HRD yang boleh jalanin ini.", 403
-    
-    updated = 0
-    # Cari semua user yang password-nya masih plaintext '123456'
-    users = Karyawan.query.filter_by(password='123456').all()
-    
-    for user in users:
-        user.password = generate_password_hash('123456')
-        updated += 1
-    
-    db.session.commit()
-    return f"Sukses. Total {updated} user diupdate. HAPUS ROUTE INI SEKARANG!"
-
 @app.route('/simpan_nilai/<int:id_karyawan>/<periode>', methods=['POST'])
 @login_required
 def simpan_nilai(id_karyawan, periode):
