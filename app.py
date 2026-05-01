@@ -787,6 +787,20 @@ def upload_karyawan():
 
     return redirect(url_for('hrd'))
 
+@app.route('/reset-kadiv/<int:npk>')
+@login_required
+def reset_kadiv(npk):
+    if current_user.role.lower() != 'hrd': 
+        return "Akses ditolak", 403
+    
+    user = Karyawan.query.filter_by(npk=npk).first()
+    if not user:
+        return f"NPK {npk} ga ketemu di DB"
+    
+    user.password = generate_password_hash('123456', method='pbkdf2:sha256')
+    db.session.commit()
+    return f"Done. {user.nama} - {user.npk} bisa login pake 123456. Role: {user.role}"
+
 @app.route('/nilai_saya')
 @login_required
 def nilai_saya():
