@@ -798,16 +798,6 @@ def upload_karyawan():
 
     return redirect(url_for('hrd'))
 
-@app.route('/hapus-kurnia')
-@login_required
-def hapus_kurnia():
-    if current_user.role.lower() not in ['kadiv', 'hrd']:
-        return "Akses ditolak", 403
-    k = Karyawan.query.filter_by(npk=2009040787).first()
-    Penilaian.query.filter_by(id_karyawan=k.id, periode='Q1', tahun=2026).delete()
-    db.session.commit()
-    return "Data Kurniyawati udah dihapus. Silakan nilai ulang dari dashboard."
-
 @app.route('/reset-kadiv/<int:npk>')
 @login_required
 def reset_kadiv(npk):
