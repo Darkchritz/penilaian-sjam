@@ -196,6 +196,23 @@ def cek_hash():
         
     return "<br>".join(output)
 
+@app.route('/force-reset-nurul')
+@login_required
+def force_reset_nurul():
+    if current_user.role.lower() != 'hrd': 
+        return "Akses ditolak", 403
+    
+    from werkzeug.security import generate_password_hash
+    user = Karyawan.query.filter_by(npk=2014122128).first()
+    if not user:
+        return "User Nurul ga ketemu"
+        
+    user.password = generate_password_hash('123456', method='pbkdf2:sha256')
+    db.session.add(user)
+    db.session.commit()
+    
+    return f"Password Nurul udah di-reset. Hash baru: {user.password}"
+
 @app.route('/reset-all-pbkdf2')
 @login_required  
 def reset_all():
