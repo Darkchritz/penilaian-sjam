@@ -255,9 +255,8 @@ def hrd():
                          order=order)
 
 @app.route('/hrd/kelola_akses_kadiv', methods=['GET', 'POST'])
-@login_required
 def kelola_akses_kadiv():
-    if current_user.role!= 'hrd':
+    if 'role' not in session or session['role']!= 'hrd':
         return redirect(url_for('login'))
 
     if request.method == 'POST':
@@ -266,62 +265,64 @@ def kelola_akses_kadiv():
         cabang_target = request.form.get('cabang_target')
         id_karyawan_target = request.form.get('id_karyawan_target') or None
 
-        existing = AksesPenilaian.query.filter_by(
+        if id_karyawan_target == '':
+            id_karyawan_target = None
+
+        cek = AksesPenilaian.query.filter_by(
             id_kadiv=id_kadiv,
             divisi_target=divisi_target,
             cabang_target=cabang_target,
-            id_karyawan_target=id_karyawan_target,
-            is_active=True
+            id_karyawan_target=id_karyawan_target
         ).first()
 
-        if not existing:
+        if cek:
+            cek.is_active = True
+        else:
             akses_baru = AksesPenilaian(
                 id_kadiv=id_kadiv,
                 divisi_target=divisi_target,
                 cabang_target=cabang_target,
                 id_karyawan_target=id_karyawan_target,
-                assigned_by=current_user.id
+                is_active=True
             )
             db.session.add(akses_baru)
-            db.session.commit()
-            flash('Akses berhasil ditambahkan', 'success')
-        else:
-            flash('Akses sudah ada', 'warning')
-        return redirect(url_for('kelola_akses_kadiv'))
 
-    # GET
-list_kadiv = Karyawan.query.filter_by(role='kadiv').all()
+        db.session.commit()
+        return jsonify({'status': 'success', 'message': 'Akses berhasil ditambahkan'})
 
-list_divisi = db.session.query(Karyawan.divisi).distinct().all()
-list_divisi = [d[0] if d[0] else '-' for d in list_divisi]
-list_divisi = sorted(list(set(list_divisi)))
+    # GET - SEMUA DI DALAM DEF, INDENT 4 SPASI
+    list_kadiv = Karyawan.query.filter_by(role='kadiv').all()
 
-list_cabang = db.session.query(Karyawan.cabang).distinct().all()
-list_cabang = [c[0] if c[0] else '-' for c in list_cabang]
-list_cabang = sorted(list(set(list_cabang)))
+    list_divisi = db.session.query(Karyawan.divisi).distinct().all()
+    list_divisi = [d[0] if d[0] else '-' for d in list_divisi]
+    list_divisi = sorted(list(set(list_divisi)))
 
-list_karyawan = Karyawan.query.order_by(Karyawan.nama).all()
+    list_cabang = db.session.query(Karyawan.cabang).distinct().all()
+    list_cabang = [c[0] if c[0] else '-' for c in list_cabang]
+    list_cabang = sorted(list(set(list_cabang)))
 
-akses_per_kadiv = {}
-for kadiv in list_kadiv:
-    akses_per_kadiv[kadiv.id] = AksesPenilaian.query.filter_by(
-        id_kadiv=kadiv.id,
-        is_active=True
-    ).all()
+    list_karyawan = Karyawan.query.order_by(Karyawan.nama).all()
 
-# DEBUG - PASTIKAN INDENT 4 SPASI
-print("=== DEBUG KARYAWAN ===")
-print("Jumlah karyawan:", len(list_karyawan))
-for k in list_karyawan[:5]:
-    print(f"Nama: {k.nama}, Divisi: {k.divisi}, Cabang: {k.cabang}, Role: {k.role}") # <-- HARUS INDENT
-print("======================")
+    akses_per_kadiv = {}
+    for kadiv in list_kadiv:
+        akses_per_kadiv[kadiv.id] = AksesPenilaian.query.filter_by(
+            id_kadiv=kadiv.id,
+            is_active=True
+        ).all()
 
-return render_template('hrd_kelola_akses.html',
-                       list_kadiv=list_kadiv,
-                       list_divisi=list_divisi,
-                       list_cabang=list_cabang,
-                       list_karyawan=list_karyawan,
-                       akses_per_kadiv=akses_per_kadiv)
+    # DEBUG - HARUS RATA SAMA BARIS DI ATASNYA
+    print("=== DEBUG KARYAWAN ===")
+    print("Jumlah karyawan:", len(list_karyawan))
+    for k in list_karyawan[:5]:
+        print(f"Nama: {k.nama}, Divisi: {k.divisi}, Cabang: {k.cabang}, Role: {k.role}")
+    print("======================")
+
+    return render_template('hrd_kelola_akses.html',
+                           list_kadiv=list_kadiv,
+                           list_divisi=list_divisi,
+                           list_cabang=list_cabang,
+                           list_karyawan=list_karyawan,
+                           akses_per_kadiv=akses_per_kadiv)
     
 @app.route('/api/karyawan')
 @login_required
