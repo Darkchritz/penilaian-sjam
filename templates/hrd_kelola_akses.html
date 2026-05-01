@@ -170,13 +170,14 @@
 <script>
 function showToast(msg) {
     const el = document.querySelector('[x-data]').__x.$data
-    el.toast = true
     el.toastMsg = msg
+    el.toast = true
     setTimeout(() => el.toast = false, 3000)
 }
 
-document.getElementById('formTambah').addEventListener('submit', async (e) => {
+document.getElementById('formTambah')?.addEventListener('submit', async (e) => {
     e.preventDefault()
+
     const formData = new FormData()
     formData.append('id_kadiv', document.getElementById('id_kadiv').value)
     formData.append('divisi_target', document.getElementById('divisi_target').value)
@@ -191,14 +192,12 @@ document.getElementById('formTambah').addEventListener('submit', async (e) => {
             throw new Error(data.message || 'Server error')
         }
 
+        showToast(data.message)
         if(data.status === 'success') {
-            showToast(data.message)
             setTimeout(() => location.reload(), 1000)
-        } else {
-            showToast(data.message)
         }
     } catch (error) {
-        console.error('Error:', error)
+        console.error('FETCH ERROR:', error)
         showToast(error.message || 'Gagal tambah akses')
     }
 })
