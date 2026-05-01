@@ -279,7 +279,12 @@ def kelola_akses_kadiv():
         ).first()
 
         if cek:
+        if not cek.is_active:
             cek.is_active = True
+            db.session.commit()
+            return jsonify({'status': 'success', 'message': 'Akses berhasil diaktifkan kembali'})
+        else:
+            return jsonify({'status': 'error', 'message': 'Akses sudah ada'})
         else:
             akses_baru = AksesPenilaian(
                 id_kadiv=id_kadiv,
