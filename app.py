@@ -754,7 +754,7 @@ def tambah_karyawan():
             karyawan = Karyawan(
                 npk=npk,
                 nama=nama,
-                password=generate_password_hash(password),
+                password=generate_password_hash(password, method='pbkdf2:sha256'),
                 role=role,
                 divisi=divisi,
                 cabang=cabang
@@ -791,7 +791,7 @@ def edit_karyawan(npk):
 
     password = request.form.get('password', '').strip()
     if password:
-        karyawan.password = generate_password_hash(password)
+        karyawan.password = generate_password_hash(password, method='pbkdf2:sha256')
 
     db.session.commit()
     flash('Data karyawan diupdate!', 'success')
@@ -886,7 +886,7 @@ def upload_karyawan():
                 if npk in existing_npk_dict:
                     existing = existing_npk_dict[npk]
                     existing.nama = row['nama']
-                    existing.password = generate_password_hash(password)
+                    existing.password = generate_password_hash(password, method='pbkdf2:sha256')
                     existing.role = row['role']
                     existing.divisi = row['divisi']
                     existing.cabang = row['cabang']
@@ -895,7 +895,7 @@ def upload_karyawan():
                     data_baru.append(Karyawan(
                         npk=npk,
                         nama=row['nama'],
-                        password=generate_password_hash(password),
+                        password=generate_password_hash(password, method='pbkdf2:sha256'),
                         role=row['role'],
                         divisi=row['divisi'],
                         cabang=row['cabang']
