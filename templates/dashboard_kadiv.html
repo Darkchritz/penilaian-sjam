@@ -37,8 +37,11 @@
                         <p class="text-sm font-medium text-gray-700">{{ user.nama }}</p>
                         <p class="text-xs text-gray-500">{{ user.divisi }} | {{ user.cabang }}</p>
                     </div>
+                    <a href="{{ url_for('nilai_saya') }}" class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm">
+                        <i class="bi bi-clipboard-data"></i> <span class="hidden sm:inline">Nilai Saya</span>
+                    </a>
                     <a href="/logout" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm">
-                        <i class="bi bi-box-arrow-right"></i> Logout
+                        <i class="bi bi-box-arrow-right"></i> <span class="hidden sm:inline">Logout</span>
                     </a>
                 </div>
             </div>
@@ -154,7 +157,6 @@
                                         <p class="font-semibold text-gray-800">{{ k.nama }}</p>
                                         <p class="text-sm text-gray-500">{{ k.npk }} | {{ k.role|upper }}</p>
                                     </div>
-                                </div>
                                 <div class="flex items-center gap-3">
                                     <div class="text-right">
                                         <p class="text-2xl font-bold text-indigo-600">{{ "%.2f"|format(k.nilai_akhir) }}</p>
@@ -180,7 +182,6 @@
     </div>
 </div>
                                 </div>
-                            </div>
                             {% endfor %}
                         </div>
                     {% else %}
