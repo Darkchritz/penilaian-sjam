@@ -213,21 +213,24 @@ def force_reset_nurul():
     
     return f"Password Nurul udah di-reset. Hash baru: {user.password}"
 
-@app.route('/reset-semua-pbkdf2')
+@app.route('/reset-satu/<int:npk>')
 @login_required
-def reset_semua_pbkdf2():
+def reset_satu(npk):
     if current_user.role.lower() != 'hrd': 
         return "Akses ditolak", 403
     
     from werkzeug.security import generate_password_hash
-    semua = Karyawan.query.all()
-    total = 0
-    for k in semua:
-        k.password = generate_password_hash('123456', method='pbkdf2:sha256')
-        total += 1
+    user = Karyawan.query.filter_by(npk=npk).first()
+    if not user:
+        return f"NPK {npk} ga ketemu"
     
-    db.session.commit()
-    return f"Berhasil reset {total} karyawan ke password 123456 pake pbkdf2"
+    try:
+        user.password = generate_password_hash('123456', method='pbkdf2:sha256')
+        db.session.commit()
+        return f"Berhasil: {user.nama} - {user.npk} udah direset ke 123456"
+    except Exception as e:
+        db.session.rollback()
+        return f"Gagal reset {npk}: {str(e)}"
     
 @app.route('/register', methods=['GET','POST'])
 def register():
