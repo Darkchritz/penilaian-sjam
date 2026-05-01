@@ -438,13 +438,13 @@ def kadiv():
                 else:
                     filter_or.append(db.and_(Karyawan.divisi == a.divisi_target, Karyawan.cabang == a.cabang_target))
             
+            # HAPUS Karyawan.role=='karyawan' DARI SINI
             karyawan_divisi = Karyawan.query.filter(
-                Karyawan.role=='karyawan', 
                 db.or_(*filter_or)
             ).all()
             print(f"Hasil query karyawan_divisi: {len(karyawan_divisi)} orang")
             for k in karyawan_divisi:
-                print(f" - {k.nama} | {k.divisi} | {k.cabang}")
+                print(f" - {k.nama} | {k.divisi} | {k.cabang} | role={k.role}")
 
     belum_dinilai = []
     sudah_dinilai = []
