@@ -521,16 +521,26 @@ def nilai(id):
     
     karyawan = Karyawan.query.get_or_404(id)
     if current_user.role.lower().strip() in ['kadiv', 'kepala divisi']:
-        punya_akses = AksesPenilaian.query.filter_by(
-            id_kadiv=current_user.id,
-            divisi_target=karyawan.divisi,
-            cabang_target=karyawan.cabang,
-            is_active=True
-        ).first()
+        # PENGECEKAN AKSES BARU - GANTI BLOK INI AJA
+        list_pusat = ['HO', 'PUSAT MD', 'SJAM HO', 'PUSAT / MD']
+        is_pusat = current_user.cabang.strip().upper() in list_pusat
         
-        if not punya_akses:
+        boleh_nilai = False
+        if current_user.divisi == karyawan.divisi and current_user.id != karyawan.id:
+            if is_pusat:
+                # Kadiv HO boleh nilai semua 1 divisi di HO
+                if karyawan.cabang.strip().upper() in list_pusat:
+                    boleh_nilai = True
+            else:
+                # Kadiv Cabang cuma boleh nilai 1 cabang
+                if current_user.cabang == karyawan.cabang:
+                    boleh_nilai = True
+
+        if not boleh_nilai:
             flash(f'Anda tidak memiliki akses untuk menilai {karyawan.nama}', 'danger')
             return redirect(url_for('kadiv'))
+        # END BLOK PENGGANTI
+    
     periode = request.args.get('periode', request.form.get('periode', 'Q1'))
     tahun = int(request.args.get('tahun', request.form.get('tahun', datetime.now().year)))
     
