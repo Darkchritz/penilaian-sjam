@@ -525,13 +525,13 @@ def nilai(id):
         is_pusat = current_user.cabang.strip().upper() in list_pusat
         
         boleh_nilai = False
-        if current_user.divisi == karyawan.divisi and current_user.id != karyawan.id:
+        if current_user.id != karyawan.id:  # Ga bisa nilai diri sendiri
             if is_pusat:
-                # Kadiv HO boleh nilai semua 1 divisi di HO
-                if karyawan.cabang.strip().upper() in list_pusat:
+                # Kadiv HO: harus 1 divisi + karyawan di HO
+                if current_user.divisi == karyawan.divisi and karyawan.cabang.strip().upper() in list_pusat:
                     boleh_nilai = True
             else:
-                # Kadiv Cabang cuma boleh nilai 1 cabang
+                # KADIV CABANG: CUKUP 1 CABANG AJA, DIVISI BEBAS
                 if current_user.cabang == karyawan.cabang:
                     boleh_nilai = True
 
