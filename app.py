@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+from flask_login import login_required, current_user
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'sjam-penilaian-secret-2026')
@@ -255,9 +256,11 @@ def hrd():
                          order=order)
 
 @app.route('/hrd/kelola_akses_kadiv', methods=['GET', 'POST'])
+@login_required
 def kelola_akses_kadiv():
-    if 'role' not in session or session['role']!= 'hrd':
-        return redirect(url_for('login'))
+    if current_user.role!= 'hrd':
+        flash('Akses ditolak', 'danger')
+        return redirect(url_for('index'))
 
     if request.method == 'POST':
         id_kadiv = request.form.get('id_kadiv')
