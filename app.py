@@ -799,6 +799,29 @@ def upload_karyawan():
 
     return redirect(url_for('hrd'))
 
+@app.route('/nilai_saya')
+@login_required
+def nilai_saya():
+    tahun_ini = datetime.now().year
+    
+    # Ambil semua nilai final buat user yang login
+    list_nilai = Penilaian.query.filter_by(
+        id_karyawan=current_user.id,
+        tahun=tahun_ini,
+        status='final'
+    ).order_by(Penilaian.periode.desc()).all()
+
+    # Ambil nama penilai buat ditampilin
+    for n in list_nilai:
+        penilai = Karyawan.query.get(n.id_penilai)
+        n.nama_penilai = penilai.nama if penilai else 'N/A'
+        n.jabatan_penilai = penilai.jabatan if penilai else '-'
+
+    return render_template('nilai_saya.html', 
+                           user=current_user,
+                           list_nilai=list_nilai,
+                           tahun=tahun_ini)
+
 @app.route('/logout')
 @login_required
 def logout():
