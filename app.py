@@ -167,102 +167,6 @@ def login():
             print(f"ERROR LOGIN: {e}")
             flash('Terjadi error di server', 'danger')
     return render_template('login.html')
-
-@app.route('/cek-hash')
-@login_required
-def cek_hash():
-    if current_user.role.lower() != 'hrd': 
-        return "Akses ditolak", 403
-    
-    from werkzeug.security import generate_password_hash, check_password_hash
-    
-    output = []
-    output.append("=== TEST 1: Generate + Check langsung ===")
-    h = generate_password_hash('123456', method='pbkdf2:sha256')
-    output.append(f"Hash: {h}")
-    output.append(f"Panjang: {len(h)}")
-    output.append(f"Check: {check_password_hash(h, '123456')}")
-    
-    output.append("<br>=== TEST 2: Cek Nurul di DB ===")
-    user = Karyawan.query.filter_by(npk=2014122128).first()
-    if user:
-        output.append(f"User: {user.nama}")
-        output.append(f"Hash DB: {user.password}")
-        output.append(f"Panjang DB: {len(user.password)}")
-        output.append(f"Check DB: {check_password_hash(user.password, '123456')}")
-        output.append(f"Hash sama? {h == user.password}")
-    else:
-        output.append("User Nurul ga ketemu")
-        
-    return "<br>".join(output)
-
-@app.route('/force-reset-nurul')
-@login_required
-def force_reset_nurul():
-    if current_user.role.lower() != 'hrd': 
-        return "Akses ditolak", 403
-    
-    from werkzeug.security import generate_password_hash
-    user = Karyawan.query.filter_by(npk=2014122128).first()
-    if not user:
-        return "User Nurul ga ketemu"
-        
-    user.password = generate_password_hash('123456', method='pbkdf2:sha256')
-    db.session.add(user)
-    db.session.commit()
-    
-    return f"Password Nurul udah di-reset. Hash baru: {user.password}"
-
-@app.route('/reset-semua-pbkdf2')
-@login_required
-def reset_semua_pbkdf2():
-    if current_user.role.lower() != 'hrd': 
-        return "Akses ditolak", 403
-    
-    from werkzeug.security import generate_password_hash
-    from flask import request, redirect, url_for
-    import time
-    
-    batch = request.args.get('batch', 1, type=int)
-    per_page = 25  # Kecilin biar ga timeout
-    
-    users = Karyawan.query.paginate(page=batch, per_page=per_page, error_out=False)
-    
-    if not users.items:
-        return "<h3>Selesai!</h3> 799 karyawan udah di-reset ke password 123456 pake pbkdf2"
-    
-    for k in users.items:
-        k.password = generate_password_hash('123456', method='pbkdf2:sha256')
-    
-    db.session.commit()
-    
-    next_batch = batch + 1
-    total_done = (batch * per_page)
-    
-    # Auto redirect 1 detik biar jalan sendiri
-    return f"""
-    <h3>Batch {batch} selesai</h3>
-    <p>Udah reset {total_done} dari 799 karyawan</p>
-    <p>Auto lanjut batch {next_batch} dalam 1 detik...</p>
-    <script>
-        setTimeout(function(){{
-            window.location.href = '/reset-semua-pbkdf2?batch={next_batch}';
-        }}, 1000);
-    </script>
-    <a href='/reset-semua-pbkdf2?batch={next_batch}'>Klik manual kalo ga jalan</a>
-    """
-
-@app.route('/list-npk')
-@login_required
-def list_npk():
-    if current_user.role.lower() != 'hrd': 
-        return "Akses ditolak", 403
-    
-    semua = Karyawan.query.with_entities(Karyawan.npk, Karyawan.nama).order_by(Karyawan.nama).all()
-    hasil = ["<h3>Klik NPK buat reset ke 123456:</h3>"]
-    for npk, nama in semua:
-        hasil.append(f"<a href='/reset-satu/{npk}' target='_blank'>{npk} - {nama}</a>")
-    return "<br>".join(hasil)
     
 @app.route('/register', methods=['GET','POST'])
 def register():
@@ -270,7 +174,7 @@ def register():
         try:
             npk = int(request.form['npk'])
             nama = request.form['nama']
-            password = generate_password_hash(request.form['password'])
+            password = generate_password_hash(request.form['password'], method='pbkdf2:sha256')
             role = request.form['role'].lower()
             divisi = request.form['divisi']
             cabang = request.form['cabang']
@@ -701,36 +605,6 @@ def nilai(id):
                          periode=periode,
                          tahun=tahun)
 
-@app.route('/simpan_nilai/<int:id_karyawan>/<periode>', methods=['POST'])
-@login_required
-def simpan_nilai(id_karyawan, periode):
-    if current_user.role.lower()!= 'hrd':
-        return redirect(url_for('login'))
-
-    karyawan = Karyawan.query.get_or_404(id_karyawan)
-    tahun_ini = datetime.now().year
-
-    p = Penilaian.query.filter_by(id_karyawan=karyawan.id, tahun=tahun_ini, periode=periode).first()
-    if not p:
-        p = Penilaian(id_karyawan=karyawan.id, tahun=tahun_ini, periode=periode, penilai_npk=current_user.npk)
-
-    p.tanggung_jawab = int(request.form.get('kpi1', 0))
-    p.inisiatif = int(request.form.get('kpi2', 0))
-    p.kerjasama = int(request.form.get('kpi3', 0))
-    p.kedisiplinan = int(request.form.get('kpi4', 0))
-    p.kemampuan = int(request.form.get('kpi5', 0))
-    p.target = int(request.form.get('kpi6', 0))
-    p.proses = int(request.form.get('kpi7', 0))
-    p.inovasi = int(request.form.get('kpi8', 0))
-    p.status = 'draft'
-    p.tanggal_update = datetime.utcnow()
-
-    db.session.add(p)
-    db.session.commit()
-    flash('Nilai berhasil disimpan', 'success')
-    return redirect(url_for('hrd'))
-
-# FIX 1: TAMBAH GET + LOGIN_REQUIRED + CABANG + PASSWORD
 @app.route('/tambah-karyawan', methods=['GET', 'POST'])
 @login_required
 def tambah_karyawan():
@@ -946,13 +820,9 @@ def logout():
 with app.app_context():
     db.create_all()
     if not Karyawan.query.filter_by(npk=123).first():
-        admin = Karyawan(npk=123, nama='Admin', password=generate_password_hash('123456'), role='hrd', divisi='HRD', cabang='PUSAT/MD')
+        admin = Karyawan(npk=123, nama='Admin', password=generate_password_hash('123456', method='pbkdf2:sha256'), role='hrd', divisi='HRD', cabang='PUSAT/MD')
         db.session.add(admin)
         db.session.commit()
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.drop_all()
-        db.create_all()
-        print("DB reset done")
     app.run(debug=True)
