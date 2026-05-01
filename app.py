@@ -485,6 +485,15 @@ def kadiv():
                            belum_dinilai=belum_dinilai,
                            sudah_dinilai=sudah_dinilai)
 
+@app.route('/lihat_penilaian/<int:id>')
+@login_required
+def lihat_penilaian(id):
+    p = Penilaian.query.get_or_404(id)
+    if p.id_penilai != current_user.id and current_user.role.lower() != 'hrd':
+        return "Akses ditolak", 403
+    k = Karyawan.query.get(p.id_karyawan)
+    return render_template('nilai.html', nilai=p, karyawan=k, readonly=True)
+
 @app.route('/dashboard_karyawan')
 @login_required
 def dashboard_karyawan():
