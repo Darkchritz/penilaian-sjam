@@ -804,6 +804,32 @@ def fix_penilai():
     db.session.commit()
     return f"Berhasil update {updated} penilaian. Cek lagi dashboard Kadiv."
 
+@app.route('/cek-kurnia')
+@login_required
+def cek_kurnia():
+    k = Karyawan.query.filter_by(npk=2009040787).first()
+    p = Penilaian.query.filter_by(id_karyawan=k.id, periode='Q1', tahun=2026).first()
+    if not p: return "Kurniyawati belum pernah dinilai"
+    penilai = Karyawan.query.get(p.id_penilai)
+    return f"""
+    ID Penilai: {p.id_penilai}<br>
+    Nama Penilai: {penilai.nama if penilai else 'KOSONG'}<br>
+    Role Penilai: {penilai.role if penilai else 'KOSONG'}<br>
+    Status: {p.status}<br>
+    ID Wendy sekarang: {current_user.id}
+    """
+
+@app.route('/force-kurnia')
+@login_required
+def force_kurnia():
+    k = Karyawan.query.filter_by(npk=2009040787).first()
+    p = Penilaian.query.filter_by(id_karyawan=k.id, periode='Q1', tahun=2026).first()
+    if p:
+        p.id_penilai = current_user.id
+        db.session.commit()
+        return "Kurniyawati udah dipindah ke Wendy"
+    return "Data penilaian ga ketemu"
+
 @app.route('/reset-kadiv/<int:npk>')
 @login_required
 def reset_kadiv(npk):
