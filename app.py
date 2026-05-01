@@ -787,6 +787,24 @@ def upload_karyawan():
 
     return redirect(url_for('hrd'))
 
+@app.route('/fix-penilai')
+@login_required
+def fix_penilai():
+    if current_user.role.lower() != 'hrd': 
+        return "Khusus HRD", 403
+    
+    # Update semua penilaian Q1 2026 yang id_penilai-nya kosong
+    updated = Penilaian.query.filter_by(
+        periode='Q1', 
+        tahun=2026, 
+        id_penilai=None
+    ).update(
+        {Penilaian.id_penilai: current_user.id}, 
+        synchronize_session=False
+    )
+    db.session.commit()
+    return f"Berhasil update {updated} penilaian. Cek lagi dashboard Kadiv."
+
 @app.route('/reset-kadiv/<int:npk>')
 @login_required
 def reset_kadiv(npk):
