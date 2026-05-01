@@ -47,6 +47,7 @@ class Karyawan(UserMixin, db.Model):
 
 class Penilaian(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    id_penilai = db.Column(db.Integer, db.ForeignKey('karyawan.id'), nullable=False)
     id_karyawan = db.Column(db.Integer, db.ForeignKey('karyawan.id'), nullable=False)
     periode = db.Column(db.String(2), nullable=False)  # Q1, Q2, Q3, Q4
     tahun = db.Column(db.Integer, nullable=False)
