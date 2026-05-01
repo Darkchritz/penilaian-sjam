@@ -798,21 +798,15 @@ def upload_karyawan():
 
     return redirect(url_for('hrd'))
 
-@app.route('/cek-user')
+@app.route('/hapus-kurnia')
 @login_required
-def cek_user():
-    semua = Karyawan.query.filter(Karyawan.nama.ilike('%Wendy%')).all()
-    hasil = ""
-    for u in semua:
-        hasil += f"ID: {u.id} | NPK: {u.npk} | Nama: {u.nama} | Role: {u.role} | Divisi: {u.divisi} | Cabang: {u.cabang}<br>"
-    return hasil
-
-@app.route('/fix-id-wendy')
-@login_required
-def fix_id_wendy():
-    Penilaian.query.filter_by(id_penilai=1).update({Penilaian.id_penilai: 2})
+def hapus_kurnia():
+    if current_user.role.lower() not in ['kadiv', 'hrd']:
+        return "Akses ditolak", 403
+    k = Karyawan.query.filter_by(npk=2009040787).first()
+    Penilaian.query.filter_by(id_karyawan=k.id, periode='Q1', tahun=2026).delete()
     db.session.commit()
-    return "ID Wendy udah dibenerin dari 1 ke 2"
+    return "Data Kurniyawati udah dihapus. Silakan nilai ulang dari dashboard."
 
 @app.route('/reset-kadiv/<int:npk>')
 @login_required
