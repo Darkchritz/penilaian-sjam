@@ -168,6 +168,34 @@ def login():
             flash('Terjadi error di server', 'danger')
     return render_template('login.html')
 
+@app.route('/cek-hash')
+@login_required
+def cek_hash():
+    if current_user.role.lower() != 'hrd': 
+        return "Akses ditolak", 403
+    
+    from werkzeug.security import generate_password_hash, check_password_hash
+    
+    output = []
+    output.append("=== TEST 1: Generate + Check langsung ===")
+    h = generate_password_hash('123456', method='pbkdf2:sha256')
+    output.append(f"Hash: {h}")
+    output.append(f"Panjang: {len(h)}")
+    output.append(f"Check: {check_password_hash(h, '123456')}")
+    
+    output.append("<br>=== TEST 2: Cek Nurul di DB ===")
+    user = Karyawan.query.filter_by(npk=2014122128).first()
+    if user:
+        output.append(f"User: {user.nama}")
+        output.append(f"Hash DB: {user.password}")
+        output.append(f"Panjang DB: {len(user.password)}")
+        output.append(f"Check DB: {check_password_hash(user.password, '123456')}")
+        output.append(f"Hash sama? {h == user.password}")
+    else:
+        output.append("User Nurul ga ketemu")
+        
+    return "<br>".join(output)
+
 @app.route('/reset-all-pbkdf2')
 @login_required  
 def reset_all():
