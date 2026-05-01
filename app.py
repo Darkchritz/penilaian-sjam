@@ -492,7 +492,7 @@ def lihat_penilaian(id):
     if p.id_penilai != current_user.id and current_user.role.lower() != 'hrd':
         return "Akses ditolak", 403
     k = Karyawan.query.get(p.id_karyawan)
-    return render_template('nilai.html', nilai=p, karyawan=k, readonly=True)
+    return render_template('form_penilaian.html', nilai=p, karyawan=k, readonly=True)
 
 @app.route('/dashboard_karyawan')
 @login_required
