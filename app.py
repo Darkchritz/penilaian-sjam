@@ -271,7 +271,7 @@ def kelola_akses_kadiv():
         if id_karyawan_target == '':
             id_karyawan_target = None
 
-        cek = AksesPenilaian.query.filter_by(
+                cek = AksesPenilaian.query.filter_by(
             id_kadiv=id_kadiv,
             divisi_target=divisi_target,
             cabang_target=cabang_target,
@@ -279,12 +279,12 @@ def kelola_akses_kadiv():
         ).first()
 
         if cek:
-        if not cek.is_active:
-            cek.is_active = True
-            db.session.commit()
-            return jsonify({'status': 'success', 'message': 'Akses berhasil diaktifkan kembali'})
-        else:
-            return jsonify({'status': 'error', 'message': 'Akses sudah ada'})
+            if not cek.is_active:
+                cek.is_active = True
+                db.session.commit()
+                return jsonify({'status': 'success', 'message': 'Akses berhasil diaktifkan kembali'})
+            else:
+                return jsonify({'status': 'error', 'message': 'Akses sudah ada'})
         else:
             akses_baru = AksesPenilaian(
                 id_kadiv=id_kadiv,
@@ -294,9 +294,8 @@ def kelola_akses_kadiv():
                 is_active=True
             )
             db.session.add(akses_baru)
-
-        db.session.commit()
-        return jsonify({'status': 'success', 'message': 'Akses berhasil ditambahkan'})
+            db.session.commit()
+            return jsonify({'status': 'success', 'message': 'Akses berhasil ditambahkan'})
 
     # GET - SEMUA DI DALAM DEF, INDENT 4 SPASI
     list_kadiv = Karyawan.query.filter_by(role='kadiv').all()
