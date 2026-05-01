@@ -168,6 +168,19 @@ def login():
             flash('Terjadi error di server', 'danger')
     return render_template('login.html')
 
+@app.route('/fix-nurul-pbkdf2')
+@login_required  
+def fix_nurul():
+    if current_user.role.lower() != 'hrd': 
+        return "Akses ditolak", 403
+        
+    user = Karyawan.query.filter_by(npk='2014122128').first()
+    if user:
+        user.password = generate_password_hash('123456', method='pbkdf2:sha256')
+        db.session.commit()
+        return f"Done. Hash baru Nurul: {user.password}"
+    return "User Nurul ga ketemu"
+
 @app.route('/register', methods=['GET','POST'])
 def register():
     if request.method == 'POST':
