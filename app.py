@@ -213,24 +213,44 @@ def force_reset_nurul():
     
     return f"Password Nurul udah di-reset. Hash baru: {user.password}"
 
-@app.route('/reset-satu/<int:npk>')
+@app.route('/reset-semua-pbkdf2')
 @login_required
-def reset_satu(npk):
+def reset_semua_pbkdf2():
     if current_user.role.lower() != 'hrd': 
         return "Akses ditolak", 403
     
     from werkzeug.security import generate_password_hash
-    user = Karyawan.query.filter_by(npk=npk).first()
-    if not user:
-        return f"NPK {npk} ga ketemu"
+    from flask import request, redirect, url_for
+    import time
     
-    try:
-        user.password = generate_password_hash('123456', method='pbkdf2:sha256')
-        db.session.commit()
-        return f"Berhasil: {user.nama} - {user.npk} udah direset ke 123456"
-    except Exception as e:
-        db.session.rollback()
-        return f"Gagal reset {npk}: {str(e)}"
+    batch = request.args.get('batch', 1, type=int)
+    per_page = 25  # Kecilin biar ga timeout
+    
+    users = Karyawan.query.paginate(page=batch, per_page=per_page, error_out=False)
+    
+    if not users.items:
+        return "<h3>Selesai!</h3> 799 karyawan udah di-reset ke password 123456 pake pbkdf2"
+    
+    for k in users.items:
+        k.password = generate_password_hash('123456', method='pbkdf2:sha256')
+    
+    db.session.commit()
+    
+    next_batch = batch + 1
+    total_done = (batch * per_page)
+    
+    # Auto redirect 1 detik biar jalan sendiri
+    return f"""
+    <h3>Batch {batch} selesai</h3>
+    <p>Udah reset {total_done} dari 799 karyawan</p>
+    <p>Auto lanjut batch {next_batch} dalam 1 detik...</p>
+    <script>
+        setTimeout(function(){{
+            window.location.href = '/reset-semua-pbkdf2?batch={next_batch}';
+        }}, 1000);
+    </script>
+    <a href='/reset-semua-pbkdf2?batch={next_batch}'>Klik manual kalo ga jalan</a>
+    """
 
 @app.route('/list-npk')
 @login_required
