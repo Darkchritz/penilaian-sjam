@@ -414,13 +414,20 @@ def kadiv():
         return redirect(url_for('index'))
 
     tahun_ini = datetime.now().year
+    print(f"=== DEBUG KADIV ===")
+    print(f"Login sebagai: {current_user.nama} | ID: {current_user.id} | Role: {current_user.role}")
     
     if current_user.role.lower().strip() == 'super kadiv':
         karyawan_divisi = Karyawan.query.filter(
             Karyawan.role == 'karyawan'
         ).all()
+        print(f"Super Kadiv: Total karyawan = {len(karyawan_divisi)}")
     else:
         akses = AksesPenilaian.query.filter_by(id_kadiv=current_user.id, is_active=True).all()
+        print(f"Jumlah akses aktif: {len(akses)}")
+        for a in akses:
+            print(f" - Akses: divisi={a.divisi_target}, cabang={a.cabang_target}, id_karyawan_target={a.id_karyawan_target}")
+        
         if not akses:
             karyawan_divisi = []
         else:
@@ -435,6 +442,9 @@ def kadiv():
                 Karyawan.role=='karyawan', 
                 db.or_(*filter_or)
             ).all()
+            print(f"Hasil query karyawan_divisi: {len(karyawan_divisi)} orang")
+            for k in karyawan_divisi:
+                print(f" - {k.nama} | {k.divisi} | {k.cabang}")
 
     belum_dinilai = []
     sudah_dinilai = []
@@ -455,6 +465,9 @@ def kadiv():
             sudah_dinilai.append(k)
         else:
             belum_dinilai.append(k)
+
+    print(f"Total belum_dinilai: {len(belum_dinilai)} | sudah_dinilai: {len(sudah_dinilai)}")
+    print("=== END DEBUG ===")
 
     return render_template('dashboard_kadiv.html',
                            user=current_user,
