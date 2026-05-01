@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Nilai Saya - {{ tahun }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Hasil Penilaian Kinerja {{ tahun }}</h4>
+                    <small class="text-muted">Nama: {{ user.nama }} | NIK: {{ user.nik }}</small>
+                </div>
+                <div class="card-body">
+                    {% if list_nilai %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Periode</th>
+                                    <th>Nilai Akhir</th>
+                                    <th>Grade</th>
+                                    <th>Dinilai Oleh</th>
+                                    <th>Jabatan Penilai</th>
+                                    <th>Tanggal Input</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for nilai in list_nilai %}
+                                <tr>
+                                    <td><strong>{{ nilai.periode }} {{ nilai.tahun }}</strong></td>
+                                    <td>
+                                        <span class="badge {% if nilai.nilai_akhir >= 90 %}bg-success{% elif nilai.nilai_akhir >= 80 %}bg-primary{% elif nilai.nilai_akhir >= 70 %}bg-warning{% else %}bg-danger{% endif %}">
+                                            {{ "%.2f"|format(nilai.nilai_akhir) }}
+                                        </span>
+                                    </td>
+                                    <td><strong>{{ nilai.grade }}</strong></td>
+                                    <td>{{ nilai.nama_penilai }}</td>
+                                    <td>{{ nilai.jabatan_penilai }}</td>
+                                    <td>{{ nilai.tanggal_input.strftime('%d %b %Y') if nilai.tanggal_input else '-' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> Belum ada nilai final untuk periode {{ tahun }}.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
