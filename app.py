@@ -472,6 +472,7 @@ def kadiv():
         k.penilaian_status = nilai.status if nilai else None
         k.penilaian_id = nilai.id if nilai else None
 
+        # Cuma final yang masuk sudah_dinilai
         if nilai and nilai.status == 'final':
             sudah_dinilai.append(k)
         else:
