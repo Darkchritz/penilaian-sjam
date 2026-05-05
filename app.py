@@ -866,6 +866,14 @@ def cek_penilaian(id_karyawan):
     2. status == 'final' ? {p.status == 'final'}<br>
     """
 
+@app.route('/fix-id-penilai')
+@login_required
+def fix_id_penilai():
+    p = Penilaian.query.get(2)  # ID Penilaian dari debug tadi
+    p.id_penilai = current_user.id
+    db.session.commit()
+    return f"Udah di-fix. id_penilai sekarang = {p.id_penilai}"
+
 @app.route('/logout')
 @login_required
 def logout():
