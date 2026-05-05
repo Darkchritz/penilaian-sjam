@@ -839,6 +839,33 @@ def nilai_saya():
                            list_nilai=list_nilai,
                            tahun=tahun_ini)
 
+@app.route('/cek-penilaian/<int:id_karyawan>')
+@login_required
+def cek_penilaian(id_karyawan):
+    p = Penilaian.query.filter_by(
+        id_karyawan=id_karyawan, 
+        periode='Q1', 
+        tahun=2026
+    ).first()
+    
+    if not p:
+        return f"Belum ada data penilaian buat id_karyawan={id_karyawan}"
+    
+    return f"""
+    ID Penilaian: {p.id}<br>
+    id_karyawan: {p.id_karyawan}<br>
+    id_penilai: {p.id_penilai}<br>
+    ID Login lu sekarang: {current_user.id}<br>
+    status: {p.status}<br>
+    periode: {p.periode}<br>
+    tahun: {p.tahun}<br>
+    nilai_akhir: {p.nilai_akhir}<br>
+    <br>
+    Syarat masuk 'Sudah Dinilai':<br>
+    1. id_penilai == {current_user.id} ? {p.id_penilai == current_user.id}<br>
+    2. status == 'final' ? {p.status == 'final'}<br>
+    """
+
 @app.route('/logout')
 @login_required
 def logout():
