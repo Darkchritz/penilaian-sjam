@@ -423,6 +423,7 @@ def kadiv():
         return redirect(url_for('index'))
 
     tahun_ini = datetime.now().year
+    periode = 'Q1'  # TAMBAHAN BARIS 1
     print(f"=== DEBUG KADIV ===")
     print(f"Login sebagai: {current_user.nama} | ID: {current_user.id} | Role: {current_user.role} | Divisi: {current_user.divisi} | Cabang: {current_user.cabang}")
     
@@ -462,7 +463,7 @@ def kadiv():
         nilai = Penilaian.query.filter_by(
             id_karyawan=k.id,
             id_penilai=current_user.id,
-            periode='Q1',
+            periode=periode,  # ganti dari 'Q1' ke variabel
             tahun=tahun_ini
         ).first()
 
@@ -484,7 +485,9 @@ def kadiv():
     return render_template('dashboard_kadiv.html',
                            user=current_user,
                            belum_dinilai=belum_dinilai,
-                           sudah_dinilai=sudah_dinilai)
+                           sudah_dinilai=sudah_dinilai,
+                           periode=periode,  # TAMBAHAN BARIS 2
+                           tahun=tahun_ini)  # TAMBAHAN BARIS 3
 
 @app.route('/lihat_penilaian/<int:id>')
 @login_required
