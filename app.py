@@ -481,6 +481,8 @@ def kadiv():
         ).first()
         k.nilai_akhir = nilai.nilai_akhir if nilai else 0
         k.grade = nilai.grade if nilai else '-'
+        k.penilaian_id = nilai.id if nilai else None
+        k.penilaian_status = nilai.status if nilai else None
 
     print(f"Total belum_dinilai: {belum_paginate.total} | sudah_dinilai: {sudah_paginate.total}")
     print("=== END DEBUG ===")
