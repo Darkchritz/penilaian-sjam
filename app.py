@@ -625,6 +625,53 @@ def nilai(id):
                          periode=periode,
                          tahun=tahun)
 
+@app.route('/submit_nilai', methods=['POST'])
+@login_required
+def submit_nilai():
+    id_karyawan = int(request.form['id'])
+    periode = request.form['periode']
+    tahun = int(request.form['tahun'])
+    action = request.form.get('action', 'draft')
+    
+    p = Penilaian.query.filter_by(id_karyawan=id_karyawan, periode=periode, tahun=tahun).first()
+    if not p:
+        p = Penilaian(
+            id_karyawan=id_karyawan,
+            id_penilai=current_user.id,  # INI WAJIB ADA
+            periode=periode,
+            tahun=tahun
+        )
+        db.session.add(p)
+    
+    # Update semua KPI
+    for i in range(1, 36):
+        setattr(p, f'kpi{i}', int(request.form.get(f'kpi{i}', 0)))
+    
+    # Set status + id_penilai
+    p.status = action
+    p.id_penilai = current_user.id  # UPDATE JUGA KALO UDAH ADA
+    
+    if action == 'final':
+        # Hitung nilai_akhir
+        total = 0
+        bobot_map = {
+            **{f'kpi{i}': 4.00 for i in range(1, 6)},
+            **{f'kpi{i}': 4.00 for i in range(6, 11)},
+            **{f'kpi{i}': 3.00 for i in range(11, 16)},
+            **{f'kpi{i}': 2.00 for i in range(16, 21)},
+            **{f'kpi{i}': 3.00 for i in range(21, 26)},
+            **{f'kpi{i}': 2.00 for i in range(26, 31)},
+            **{f'kpi{i}': 2.00 for i in range(31, 36)},
+        }
+        for kpi, bobot in bobot_map.items():
+            nilai_kpi = getattr(p, kpi, 0) or 0
+            total += (nilai_kpi / 5) * bobot
+        p.nilai_akhir = round(total, 2)
+    
+    db.session.commit()
+    flash(f'Penilaian {periode} berhasil disimpan!', 'success')
+    return redirect(url_for('kadiv'))
+
 @app.route('/tambah-karyawan', methods=['GET', 'POST'])
 @login_required
 def tambah_karyawan():
