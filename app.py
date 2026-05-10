@@ -14,6 +14,10 @@ app.secret_key = os.environ.get('SECRET_KEY', 'sjam-penilaian-secret-2026')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+from datetime import timedelta
+app.config['REMEMBER_COOKIE_DURATION'] = timedelta(days=0)  # matiin auto-login
+app.config['SESSION_PERMANENT'] = False
+
 def hitung_grade(nilai):
     if nilai <= 20: return 'E'
     elif nilai <= 30: return 'E+'
