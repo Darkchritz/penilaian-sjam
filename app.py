@@ -493,12 +493,15 @@ def kadiv():
 @login_required
 def lihat_penilaian(id):
     p = Penilaian.query.get_or_404(id)
-    if p.id_penilai != current_user.id and current_user.role.lower() != 'hrd':
+    if p.id_penilai!= current_user.id and current_user.role.lower()!= 'hrd':
         return "Akses ditolak", 403
     k = Karyawan.query.get(p.id_karyawan)
-    return render_template('nilai_form.html', nilai=p, karyawan=k, readonly=True)
-    periode=p.periode,
-    tahun=p.tahun)
+    return render_template('nilai_form.html', 
+                         nilai=p, 
+                         karyawan=k, 
+                         readonly=True,
+                         periode=p.periode,
+                         tahun=p.tahun)
 
 @app.route('/dashboard_karyawan')
 @login_required
