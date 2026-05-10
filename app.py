@@ -950,14 +950,13 @@ def logout():
 @app.route('/export_rekap')
 @login_required
 def export_rekap():
-    # Kasih akses ke admin + super kadiv + kadiv + hrd
     if current_user.role.lower().strip() not in ['admin', 'super kadiv', 'kadiv', 'kepala divisi', 'hrd']:
         return "Akses ditolak", 403
 
     tahun_ini = datetime.now().year
-    periode = request.args.get('periode', 'Q1')
+    periode = request.args.get('periode', 'Q1')  # default Q1
 
-    # Query semua penilaian final
+    # Query penilaian final + join penilai
     data = db.session.query(
         Karyawan.npk,
         Karyawan.nama,
@@ -968,20 +967,19 @@ def export_rekap():
         Penilaian.tahun,
         Penilaian.nilai_akhir,
         Penilaian.grade,
-        Karyawan.id.label('penilai_id')  # buat join penilai
+        Penilaian.id_penilai
     ).join(Penilaian, Karyawan.id == Penilaian.id_karyawan)\
      .filter(Penilaian.status == 'final', Penilaian.tahun == tahun_ini, Penilaian.periode == periode)\
      .all()
 
     if not data:
-        flash('Data rekap kosong untuk periode ' + periode, 'error')
-        return redirect(url_for('index'))
+        flash(f'Data rekap {periode} kosong', 'error')
+        return redirect(url_for('hrd'))
 
-    # Ambil nama penilai
+    # Ambil nama + NPK penilai
     hasil = []
     for d in data:
-        p = Penilaian.query.filter_by(id_karyawan=d.penilai_id, periode=periode, tahun=tahun_ini, status='final').first()
-        penilai = Karyawan.query.get(p.id_penilai) if p else None
+        penilai = Karyawan.query.get(d.id_penilai) if d.id_penilai else None
         hasil.append({
             'NPK': d.npk,
             'Nama': d.nama,
@@ -992,26 +990,19 @@ def export_rekap():
             'Tahun': d.tahun,
             'Nilai Akhir': d.nilai_akhir,
             'Grade': d.grade,
-            'Dinilai Oleh': penilai.nama if penilai else '-'
+            'Dinilai Oleh': penilai.nama if penilai else '-',
+            'NPK Penilai': penilai.npk if penilai else '-'  # TAMBAH INI
         })
 
     df = pd.DataFrame(hasil)
     
-    # Simpan ke Excel di memory
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        df.to_excel(writer, index=False, sheet_name='Rekap Penilaian')
+        df.to_excel(writer, index=False, sheet_name=f'Rekap {periode}')
     output.seek(0)
 
     filename = f"Rekap_Penilaian_{periode}_{tahun_ini}.xlsx"
     return send_file(output, download_name=filename, as_attachment=True, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-
-with app.app_context():
-    db.create_all()
-    if not Karyawan.query.filter_by(npk=123).first():
-        admin = Karyawan(npk=123, nama='Admin', password=generate_password_hash('123456', method='pbkdf2:sha256'), role='hrd', divisi='HRD', cabang='PUSAT/MD')
-        db.session.add(admin)
-        db.session.commit()
 
 with app.app_context():
     db.create_all()
