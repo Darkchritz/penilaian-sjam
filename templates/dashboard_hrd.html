@@ -59,35 +59,50 @@
     {% endif %}
 
     <!-- Action Buttons -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-            <button @click="showTambah = true" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-4 py-3 rounded-xl font-semibold transition shadow-md flex items-center justify-center gap-2">
-                <i class="bi bi-person-plus text-lg"></i>
-                <span>Tambah Karyawan</span>
-            </button>
-            <a href="{{ url_for('kelola_akses_kadiv') }}" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-3 rounded-xl font-semibold transition shadow-md flex items-center justify-center gap-2">
-                <i class="bi bi-person-lock text-lg"></i>
-                <span>Kelola Akses Kadiv</span>
-            </a>
-            <a href="/hrd/download_karyawan" class="bg-white border-2 border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 text-gray-700 hover:text-indigo-700 px-4 py-3 rounded-xl font-semibold transition shadow-sm flex items-center justify-center gap-2">
-                <i class="bi bi-download text-lg"></i>
-                <span>Download Template</span>
-            </a>
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        <button @click="showTambah = true" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-4 py-3 rounded-xl font-semibold transition shadow-md flex items-center justify-center gap-2">
+            <i class="bi bi-person-plus text-lg"></i>
+            <span>Tambah Karyawan</span>
+        </button>
+        <a href="{{ url_for('kelola_akses_kadiv') }}" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-3 rounded-xl font-semibold transition shadow-md flex items-center justify-center gap-2">
+            <i class="bi bi-person-lock text-lg"></i>
+            <span>Kelola Akses Kadiv</span>
+        </a>
+        <a href="/hrd/download_karyawan" class="bg-white border-2 border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 text-gray-700 hover:text-indigo-700 px-4 py-3 rounded-xl font-semibold transition shadow-sm flex items-center justify-center gap-2">
+            <i class="bi bi-download text-lg"></i>
+            <span>Download Template</span>
+        </a>
 
-            <form action="/hrd/upload_karyawan" method="POST" enctype="multipart/form-data" class="h-full">
-                <label class="bg-white border-2 border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 text-gray-700 hover:text-indigo-700 px-4 py-3 rounded-xl font-semibold transition shadow-sm cursor-pointer flex items-center justify-center gap-2 w-full h-full min-h-[52px]">
-                    <i class="bi bi-upload text-lg"></i>
-                    <span>Upload Excel</span>
-                    <input type="file" name="file" accept=".xlsx" class="hidden" onchange="this.form.submit()">
-                </label>
-            </form>
+        <form action="/hrd/upload_karyawan" method="POST" enctype="multipart/form-data" class="h-full">
+            <label class="bg-white border-2 border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 text-gray-700 hover:text-indigo-700 px-4 py-3 rounded-xl font-semibold transition shadow-sm cursor-pointer flex items-center justify-center gap-2 w-full h-full min-h-">
+                <i class="bi bi-upload text-lg"></i>
+                <span>Upload Excel</span>
+                <input type="file" name="file" accept=".xlsx" class="hidden" onchange="this.form.submit()">
+            </label>
+        </form>
 
-            <a href="{{ url_for('export_rekap', periode=periode_aktif) }}" class="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-4 py-3 rounded-xl font-semibold transition shadow-md flex items-center justify-center gap-2">
+        <!-- GANTI TOMBOL EXPORT JADI DROPDOWN -->
+        <div class="relative" x-data="{ openExport: false }">
+            <button @click="openExport = !openExport" type="button" class="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-4 py-3 rounded-xl font-semibold transition shadow-md flex items-center justify-center gap-2">
                 <i class="bi bi-file-earmark-excel text-lg"></i>
-                <span>Export Rekap {{ periode_aktif }}</span>
-            </a>
+                <span>Export Rekap</span>
+                <i class="bi bi-chevron-down text-xs"></i>
+            </button>
+            <div x-show="openExport" 
+                 @click.away="openExport = false"
+                 x-transition
+                 class="origin-top-right absolute right-0 mt-2 w-40 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-20">
+                <div class="py-1">
+                    <a href="{{ url_for('export_rekap', periode='Q1') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Export Q1</a>
+                    <a href="{{ url_for('export_rekap', periode='Q2') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Export Q2</a>
+                    <a href="{{ url_for('export_rekap', periode='Q3') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Export Q3</a>
+                    <a href="{{ url_for('export_rekap', periode='Q4') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Export Q4</a>
+                </div>
+            </div>
         </div>
     </div>
+</div>
 
     <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <!-- Master Karyawan - Full Width -->
