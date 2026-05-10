@@ -456,13 +456,12 @@ def kadiv():
             )
             print(f"Kadiv Cabang: Total bawahan semua divisi = {base_query.count()} orang")
 
-    # Subquery buat cek yg udah final
+    # UBAH 1: Hapus id_penilai=current_user.id biar cek semua kadiv yg udah final
     subquery_final = Penilaian.query.with_entities(Penilaian.id_karyawan).filter_by(
-        id_penilai=current_user.id,
         periode=periode,
         tahun=tahun_ini,
         status='final'
-    )
+    ).distinct()
     
     belum_query = base_query.filter(~Karyawan.id.in_(subquery_final))
     sudah_query = base_query.filter(Karyawan.id.in_(subquery_final))
@@ -470,11 +469,10 @@ def kadiv():
     belum_paginate = belum_query.paginate(page=page_belum, per_page=per_page, error_out=False)
     sudah_paginate = sudah_query.paginate(page=page_sudah, per_page=per_page, error_out=False)
 
-    # Tambahin data nilai buat yg sudah dinilai
+    # UBAH 2: Hapus id_penilai=current_user.id + tambah nama penilai
     for k in sudah_paginate.items:
         nilai = Penilaian.query.filter_by(
             id_karyawan=k.id,
-            id_penilai=current_user.id,
             periode=periode,
             tahun=tahun_ini,
             status='final'
@@ -483,6 +481,7 @@ def kadiv():
         k.grade = nilai.grade if nilai else '-'
         k.penilaian_id = nilai.id if nilai else None
         k.penilaian_status = nilai.status if nilai else None
+        k.dinilai_oleh = nilai.penilai.nama if nilai and nilai.penilai else '-'
 
     print(f"Total belum_dinilai: {belum_paginate.total} | sudah_dinilai: {sudah_paginate.total}")
     print("=== END DEBUG ===")
