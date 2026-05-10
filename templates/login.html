@@ -47,15 +47,20 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">NPK</label>
                 <div class="relative">
                     <i class="bi bi-person absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                    <input name="npk" required class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" placeholder="Masukkan NPK">
+                    <input id="npk" name="npk" required class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" placeholder="Masukkan NPK">
                 </div>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
                 <div class="relative">
                     <i class="bi bi-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                    <input name="password" type="password" required class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" placeholder="Masukkan password">
+                    <input id="password" name="password" type="password" required class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" placeholder="Masukkan password">
                 </div>
+            </div>
+            <!-- TAMBAH CHECKBOX INI -->
+            <div class="flex items-center">
+                <input id="remember" name="remember" type="checkbox" class="h-4 w-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500">
+                <label for="remember" class="ml-2 block text-sm text-gray-700">Ingat saya</label>
             </div>
             <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white py-3 rounded-xl font-semibold transition shadow-lg shadow-indigo-500/30">
                 <i class="bi bi-box-arrow-in-right"></i> Masuk
@@ -66,5 +71,36 @@
             Belum punya akun? <a href="/register" class="text-indigo-600 hover:text-indigo-800 font-semibold">Daftar di sini</a>
         </p>
     </div>
+
+    <!-- TAMBAH JS INI SEBELUM </body> -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const npkInput = document.getElementById('npk');
+        const passwordInput = document.getElementById('password');
+        const rememberCheckbox = document.getElementById('remember');
+        const loginForm = document.querySelector('form');
+
+        // Pas load, isi dari localStorage kalo ada
+        const savedNPK = localStorage.getItem('savedNPK');
+        const savedPassword = localStorage.getItem('savedPassword');
+        
+        if (savedNPK && savedPassword) {
+            npkInput.value = savedNPK;
+            passwordInput.value = savedPassword;
+            rememberCheckbox.checked = true;
+        }
+
+        // Pas submit, simpen ke localStorage kalo dicentang
+        loginForm.addEventListener('submit', function() {
+            if (rememberCheckbox.checked) {
+                localStorage.setItem('savedNPK', npkInput.value);
+                localStorage.setItem('savedPassword', passwordInput.value);
+            } else {
+                localStorage.removeItem('savedNPK');
+                localStorage.removeItem('savedPassword');
+            }
+        });
+    });
+    </script>
 </body>
 </html>
