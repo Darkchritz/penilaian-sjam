@@ -423,9 +423,9 @@ def kadiv():
         return redirect(url_for('index'))
 
     tahun_ini = datetime.now().year
-    periode = 'Q1'  # TAMBAHAN BARIS 1
+    periode = request.args.get('periode', 'Q1')  # GANTI BARIS INI
     print(f"=== DEBUG KADIV ===")
-    print(f"Login sebagai: {current_user.nama} | ID: {current_user.id} | Role: {current_user.role} | Divisi: {current_user.divisi} | Cabang: {current_user.cabang}")
+    print(f"Login sebagai: {current_user.nama} | ID: {current_user.id} | Role: {current_user.role} | Divisi: {current_user.divisi} | Cabang: {current_user.cabang} | Periode: {periode}")
     
     if current_user.role.lower().strip() == 'super kadiv':
         karyawan_divisi = Karyawan.query.filter(
@@ -465,7 +465,7 @@ def kadiv():
             id_penilai=current_user.id,
             periode=periode,
             tahun=tahun_ini,
-            status='final'  # TAMBAH BARIS INI DOANG
+            status='final'
         ).first()
 
         if nilai:
