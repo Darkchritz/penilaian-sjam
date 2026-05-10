@@ -423,15 +423,17 @@ def kadiv():
         return redirect(url_for('index'))
 
     tahun_ini = datetime.now().year
-    periode = request.args.get('periode', 'Q1')  # GANTI BARIS INI
+    periode = request.args.get('periode', 'Q1')
+    page_belum = request.args.get('page_belum', 1, type=int)
+    page_sudah = request.args.get('page_sudah', 1, type=int)
+    per_page = 8  # 8 orang per halaman
+    
     print(f"=== DEBUG KADIV ===")
     print(f"Login sebagai: {current_user.nama} | ID: {current_user.id} | Role: {current_user.role} | Divisi: {current_user.divisi} | Cabang: {current_user.cabang} | Periode: {periode}")
     
     if current_user.role.lower().strip() == 'super kadiv':
-        karyawan_divisi = Karyawan.query.filter(
-            Karyawan.role == 'karyawan'
-        ).all()
-        print(f"Super Kadiv: Total karyawan = {len(karyawan_divisi)}")
+        base_query = Karyawan.query.filter(Karyawan.role == 'karyawan')
+        print(f"Super Kadiv: Total karyawan = {base_query.count()}")
     else:
         # Cek apakah Kadiv HO/PUSAT
         list_pusat = ['HO', 'PUSAT MD', 'SJAM HO', 'PUSAT / MD']
@@ -440,26 +442,36 @@ def kadiv():
 
         if is_pusat:
             # Kadiv HO: tetap 1 divisi doang, tapi semua cabang HO
-            karyawan_divisi = Karyawan.query.filter(
+            base_query = Karyawan.query.filter(
                 Karyawan.divisi == current_user.divisi,
                 Karyawan.cabang.in_(list_pusat),
                 Karyawan.id != current_user.id
-            ).all()
-            print(f"Kadiv HO: Total bawahan 1 divisi = {len(karyawan_divisi)}")
+            )
+            print(f"Kadiv HO: Total bawahan 1 divisi = {base_query.count()}")
         else:
             # KADIV CABANG: HAPUS FILTER DIVISI, KUNCI CABANG AJA
-            karyawan_divisi = Karyawan.query.filter(
+            base_query = Karyawan.query.filter(
                 Karyawan.cabang == current_user.cabang,
                 Karyawan.id != current_user.id
-            ).all()
-            print(f"Kadiv Cabang: Total bawahan semua divisi = {len(karyawan_divisi)} orang")
-            for k in karyawan_divisi:
-                print(f" - {k.nama} | {k.divisi} | {k.cabang} | role={k.role}")
+            )
+            print(f"Kadiv Cabang: Total bawahan semua divisi = {base_query.count()} orang")
 
-    belum_dinilai = []
-    sudah_dinilai = []
+    # Subquery buat cek yg udah final
+    subquery_final = Penilaian.query.with_entities(Penilaian.id_karyawan).filter_by(
+        id_penilai=current_user.id,
+        periode=periode,
+        tahun=tahun_ini,
+        status='final'
+    )
+    
+    belum_query = base_query.filter(~Karyawan.id.in_(subquery_final))
+    sudah_query = base_query.filter(Karyawan.id.in_(subquery_final))
 
-    for k in karyawan_divisi:
+    belum_paginate = belum_query.paginate(page=page_belum, per_page=per_page, error_out=False)
+    sudah_paginate = sudah_query.paginate(page=page_sudah, per_page=per_page, error_out=False)
+
+    # Tambahin data nilai buat yg sudah dinilai
+    for k in sudah_paginate.items:
         nilai = Penilaian.query.filter_by(
             id_karyawan=k.id,
             id_penilai=current_user.id,
@@ -467,29 +479,16 @@ def kadiv():
             tahun=tahun_ini,
             status='final'
         ).first()
+        k.nilai_akhir = nilai.nilai_akhir if nilai else 0
+        k.grade = nilai.grade if nilai else '-'
 
-        if nilai:
-            k.nilai_akhir = nilai.nilai_akhir
-            k.grade = nilai.grade
-            k.status_nilai = nilai.status
-            k.penilaian_status = nilai.status
-            k.penilaian_id = nilai.id
-            sudah_dinilai.append(k)
-        else:
-            k.nilai_akhir = 0
-            k.grade = '-'
-            k.status_nilai = None
-            k.penilaian_status = None
-            k.penilaian_id = None
-            belum_dinilai.append(k)
-
-    print(f"Total belum_dinilai: {len(belum_dinilai)} | sudah_dinilai: {len(sudah_dinilai)}")
+    print(f"Total belum_dinilai: {belum_paginate.total} | sudah_dinilai: {sudah_paginate.total}")
     print("=== END DEBUG ===")
 
     return render_template('dashboard_kadiv.html',
                            user=current_user,
-                           belum_dinilai=belum_dinilai,
-                           sudah_dinilai=sudah_dinilai,
+                           belum_paginate=belum_paginate,
+                           sudah_paginate=sudah_paginate,
                            periode=periode,
                            tahun=tahun_ini)
 
