@@ -954,44 +954,33 @@ def export_rekap():
         return "Akses ditolak", 403
 
     tahun_ini = datetime.now().year
-    periode = request.args.get('periode', 'Q1')  # default Q1
+    periode = request.args.get('periode', 'Q1')
 
-    # Query penilaian final + join penilai
-    data = db.session.query(
-        Karyawan.npk,
-        Karyawan.nama,
-        Karyawan.divisi,
-        Karyawan.cabang,
-        Karyawan.role,
-        Penilaian.periode,
-        Penilaian.tahun,
-        Penilaian.nilai_akhir,
-        Penilaian.grade,
-        Penilaian.id_penilai
-    ).join(Penilaian, Karyawan.id == Penilaian.id_karyawan)\
-     .filter(Penilaian.status == 'final', Penilaian.tahun == tahun_ini, Penilaian.periode == periode)\
-     .all()
+    # Ambil data penilaian + join karyawan yg dinilai
+    data_penilaian = db.session.query(Penilaian, Karyawan)\
+        .join(Karyawan, Penilaian.id_karyawan == Karyawan.id)\
+        .filter(Penilaian.status == 'final', Penilaian.tahun == tahun_ini, Penilaian.periode == periode)\
+        .all()
 
-    if not data:
+    if not data_penilaian:
         flash(f'Data rekap {periode} kosong', 'error')
         return redirect(url_for('hrd'))
 
-    # Ambil nama + NPK penilai
     hasil = []
-    for d in data:
-        penilai = Karyawan.query.get(d.id_penilai) if d.id_penilai else None
+    for p, k in data_penilaian:  # p = Penilaian, k = Karyawan yg dinilai
+        penilai = Karyawan.query.get(p.id_penilai) if p.id_penilai else None
         hasil.append({
-            'NPK': d.npk,
-            'Nama': d.nama,
-            'Divisi': d.divisi,
-            'Cabang': d.cabang,
-            'Role': d.role,
-            'Periode': d.periode,
-            'Tahun': d.tahun,
-            'Nilai Akhir': d.nilai_akhir,
-            'Grade': d.grade,
+            'NPK': k.npk,
+            'Nama': k.nama,
+            'Divisi': k.divisi,
+            'Cabang': k.cabang,
+            'Role': k.role,
+            'Periode': p.periode,
+            'Tahun': p.tahun,
+            'Nilai Akhir': p.nilai_akhir,
+            'Grade': p.grade,
             'Dinilai Oleh': penilai.nama if penilai else '-',
-            'NPK Penilai': penilai.npk if penilai else '-'  # TAMBAH INI
+            'NPK Penilai': penilai.npk if penilai else '-'  # INI YANG KEMARIN KOSONG
         })
 
     df = pd.DataFrame(hasil)
@@ -1003,7 +992,7 @@ def export_rekap():
 
     filename = f"Rekap_Penilaian_{periode}_{tahun_ini}.xlsx"
     return send_file(output, download_name=filename, as_attachment=True, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-
+    
 with app.app_context():
     db.create_all()
     if not Karyawan.query.filter_by(npk=123).first():
