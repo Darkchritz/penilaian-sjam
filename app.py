@@ -481,7 +481,9 @@ def kadiv():
         k.grade = nilai.grade if nilai else '-'
         k.penilaian_id = nilai.id if nilai else None
         k.penilaian_status = nilai.status if nilai else None
-        k.dinilai_oleh = nilai.penilai.nama if nilai and nilai.penilai else '-'
+        # FIX: ganti baris ini karena model Penilaian ga ada relationship 'penilai'
+        penilai = Karyawan.query.get(nilai.id_penilai) if nilai else None
+        k.dinilai_oleh = penilai.nama if penilai else '-'
 
     print(f"Total belum_dinilai: {belum_paginate.total} | sudah_dinilai: {sudah_paginate.total}")
     print("=== END DEBUG ===")
