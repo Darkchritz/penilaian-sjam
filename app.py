@@ -142,10 +142,14 @@ def index():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+        
     if request.method == 'POST':
         try:
             npk_input = request.form['npk']
             password_input = request.form['password']
+            remember = True if request.form.get('remember') else False  # tambah ini
             
             print(f"DEBUG NPK DARI FORM: '{npk_input}'") # cek ada spasi ga
             
@@ -159,7 +163,7 @@ def login():
                 print(f"DEBUG HASIL CHECK_PASSWORD: {cek}")
                 
                 if cek:
-                    login_user(user)
+                    login_user(user, remember=remember)  # tambah remember=remember
                     return redirect(url_for('index'))
             
             flash('NPK atau Password salah', 'danger')
