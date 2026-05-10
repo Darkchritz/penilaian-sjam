@@ -947,6 +947,72 @@ def logout():
     session.clear()
     return redirect('/login')
 
+@app.route('/export_rekap')
+@login_required
+def export_rekap():
+    # Kasih akses ke admin + super kadiv + kadiv + hrd
+    if current_user.role.lower().strip() not in ['admin', 'super kadiv', 'kadiv', 'kepala divisi', 'hrd']:
+        return "Akses ditolak", 403
+
+    tahun_ini = datetime.now().year
+    periode = request.args.get('periode', 'Q1')
+
+    # Query semua penilaian final
+    data = db.session.query(
+        Karyawan.npk,
+        Karyawan.nama,
+        Karyawan.divisi,
+        Karyawan.cabang,
+        Karyawan.role,
+        Penilaian.periode,
+        Penilaian.tahun,
+        Penilaian.nilai_akhir,
+        Penilaian.grade,
+        Karyawan.id.label('penilai_id')  # buat join penilai
+    ).join(Penilaian, Karyawan.id == Penilaian.id_karyawan)\
+     .filter(Penilaian.status == 'final', Penilaian.tahun == tahun_ini, Penilaian.periode == periode)\
+     .all()
+
+    if not data:
+        flash('Data rekap kosong untuk periode ' + periode, 'error')
+        return redirect(url_for('index'))
+
+    # Ambil nama penilai
+    hasil = []
+    for d in data:
+        p = Penilaian.query.filter_by(id_karyawan=d.penilai_id, periode=periode, tahun=tahun_ini, status='final').first()
+        penilai = Karyawan.query.get(p.id_penilai) if p else None
+        hasil.append({
+            'NPK': d.npk,
+            'Nama': d.nama,
+            'Divisi': d.divisi,
+            'Cabang': d.cabang,
+            'Role': d.role,
+            'Periode': d.periode,
+            'Tahun': d.tahun,
+            'Nilai Akhir': d.nilai_akhir,
+            'Grade': d.grade,
+            'Dinilai Oleh': penilai.nama if penilai else '-'
+        })
+
+    df = pd.DataFrame(hasil)
+    
+    # Simpan ke Excel di memory
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Rekap Penilaian')
+    output.seek(0)
+
+    filename = f"Rekap_Penilaian_{periode}_{tahun_ini}.xlsx"
+    return send_file(output, download_name=filename, as_attachment=True, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+
+with app.app_context():
+    db.create_all()
+    if not Karyawan.query.filter_by(npk=123).first():
+        admin = Karyawan(npk=123, nama='Admin', password=generate_password_hash('123456', method='pbkdf2:sha256'), role='hrd', divisi='HRD', cabang='PUSAT/MD')
+        db.session.add(admin)
+        db.session.commit()
+
 with app.app_context():
     db.create_all()
     if not Karyawan.query.filter_by(npk=123).first():
