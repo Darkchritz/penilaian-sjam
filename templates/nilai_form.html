@@ -48,7 +48,7 @@
                 </div>
             </div>
 
-            {% if penilaian and penilaian.status == 'final' %}
+            {% if nilai and nilai.status == 'final' %}
             <div class="bg-green-50 border border-green-200 rounded-xl p-4 mb-6 flex items-center gap-3">
                 <i class="bi bi-check-circle text-green-600 text-xl"></i>
                 <p class="text-sm text-green-800 font-semibold">Penilaian {{ periode }} sudah Final. Hubungi HRD untuk mengubah.</p>
@@ -71,7 +71,7 @@
                         ('kpi5', 'Disiplin dalam Menjaga Kebersihan dan Kerapian Tempat Kerja', '4.00%')
                     ] %}
                     {% for key, title, bobot in kpi_list %}
-                        {% set val = penilaian[key] if penilaian else None %}
+                        {% set val = nilai[key] if nilai else None %}
                         <div class="mb-5 pb-5 border-b last:border-0">
                             <p class="font-semibold text-gray-800 mb-1">{{ loop.index }}. {{ title }}</p>
                             <p class="text-xs text-gray-500 mb-3">Bobot: {{ bobot }}</p>
@@ -81,7 +81,7 @@
                                 <label class="flex-1">
                                     <input type="radio" name="{{ key }}" value="{{ n }}" required
                                            {% if val == n %}checked{% endif %}
-                                           {% if penilaian and penilaian.status == 'final' %}disabled{% endif %}
+                                           {% if nilai and nilai.status == 'final' %}disabled{% endif %}
                                            class="peer hidden">
                                     <div class="text-center py-2 px-1 rounded-lg border-2 cursor-pointer transition
                                                 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600
@@ -108,7 +108,7 @@
                         ('kpi10', 'Peningkatan kinerja secara berkelanjutan', '4.00%')
                     ] %}
                     {% for key, title, bobot in kpi_list %}
-                        {% set val = penilaian[key] if penilaian else None %}
+                        {% set val = nilai[key] if nilai else None %}
                         <div class="mb-5 pb-5 border-b last:border-0">
                             <p class="font-semibold text-gray-800 mb-1">{{ loop.index }}. {{ title }}</p>
                             <p class="text-xs text-gray-500 mb-3">Bobot: {{ bobot }}</p>
@@ -118,7 +118,7 @@
                                 <label class="flex-1">
                                     <input type="radio" name="{{ key }}" value="{{ n }}" required
                                            {% if val == n %}checked{% endif %}
-                                           {% if penilaian and penilaian.status == 'final' %}disabled{% endif %}
+                                           {% if nilai and nilai.status == 'final' %}disabled{% endif %}
                                            class="peer hidden">
                                     <div class="text-center py-2 px-1 rounded-lg border-2 cursor-pointer transition
                                                 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600
@@ -145,7 +145,7 @@
                         ('kpi15', 'Responsif terhadap tugas yang mendadak', '3.00%')
                     ] %}
                     {% for key, title, bobot in kpi_list %}
-                        {% set val = penilaian[key] if penilaian else None %}
+                        {% set val = nilai[key] if nilai else None %}
                         <div class="mb-5 pb-5 border-b last:border-0">
                             <p class="font-semibold text-gray-800 mb-1">{{ loop.index }}. {{ title }}</p>
                             <p class="text-xs text-gray-500 mb-3">Bobot: {{ bobot }}</p>
@@ -155,7 +155,7 @@
                                 <label class="flex-1">
                                     <input type="radio" name="{{ key }}" value="{{ n }}" required
                                            {% if val == n %}checked{% endif %}
-                                           {% if penilaian and penilaian.status == 'final' %}disabled{% endif %}
+                                           {% if nilai and nilai.status == 'final' %}disabled{% endif %}
                                            class="peer hidden">
                                     <div class="text-center py-2 px-1 rounded-lg border-2 cursor-pointer transition
                                                 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600
@@ -182,7 +182,7 @@
                         ('kpi20', 'Sikap Profesional dalam Interaksi Team', '2.00%')
                     ] %}
                     {% for key, title, bobot in kpi_list %}
-                        {% set val = penilaian[key] if penilaian else None %}
+                        {% set val = nilai[key] if nilai else None %}
                         <div class="mb-5 pb-5 border-b last:border-0">
                             <p class="font-semibold text-gray-800 mb-1">{{ loop.index }}. {{ title }}</p>
                             <p class="text-xs text-gray-500 mb-3">Bobot: {{ bobot }}</p>
@@ -192,7 +192,7 @@
                                 <label class="flex-1">
                                     <input type="radio" name="{{ key }}" value="{{ n }}" required
                                            {% if val == n %}checked{% endif %}
-                                           {% if penilaian and penilaian.status == 'final' %}disabled{% endif %}
+                                           {% if nilai and nilai.status == 'final' %}disabled{% endif %}
                                            class="peer hidden">
                                     <div class="text-center py-2 px-1 rounded-lg border-2 cursor-pointer transition
                                                 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600
@@ -219,7 +219,7 @@
                         ('kpi25', 'Mengelola dan Mengatur Prioritas Kerja', '3.00%')
                     ] %}
                     {% for key, title, bobot in kpi_list %}
-                        {% set val = penilaian[key] if penilaian else None %}
+                        {% set val = nilai[key] if nilai else None %}
                         <div class="mb-5 pb-5 border-b last:border-0">
                             <p class="font-semibold text-gray-800 mb-1">{{ loop.index }}. {{ title }}</p>
                             <p class="text-xs text-gray-500 mb-3">Bobot: {{ bobot }}</p>
@@ -229,7 +229,7 @@
                                 <label class="flex-1">
                                     <input type="radio" name="{{ key }}" value="{{ n }}" required
                                            {% if val == n %}checked{% endif %}
-                                           {% if penilaian and penilaian.status == 'final' %}disabled{% endif %}
+                                           {% if nilai and nilai.status == 'final' %}disabled{% endif %}
                                            class="peer hidden">
                                     <div class="text-center py-2 px-1 rounded-lg border-2 cursor-pointer transition
                                                 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600
@@ -256,7 +256,7 @@
                         ('kpi30', 'Proaktif dalam Mencari Solusi Alternatif', '2.00%')
                     ] %}
                     {% for key, title, bobot in kpi_list %}
-                        {% set val = penilaian[key] if penilaian else None %}
+                        {% set val = nilai[key] if nilai else None %}
                         <div class="mb-5 pb-5 border-b last:border-0">
                             <p class="font-semibold text-gray-800 mb-1">{{ loop.index }}. {{ title }}</p>
                             <p class="text-xs text-gray-500 mb-3">Bobot: {{ bobot }}</p>
@@ -266,7 +266,7 @@
                                 <label class="flex-1">
                                     <input type="radio" name="{{ key }}" value="{{ n }}" required
                                            {% if val == n %}checked{% endif %}
-                                           {% if penilaian and penilaian.status == 'final' %}disabled{% endif %}
+                                           {% if nilai and nilai.status == 'final' %}disabled{% endif %}
                                            class="peer hidden">
                                     <div class="text-center py-2 px-1 rounded-lg border-2 cursor-pointer transition
                                                 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600
@@ -293,7 +293,7 @@
                         ('kpi35', 'Keterbukaan dalam berkomunikasi', '2.00%')
                     ] %}
                     {% for key, title, bobot in kpi_list %}
-                        {% set val = penilaian[key] if penilaian else None %}
+                        {% set val = nilai[key] if nilai else None %}
                         <div class="mb-5 pb-5 border-b last:border-0">
                             <p class="font-semibold text-gray-800 mb-1">{{ loop.index }}. {{ title }}</p>
                             <p class="text-xs text-gray-500 mb-3">Bobot: {{ bobot }}</p>
@@ -303,7 +303,7 @@
                                 <label class="flex-1">
                                     <input type="radio" name="{{ key }}" value="{{ n }}" required
                                            {% if val == n %}checked{% endif %}
-                                           {% if penilaian and penilaian.status == 'final' %}disabled{% endif %}
+                                           {% if nilai and nilai.status == 'final' %}disabled{% endif %}
                                            class="peer hidden">
                                     <div class="text-center py-2 px-1 rounded-lg border-2 cursor-pointer transition
                                                 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600
@@ -320,20 +320,20 @@
                 </div>
 
                 <div class="pt-8">
-    <div class="flex gap-4">
-        <a href="{{ url_for('hrd') if current_user.role.lower() == 'hrd' else url_for('kadiv') }}" class="flex-1 px-6 py-4 rounded-xl border border-gray-300 text-gray-700 font-semibold text-center hover:bg-gray-50 transition">
-            Batal
-        </a>
-        {% if not (penilaian and penilaian.status == 'final') %}
-        <button type="submit" name="action" value="draft" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-6 py-4 rounded-xl font-bold text-lg transition shadow-lg">
-            <i class="bi bi-save"></i> Simpan Draft
-        </button>
-        <button type="submit" name="action" value="final" class="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-6 py-4 rounded-xl font-bold text-lg transition shadow-lg shadow-indigo-500/30">
-            <i class="bi bi-check-circle"></i> Simpan & Final {{ periode }}
-        </button>
-        {% endif %}
-    </div>
-</div>
+                    <div class="flex gap-4">
+                        <a href="{{ url_for('hrd') if current_user.role.lower() == 'hrd' else url_for('kadiv') }}" class="flex-1 px-6 py-4 rounded-xl border border-gray-300 text-gray-700 font-semibold text-center hover:bg-gray-50 transition">
+                            Batal
+                        </a>
+                        {% if not (nilai and nilai.status == 'final') %}
+                        <button type="submit" name="action" value="draft" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-6 py-4 rounded-xl font-bold text-lg transition shadow-lg">
+                            <i class="bi bi-save"></i> Simpan Draft
+                        </button>
+                        <button type="submit" name="action" value="final" class="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-6 py-4 rounded-xl font-bold text-lg transition shadow-lg shadow-indigo-500/30">
+                            <i class="bi bi-check-circle"></i> Simpan & Final {{ periode }}
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
             </form>
         </div>
     </main>
