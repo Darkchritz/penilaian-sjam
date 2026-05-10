@@ -82,9 +82,9 @@
                 </label>
             </form>
 
-            <a href="/export_hrd" class="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-4 py-3 rounded-xl font-semibold transition shadow-md flex items-center justify-center gap-2">
+            <a href="{{ url_for('export_rekap', periode=periode_aktif) }}" class="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-4 py-3 rounded-xl font-semibold transition shadow-md flex items-center justify-center gap-2">
                 <i class="bi bi-file-earmark-excel text-lg"></i>
-                <span>Export Rekap</span>
+                <span>Export Rekap {{ periode_aktif }}</span>
             </a>
         </div>
     </div>
@@ -312,7 +312,7 @@
                     <td class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">{{ k.divisi }}</td>
                     <td class="px-6 py-4 text-sm text-center relative">
                         <div class="relative inline-block text-left">
-                            <button @click="openDropdown = openDropdown === {{ k.id }} ? null : {{ k.id }}"
+                            <button @click="openDropdown = openDropdown === {{ k.id }}? null : {{ k.id }}"
                                     type="button"
                                     class="inline-flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-xs font-semibold transition">
                                 <i class="bi bi-pencil"></i> Nilai <i class="bi bi-chevron-down text-xs"></i>
