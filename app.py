@@ -463,20 +463,24 @@ def kadiv():
         nilai = Penilaian.query.filter_by(
             id_karyawan=k.id,
             id_penilai=current_user.id,
-            periode=periode,  # ganti dari 'Q1' ke variabel
-            tahun=tahun_ini
+            periode=periode,
+            tahun=tahun_ini,
+            status='final'  # TAMBAH BARIS INI DOANG
         ).first()
 
-        k.nilai_akhir = nilai.nilai_akhir if nilai else 0
-        k.grade = nilai.grade if nilai else '-'
-        k.status_nilai = nilai.status if nilai else None
-        k.penilaian_status = nilai.status if nilai else None
-        k.penilaian_id = nilai.id if nilai else None
-
-        # Cuma final yang masuk sudah_dinilai
-        if nilai and nilai.status == 'final':
+        if nilai:
+            k.nilai_akhir = nilai.nilai_akhir
+            k.grade = nilai.grade
+            k.status_nilai = nilai.status
+            k.penilaian_status = nilai.status
+            k.penilaian_id = nilai.id
             sudah_dinilai.append(k)
         else:
+            k.nilai_akhir = 0
+            k.grade = '-'
+            k.status_nilai = None
+            k.penilaian_status = None
+            k.penilaian_id = None
             belum_dinilai.append(k)
 
     print(f"Total belum_dinilai: {len(belum_dinilai)} | sudah_dinilai: {len(sudah_dinilai)}")
@@ -486,8 +490,8 @@ def kadiv():
                            user=current_user,
                            belum_dinilai=belum_dinilai,
                            sudah_dinilai=sudah_dinilai,
-                           periode=periode,  # TAMBAHAN BARIS 2
-                           tahun=tahun_ini)  # TAMBAHAN BARIS 3
+                           periode=periode,
+                           tahun=tahun_ini)
 
 @app.route('/lihat_penilaian/<int:id>')
 @login_required
