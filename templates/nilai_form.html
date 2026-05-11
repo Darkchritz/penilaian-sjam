@@ -72,12 +72,9 @@
         ('disiplin_kebersihan', 'Disiplin dalam Menjaga Kebersihan dan Kerapian Tempat Kerja', '4.00%')
     ] %}
     {% for key, title, bobot in kpi_list %}
-    {% if key in ['kehadiran','kepatuhan_aturan'] %}
-        {% set val = nilai[key] if nilai and nilai[key] is not none else None %}
-    {% elif current_user.role.lower() in ['kadiv', 'kepala divisi'] %}
+    {% set val = nilai[key] if nilai else None %}
+    {% if key not in ['kehadiran','kepatuhan_aturan'] and current_user.role.lower() in ['kadiv', 'kepala divisi'] and val is none %}
         {% set val = None %}
-    {% else %}
-        {% set val = nilai[key] if nilai and nilai[key] is not none else None %}
     {% endif %}
     <div class="mb-5 pb-5 border-b last:border-0">
         <p class="font-semibold text-gray-800 mb-1">{{ loop.index }}. {{ title }}</p>
@@ -116,10 +113,9 @@
         ('peningkatan_kinerja', 'Peningkatan kinerja secara berkelanjutan', '4.00%')
     ] %}
     {% for key, title, bobot in kpi_list %}
-        {% if current_user.role.lower() in ['kadiv', 'kepala divisi'] %}
+        {% set val = nilai[key] if nilai else None %}
+        {% if current_user.role.lower() in ['kadiv', 'kepala divisi'] and val is none %}
             {% set val = None %}
-        {% else %}
-            {% set val = nilai[key] if nilai and nilai[key] is not none else None %}
         {% endif %}
         <div class="mb-5 pb-5 border-b last:border-0">
             <p class="font-semibold text-gray-800 mb-1">{{ loop.index }}. {{ title }}</p>
@@ -157,10 +153,9 @@
         ('responsif', 'Responsif terhadap tugas yang mendadak', '3.00%')
     ] %}
     {% for key, title, bobot in kpi_list %}
-        {% if current_user.role.lower() in ['kadiv', 'kepala divisi'] %}
+        {% set val = nilai[key] if nilai else None %}
+        {% if current_user.role.lower() in ['kadiv', 'kepala divisi'] and val is none %}
             {% set val = None %}
-        {% else %}
-            {% set val = nilai[key] if nilai and nilai[key] is not none else None %}
         {% endif %}
         <div class="mb-5 pb-5 border-b last:border-0">
             <p class="font-semibold text-gray-800 mb-1">{{ loop.index }}. {{ title }}</p>
@@ -198,10 +193,9 @@
         ('profesional', 'Sikap Profesional dalam Interaksi Team', '2.00%')
     ] %}
     {% for key, title, bobot in kpi_list %}
-        {% if current_user.role.lower() in ['kadiv', 'kepala divisi'] %}
+        {% set val = nilai[key] if nilai else None %}
+        {% if current_user.role.lower() in ['kadiv', 'kepala divisi'] and val is none %}
             {% set val = None %}
-        {% else %}
-            {% set val = nilai[key] if nilai and nilai[key] is not none else None %}
         {% endif %}
         <div class="mb-5 pb-5 border-b last:border-0">
             <p class="font-semibold text-gray-800 mb-1">{{ loop.index }}. {{ title }}</p>
@@ -239,10 +233,9 @@
         ('mengelola_prioritas', 'Mengelola dan Mengatur Prioritas Kerja', '3.00%')
     ] %}
     {% for key, title, bobot in kpi_list %}
-        {% if current_user.role.lower() in ['kadiv', 'kepala divisi'] %}
+        {% set val = nilai[key] if nilai else None %}
+        {% if current_user.role.lower() in ['kadiv', 'kepala divisi'] and val is none %}
             {% set val = None %}
-        {% else %}
-            {% set val = nilai[key] if nilai and nilai[key] is not none else None %}
         {% endif %}
         <div class="mb-5 pb-5 border-b last:border-0">
             <p class="font-semibold text-gray-800 mb-1">{{ loop.index }}. {{ title }}</p>
@@ -280,10 +273,9 @@
         ('solusi_alternatif', 'Proaktif dalam Mencari Solusi Alternatif', '2.00%')
     ] %}
     {% for key, title, bobot in kpi_list %}
-        {% if current_user.role.lower() in ['kadiv', 'kepala divisi'] %}
+        {% set val = nilai[key] if nilai else None %}
+        {% if current_user.role.lower() in ['kadiv', 'kepala divisi'] and val is none %}
             {% set val = None %}
-        {% else %}
-            {% set val = nilai[key] if nilai and nilai[key] is not none else None %}
         {% endif %}
         <div class="mb-5 pb-5 border-b last:border-0">
             <p class="font-semibold text-gray-800 mb-1">{{ loop.index }}. {{ title }}</p>
@@ -321,10 +313,9 @@
         ('keterbukaan', 'Keterbukaan dalam berkomunikasi', '2.00%')
     ] %}
     {% for key, title, bobot in kpi_list %}
-        {% if current_user.role.lower() in ['kadiv', 'kepala divisi'] %}
+        {% set val = nilai[key] if nilai else None %}
+        {% if current_user.role.lower() in ['kadiv', 'kepala divisi'] and val is none %}
             {% set val = None %}
-        {% else %}
-            {% set val = nilai[key] if nilai and nilai[key] is not none else None %}
         {% endif %}
         <div class="mb-5 pb-5 border-b last:border-0">
             <p class="font-semibold text-gray-800 mb-1">{{ loop.index }}. {{ title }}</p>
