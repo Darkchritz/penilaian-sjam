@@ -36,37 +36,37 @@
         <p class="text-gray-500">{{ user.nama }} - {{ user.divisi }}</p>
     </div>
 
-    <!-- HAPUS BANNER "Masih Ada 3 Karyawan..." -->
-
     <!-- Action Buttons -->
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-        <button @click="showTambah = true" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-4 py-3 rounded-xl font-semibold transition shadow-md flex items-center justify-center gap-2 h-full min-h-[52px]">
-            <i class="bi bi-person-plus text-lg"></i>
-            <span>Tambah Karyawan</span>
+        <button @click="showTambah = true" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-4 py-3 rounded-xl font-semibold transition shadow-md flex items-center justify-center gap-2 h-full min-h-">
+            <i class="bi bi-person-plus text-lg flex-shrink-0"></i>
+            <span class="whitespace-nowrap">Tambah Karyawan</span>
         </button>
-        <a href="{{ url_for('kelola_akses_kadiv') }}" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-3 rounded-xl font-semibold transition shadow-md flex items-center justify-center gap-2 h-full min-h-[52px]">
-            <i class="bi bi-person-lock text-lg"></i>
-            <span>Kelola Akses Kadiv</span>
+        
+        <a href="{{ url_for('kelola_akses_kadiv') }}" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-3 rounded-xl font-semibold transition shadow-md flex items-center justify-center gap-2 h-full min-h-">
+            <i class="bi bi-person-lock text-lg flex-shrink-0"></i>
+            <span class="whitespace-nowrap">Kelola Akses Kadiv</span>
         </a>
-        <a href="/hrd/download_karyawan" class="bg-white border-2 border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 text-gray-700 hover:text-indigo-700 px-4 py-3 rounded-xl font-semibold transition shadow-sm flex items-center justify-center gap-2 h-full min-h-[52px]">
-            <i class="bi bi-download text-lg"></i>
-            <span>Download Template</span>
+        
+        <a href="/hrd/download_karyawan" class="bg-white border-2 border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 text-gray-700 hover:text-indigo-700 px-4 py-3 rounded-xl font-semibold transition shadow-sm flex items-center justify-center gap-2 h-full min-h-">
+            <i class="bi bi-download text-lg flex-shrink-0"></i>
+            <span class="whitespace-nowrap">Download Template</span>
         </a>
 
         <form action="/hrd/upload_karyawan" method="POST" enctype="multipart/form-data" class="h-full">
-            <label class="bg-white border-2 border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 text-gray-700 hover:text-indigo-700 px-4 py-3 rounded-xl font-semibold transition shadow-sm cursor-pointer flex items-center justify-center gap-2 w-full h-full min-h-[52px]">
-                <i class="bi bi-upload text-lg"></i>
-                <span>Upload Excel</span>
+            <label class="bg-white border-2 border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 text-gray-700 hover:text-indigo-700 px-4 py-3 rounded-xl font-semibold transition shadow-sm cursor-pointer flex items-center justify-center gap-2 w-full h-full min-h-">
+                <i class="bi bi-upload text-lg flex-shrink-0"></i>
+                <span class="whitespace-nowrap">Upload Excel</span>
                 <input type="file" name="file" accept=".xlsx" class="hidden" onchange="this.form.submit()">
             </label>
         </form>
 
         <div class="relative h-full" x-data="{ openExport: false }">
-            <button @click="openExport =!openExport" type="button" class="w-full h-full min-h-[52px] bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-4 py-3 rounded-xl font-semibold transition shadow-md flex items-center justify-center gap-2">
-                <i class="bi bi-file-earmark-excel text-lg"></i>
-                <span>Export Rekap</span>
-                <i class="bi bi-chevron-down text-xs"></i>
+            <button @click="openExport =!openExport" type="button" class="w-full h-full min-h- bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-4 py-3 rounded-xl font-semibold transition shadow-md flex items-center justify-center gap-2">
+                <i class="bi bi-file-earmark-excel text-lg flex-shrink-0"></i>
+                <span class="whitespace-nowrap">Export Rekap</span>
+                <i class="bi bi-chevron-down text-xs flex-shrink-0"></i>
             </button>
             <div x-show="openExport" 
                  @click.away="openExport = false"
