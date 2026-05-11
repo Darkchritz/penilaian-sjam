@@ -585,43 +585,59 @@ def nilai(id):
     tahun = int(request.args.get('tahun', request.form.get('tahun', datetime.now().year)))
     
     # Ambil data penilaian existing buat periode ini
-    penilaian = Penilaian.query.filter_by(
+    nilai = Penilaian.query.filter_by(
         id_karyawan=karyawan.id, 
         periode=periode, 
         tahun=tahun
     ).first()
 
     if request.method == 'POST':
-        if penilaian and penilaian.status == 'final':
+        if nilai and nilai.status == 'final':
             flash('Penilaian sudah final, tidak bisa diubah', 'error')
             return redirect(url_for('nilai', id=id, periode=periode, tahun=tahun))
         
-        if not penilaian:
-            penilaian = Penilaian(
+        if not nilai:
+            nilai = Penilaian(
                 id_karyawan=karyawan.id,
+                id_penilai=current_user.id,
                 periode=periode,
                 tahun=tahun
             )
-            db.session.add(penilaian)
+            db.session.add(nilai)
         
-        # Simpan semua KPI 1-35
-        total_skor = 0
+        # UPDATE KPI: Kadiv cuma bisa ubah kpi3-kpi35. kpi1&kpi2 skip kalo role kadiv
         for i in range(1, 36):
-            val = int(request.form.get(f'kpi{i}', 0))
-            setattr(penilaian, f'kpi{i}', val)
-            total_skor += val
+            key = f'kpi{i}'
+            # Kalo Kadiv, skip kpi1 & kpi2 biar ga nimpa data HRD
+            if current_user.role.lower() in ['kadiv', 'kepala divisi'] and key in ['kpi1', 'kpi2']:
+                continue
+            setattr(nilai, key, int(request.form.get(key, 0)))
         
-        # Hitung nilai akhir: total 35 KPI * 5 = 175 poin max = 100%
-        penilaian.nilai_akhir = round(total_skor / 175 * 100, 2)
-        penilaian.grade = hitung_grade(penilaian.nilai_akhir)
-        penilaian.updated_at = datetime.utcnow()
+        # HITUNG NILAI & GRADE SELALU, DRAFT ATAU FINAL
+        total = 0
+        bobot_map = {
+            **{f'kpi{i}': 4.00 for i in range(1, 6)},
+            **{f'kpi{i}': 4.00 for i in range(6, 11)},
+            **{f'kpi{i}': 3.00 for i in range(11, 16)},
+            **{f'kpi{i}': 2.00 for i in range(16, 21)},
+            **{f'kpi{i}': 3.00 for i in range(21, 26)},
+            **{f'kpi{i}': 2.00 for i in range(26, 31)},
+            **{f'kpi{i}': 2.00 for i in range(31, 36)},
+        }
+        for kpi, bobot in bobot_map.items():
+            nilai_kpi = getattr(nilai, kpi, 0) or 0
+            total += (nilai_kpi / 5) * bobot
+        nilai.nilai_akhir = round(total, 2)
+        nilai.grade = hitung_grade(nilai.nilai_akhir)
+        nilai.updated_at = datetime.utcnow()
+        nilai.id_penilai = current_user.id
         
         # Cek kalo ada tombol "Simpan Final" 
         if request.form.get('action') == 'final':
-            penilaian.status = 'final'
-            flash(f'Penilaian {karyawan.nama} difinalisasi. Nilai: {penilaian.nilai_akhir} - Grade {penilaian.grade}', 'success')
+            nilai.status = 'final'
+            flash(f'Penilaian {karyawan.nama} difinalisasi. Nilai: {nilai.nilai_akhir} - Grade {nilai.grade}', 'success')
         else:
-            penilaian.status = 'draft'
+            nilai.status = 'draft'
             flash(f'Draft penilaian {karyawan.nama} disimpan', 'success')
         
         db.session.commit()
@@ -634,10 +650,10 @@ def nilai(id):
 
     return render_template('nilai_form.html', 
                          karyawan=karyawan, 
-                         penilaian=penilaian,
+                         nilai=nilai,
                          periode=periode,
                          tahun=tahun)
-
+    
 @app.route('/submit_nilai', methods=['POST'])
 @login_required
 def submit_nilai():
