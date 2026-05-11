@@ -9,7 +9,33 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap'); body { font-family: 'Poppins', sans-serif; }</style>
 </head>
-<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen" x-data="{showTambah: false, showEdit: false, showHapus: false, showReset: false, editData: {}, hapusData: {}, resetData: {}, openDropdown: null}">
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen" x-data="{
+    showTambah: false, 
+    showEdit: false, 
+    showHapus: false, 
+    showReset: false, 
+    editData: {}, 
+    hapusData: {}, 
+    resetData: {}, 
+    openDropdown: null,
+    resetPenilaian(periode) {
+        const tahun = new Date().getFullYear();
+        if (confirm(`Yakin reset penilaian ${this.resetData.nama} periode ${periode} ${tahun}?`)) {
+            fetch(`/admin/reset_penilaian/${this.resetData.id}/${periode}/${tahun}`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'}
+            }).then(r => r.json()).then(res => {
+                alert(res.message);
+                if (res.status === 'success') {
+                    this.showReset = false;
+                    location.reload();
+                }
+            }).catch(err => {
+                alert('Error: ' + err);
+            });
+        }
+    }
+}">
     <nav class="bg-white/80 backdrop-blur-md shadow-sm border-b sticky top-0 z-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
@@ -82,8 +108,9 @@
         </div>
     </div>
 </div>
-    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        <!-- Master Karyawan - Full Width -->
+
+    <!-- HAPUS grid-cols-1 xl:grid-cols-2 biar full width -->
+    <!-- Master Karyawan - Full Width -->
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
     <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
         <h3 class="font-bold text-gray-800 flex items-center gap-2">
@@ -154,7 +181,6 @@
                         </a>
                     </th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Role</th>
-                    <!-- HAPUS KOLOM STATUS NILAI -->
                     <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase w-32">Aksi</th>
                 </tr>
             </thead>
@@ -173,7 +199,6 @@
                             {{ k.role|upper }}
                         </span>
                     </td>
-                    <!-- HAPUS TD STATUS NILAI -->
                     <td class="px-6 py-4 text-sm text-center whitespace-nowrap">
                         <div class="flex items-center justify-center gap-3">
                             <button type="button"
@@ -214,9 +239,6 @@
     </div>
     {% endif %}
 </div>
-        
-        <!-- HAPUS: Belum Dinilai Final -->
-        <!-- HAPUS: Penilaian Karyawan Divisi -->
 
     <!-- Modal Tambah Karyawan -->
     <div x-show="showTambah" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display: none;">
@@ -267,7 +289,7 @@
         </div>
     </div>
 
-    <!-- Modal Reset Penilaian - BARU -->
+    <!-- Modal Reset Penilaian -->
     <div x-show="showReset" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display: none;">
         <div @click="showReset = false" class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
         <div class="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
@@ -314,21 +336,5 @@
         </div>
     </div>
     </main>
-
-<script>
-function resetPenilaian(periode) {
-    const data = Alpine.raw(this.resetData);
-    const tahun = new Date().getFullYear();
-    if (confirm(`Yakin reset penilaian ${data.nama} periode ${periode} ${tahun}?`)) {
-        fetch(`/admin/reset_penilaian/${data.id}/${periode}/${tahun}`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'}
-        }).then(r => r.json()).then(res => {
-            alert(res.message);
-            if (res.status === 'success') location.reload();
-        });
-    }
-}
-</script>
 </body>
 </html>
