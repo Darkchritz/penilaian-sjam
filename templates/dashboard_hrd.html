@@ -9,7 +9,7 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap'); body { font-family: 'Poppins', sans-serif; }</style>
 </head>
-<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen" x-data="{showTambah: false, showEdit: false, showHapus: false, editData: {}, hapusData: {}, openDropdown: null}">
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen" x-data="{showTambah: false, showEdit: false, showHapus: false, showReset: false, editData: {}, hapusData: {}, resetData: {}, openDropdown: null}">
     <nav class="bg-white/80 backdrop-blur-md shadow-sm border-b sticky top-0 z-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
@@ -36,27 +36,7 @@
         <p class="text-gray-500">{{ user.nama }} - {{ user.divisi }}</p>
     </div>
 
-    {% if belum_dinilai|length > 0 %}
-    <div class="mb-6 bg-yellow-50 border border-yellow-200 rounded-2xl p-6">
-        <div class="flex items-center gap-3">
-            <i class="bi bi-exclamation-triangle text-2xl text-yellow-600"></i>
-            <div>
-                <p class="font-bold text-yellow-800">Masih Ada {{ belum_dinilai|length }} Karyawan Belum Dinilai Q1</p>
-                <p class="text-sm text-yellow-700">Periode Januari - Maret 2026</p>
-            </div>
-        </div>
-    </div>
-    {% else %}
-    <div class="mb-6 bg-green-50 border border-green-200 rounded-2xl p-6">
-        <div class="flex items-center gap-3">
-            <i class="bi bi-check-circle text-2xl text-green-600"></i>
-            <div>
-                <p class="font-bold text-green-800">Semua Karyawan Sudah Dinilai Q1!</p>
-                <p class="text-sm text-green-700">Periode Januari - Maret 2026</p>
-            </div>
-        </div>
-    </div>
-    {% endif %}
+    <!-- HAPUS BANNER "Masih Ada 3 Karyawan..." -->
 
     <!-- Action Buttons -->
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6">
@@ -82,7 +62,6 @@
             </label>
         </form>
 
-        <!-- FIX: KASIH h-full min-h-[52px] BIAR SAMA TINGGI -->
         <div class="relative h-full" x-data="{ openExport: false }">
             <button @click="openExport =!openExport" type="button" class="w-full h-full min-h-[52px] bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-4 py-3 rounded-xl font-semibold transition shadow-md flex items-center justify-center gap-2">
                 <i class="bi bi-file-earmark-excel text-lg"></i>
@@ -118,7 +97,6 @@
     <!-- Form Search -->
     <div class="px-6 py-3 border-b border-gray-100 bg-gray-50">
         <form method="GET" action="{{ url_for('hrd') }}" class="flex gap-2 items-center">
-            <input type="hidden" name="periode" value="{{ periode_aktif }}">
             <input type="text" 
                    name="search" 
                    value="{{ search }}" 
@@ -128,7 +106,7 @@
                 <i class="bi bi-search"></i> Cari
             </button>
             {% if search %}
-            <a href="{{ url_for('hrd', periode=periode_aktif) }}" class="px-4 py-1.5 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300">
+            <a href="{{ url_for('hrd') }}" class="px-4 py-1.5 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300">
                 Reset
             </a>
             {% endif %}
@@ -140,7 +118,7 @@
             <thead class="bg-gray-50">
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                        <a href="{{ url_for('hrd', sort='npk', order='desc' if sort_by=='npk' and order=='asc' else 'asc', search=search, page=page, periode=periode_aktif) }}" 
+                        <a href="{{ url_for('hrd', sort='npk', order='desc' if sort_by=='npk' and order=='asc' else 'asc', search=search, page=page) }}" 
                            class="flex items-center gap-1 hover:text-gray-900">
                             NPK
                             {% if sort_by=='npk' %}
@@ -149,7 +127,7 @@
                         </a>
                     </th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                        <a href="{{ url_for('hrd', sort='nama', order='desc' if sort_by=='nama' and order=='asc' else 'asc', search=search, page=page, periode=periode_aktif) }}" 
+                        <a href="{{ url_for('hrd', sort='nama', order='desc' if sort_by=='nama' and order=='asc' else 'asc', search=search, page=page) }}" 
                            class="flex items-center gap-1 hover:text-gray-900">
                             Nama
                             {% if sort_by=='nama' %}
@@ -158,7 +136,7 @@
                         </a>
                     </th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                        <a href="{{ url_for('hrd', sort='divisi', order='desc' if sort_by=='divisi' and order=='asc' else 'asc', search=search, page=page, periode=periode_aktif) }}" 
+                        <a href="{{ url_for('hrd', sort='divisi', order='desc' if sort_by=='divisi' and order=='asc' else 'asc', search=search, page=page) }}" 
                            class="flex items-center gap-1 hover:text-gray-900">
                             Divisi
                             {% if sort_by=='divisi' %}
@@ -167,7 +145,7 @@
                         </a>
                     </th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                        <a href="{{ url_for('hrd', sort='cabang', order='desc' if sort_by=='cabang' and order=='asc' else 'asc', search=search, page=page, periode=periode_aktif) }}" 
+                        <a href="{{ url_for('hrd', sort='cabang', order='desc' if sort_by=='cabang' and order=='asc' else 'asc', search=search, page=page) }}" 
                            class="flex items-center gap-1 hover:text-gray-900">
                             Cabang
                             {% if sort_by=='cabang' %}
@@ -176,8 +154,8 @@
                         </a>
                     </th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Role</th>
-                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status Nilai</th>
-                    <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase w-28">Aksi</th>
+                    <!-- HAPUS KOLOM STATUS NILAI -->
+                    <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase w-32">Aksi</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
@@ -195,28 +173,23 @@
                             {{ k.role|upper }}
                         </span>
                     </td>
-                    <td class="px-6 py-4 text-sm">
-                        {% if status_penilaian.get(k.id) == 'final' %}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                <i class="bi bi-check-circle mr-1"></i> Sudah Dinilai
-                            </span>
-                        {% else %}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                <i class="bi bi-clock mr-1"></i> Belum Dinilai
-                            </span>
-                        {% endif %}
-                    </td>
+                    <!-- HAPUS TD STATUS NILAI -->
                     <td class="px-6 py-4 text-sm text-center whitespace-nowrap">
-                        <div class="flex items-center justify-center gap-4">
+                        <div class="flex items-center justify-center gap-3">
                             <button type="button"
                                     x-on:click='showEdit = true; editData = {"npk": {{ k.npk|tojson }}, "nama": {{ k.nama|tojson }}, "role": {{ k.role|tojson }}, "divisi": {{ k.divisi|tojson }}, "cabang": {{ k.cabang|tojson }}}'
-                                    class="text-blue-600 hover:text-blue-800 transition">
-                                <i class="bi bi-pencil-square text-xl"></i>
+                                    class="text-blue-600 hover:text-blue-800 transition" title="Edit">
+                                <i class="bi bi-pencil-square text-lg"></i>
+                            </button>
+                            <button type="button"
+                                    x-on:click='showReset = true; resetData = {"id": {{ k.id }}, "nama": {{ k.nama|tojson }}, "npk": {{ k.npk|tojson }}}'
+                                    class="text-orange-600 hover:text-orange-800 transition" title="Reset Penilaian">
+                                <i class="bi bi-arrow-counterclockwise text-lg"></i>
                             </button>
                             <button type="button"
                                     x-on:click='showHapus = true; hapusData = {"npk": {{ k.npk|tojson }}, "nama": {{ k.nama|tojson }}}'
-                                    class="text-red-600 hover:text-red-800 transition">
-                                <i class="bi bi-trash text-xl"></i>
+                                    class="text-red-600 hover:text-red-800 transition" title="Hapus">
+                                <i class="bi bi-trash text-lg"></i>
                             </button>
                         </div>
                     </td>
@@ -229,12 +202,12 @@
     <!-- Pagination -->
     {% if total_pages > 1 %}
     <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
-        <a href="{{ url_for('hrd', page=page-1, search=search, sort=sort_by, order=order, periode=periode_aktif) }}"
+        <a href="{{ url_for('hrd', page=page-1, search=search, sort=sort_by, order=order) }}"
            class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 {% if page <= 1 %}pointer-events-none opacity-50{% endif %}">
             <i class="bi bi-chevron-left"></i> Sebelumnya
         </a>
         <span class="text-sm text-gray-600">Halaman {{ page }} dari {{ total_pages }}</span>
-        <a href="{{ url_for('hrd', page=page+1, search=search, sort=sort_by, order=order, periode=periode_aktif) }}"
+        <a href="{{ url_for('hrd', page=page+1, search=search, sort=sort_by, order=order) }}"
            class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 {% if page >= total_pages %}pointer-events-none opacity-50{% endif %}">
             Selanjutnya <i class="bi bi-chevron-right"></i>
         </a>
@@ -242,121 +215,8 @@
     {% endif %}
 </div>
         
-        <!-- Rekap Final - Hanya yang Belum Dinilai -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
-            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                <h3 class="font-bold text-gray-800 flex items-center gap-2">
-                    <i class="bi bi-exclamation-triangle text-orange-600"></i> Belum Dinilai Final
-                </h3>
-                <span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-semibold">
-                    {{ belum_dinilai|length }} karyawan
-                </span>
-            </div>
-            <div class="overflow-x-auto">
-                {% if belum_dinilai|length > 0 %}
-                <table class="w-full">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">NPK</th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Nama</th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Divisi</th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Cabang</th>
-                            <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase min-w-[120px]">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100">
-                        {% for b in belum_dinilai %}
-                        <tr class="hover:bg-orange-50 transition">
-                            <td class="px-6 py-4 text-sm font-mono text-gray-900 whitespace-nowrap">{{ b.npk }}</td>
-                            <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ b.nama }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">{{ b.divisi }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">{{ b.cabang }}</td>
-                            <td class="px-6 py-4 text-center">
-                                <span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-semibold whitespace-nowrap">
-                                    Belum Dinilai
-                                </span>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                {% else %}
-                <div class="p-12 text-center">
-                    <i class="bi bi-check-circle text-5xl text-green-400 mb-3"></i>
-                    <p class="text-gray-500">Semua karyawan sudah dinilai final!</p>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-
-        <!-- Penilaian Karyawan Divisi -->
-<div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-        <h3 class="font-bold text-gray-800 flex items-center gap-2">
-            <i class="bi bi-clipboard-check text-green-600"></i> Penilaian Karyawan Divisi {{ user.divisi }}
-        </h3>
-        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
-            {{ karyawan_untuk_dinilai|length }} orang
-        </span>
-    </div>
-    <div class="overflow-x-auto">
-        {% if karyawan_untuk_dinilai %}
-        <table class="w-full">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">NPK</th>
-                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Nama</th>
-                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Role</th>
-                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Divisi</th>
-                    <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Aksi</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200">
-                {% for k in karyawan_untuk_dinilai %}
-                <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 text-sm font-mono text-gray-900 whitespace-nowrap">{{ k.npk }}</td>
-                    <td class="px-6 py-4 text-sm text-gray-900">{{ k.nama }}</td>
-                    <td class="px-6 py-4 text-sm">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                            {% if k.role == 'kadiv' %}bg-purple-100 text-purple-800
-                            {% else %}bg-blue-100 text-blue-800{% endif %}">
-                            {{ k.role|upper }}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">{{ k.divisi }}</td>
-                    <td class="px-6 py-4 text-sm text-center relative">
-                        <div class="relative inline-block text-left">
-                            <button @click="openDropdown = openDropdown === {{ k.id }}? null : {{ k.id }}"
-                                    type="button"
-                                    class="inline-flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-xs font-semibold transition">
-                                <i class="bi bi-pencil"></i> Nilai <i class="bi bi-chevron-down text-xs"></i>
-                            </button>
-
-                            <div x-show="openDropdown === {{ k.id }}"
-                                 @click.away="openDropdown = null"
-                                 x-transition
-                                 class="origin-top-right absolute right-0 mt-2 w-36 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-20">
-                                <div class="py-1">
-                                    <a href="{{ url_for('nilai', id=k.id, periode='Q1') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Nilai Q1</a>
-                                    <a href="{{ url_for('nilai', id=k.id, periode='Q2') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Nilai Q2</a>
-                                    <a href="{{ url_for('nilai', id=k.id, periode='Q3') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Nilai Q3</a>
-                                    <a href="{{ url_for('nilai', id=k.id, periode='Q4') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Nilai Q4</a>
-                                </div>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-        <div class="p-12 text-center">
-            <i class="bi bi-people text-5xl text-gray-300 mb-3"></i>
-            <p class="text-gray-500">Tidak ada karyawan di divisi ini.</p>
-        </div>
-        {% endif %}
-    </div>
-</div>
+        <!-- HAPUS: Belum Dinilai Final -->
+        <!-- HAPUS: Penilaian Karyawan Divisi -->
 
     <!-- Modal Tambah Karyawan -->
     <div x-show="showTambah" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display: none;">
@@ -407,6 +267,30 @@
         </div>
     </div>
 
+    <!-- Modal Reset Penilaian - BARU -->
+    <div x-show="showReset" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display: none;">
+        <div @click="showReset = false" class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <div class="text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-orange-100 mb-4">
+                    <i class="bi bi-arrow-counterclockwise text-orange-600 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">Reset Penilaian</h3>
+                <p class="text-sm text-gray-500 mb-6">
+                    Pilih periode yang mau direset untuk <span class="font-semibold text-gray-900" x-text="resetData.nama"></span>?<br>
+                    Penilaian final akan dihapus dan Kadiv bisa nilai ulang.
+                </p>
+                <div class="grid grid-cols-2 gap-3">
+                    <button @click="resetPenilaian('Q1')" class="px-4 py-3 rounded-xl border-2 border-orange-300 text-orange-700 font-medium hover:bg-orange-50">Reset Q1</button>
+                    <button @click="resetPenilaian('Q2')" class="px-4 py-3 rounded-xl border-2 border-orange-300 text-orange-700 font-medium hover:bg-orange-50">Reset Q2</button>
+                    <button @click="resetPenilaian('Q3')" class="px-4 py-3 rounded-xl border-2 border-orange-300 text-orange-700 font-medium hover:bg-orange-50">Reset Q3</button>
+                    <button @click="resetPenilaian('Q4')" class="px-4 py-3 rounded-xl border-2 border-orange-300 text-orange-700 font-medium hover:bg-orange-50">Reset Q4</button>
+                </div>
+                <button type="button" @click="showReset = false" class="w-full mt-4 px-4 py-3 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50">Batal</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Hapus Karyawan -->
     <div x-show="showHapus" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display: none;">
         <div @click="showHapus = false" class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
@@ -430,5 +314,21 @@
         </div>
     </div>
     </main>
+
+<script>
+function resetPenilaian(periode) {
+    const data = Alpine.raw(this.resetData);
+    const tahun = new Date().getFullYear();
+    if (confirm(`Yakin reset penilaian ${data.nama} periode ${periode} ${tahun}?`)) {
+        fetch(`/admin/reset_penilaian/${data.id}/${periode}/${tahun}`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'}
+        }).then(r => r.json()).then(res => {
+            alert(res.message);
+            if (res.status === 'success') location.reload();
+        });
+    }
+}
+</script>
 </body>
 </html>
