@@ -563,24 +563,24 @@ def nilai(id):
     
     karyawan = Karyawan.query.get_or_404(id)
     
-    # Cek akses khusus Kadiv
+    # Default: boleh liat semua. Cek akses cuma buat POST
     boleh_nilai = True
     if current_user.role.lower().strip() in ['kadiv', 'kepala divisi']:
         list_pusat = ['HO', 'PUSAT MD', 'SJAM HO', 'PUSAT / MD']
         is_pusat = current_user.cabang.strip().upper() in list_pusat
         
-        boleh_nilai = False
-        if current_user.id != karyawan.id:  # Bukan diri sendiri
+        # Kadiv ga bisa nilai diri sendiri
+        if current_user.id == karyawan.id:
+            boleh_nilai = False
+        else:
             if is_pusat:
                 # Kadiv HO: harus 1 divisi + karyawan di HO
-                if current_user.divisi == karyawan.divisi and karyawan.cabang.strip().upper() in list_pusat:
-                    boleh_nilai = True
+                boleh_nilai = current_user.divisi == karyawan.divisi and karyawan.cabang.strip().upper() in list_pusat
             else:
-                # KADIV CABANG: CUKUP 1 CABANG AJA, DIVISI BEBAS
-                if current_user.cabang == karyawan.cabang:
-                    boleh_nilai = True
+                # KADIV CABANG: CUKUP 1 CABANG AJA
+                boleh_nilai = current_user.cabang == karyawan.cabang
 
-        # BLOK HANYA PAS POST. GET BOLEH BUKA SEMUA BUAT LIAT.
+        # BLOK CUMA PAS SIMPAN/POST. GET BOLEH BUKA SEMUA
         if request.method == 'POST' and not boleh_nilai:
             flash(f'Anda tidak memiliki akses untuk menilai {karyawan.nama}', 'danger')
             return redirect(url_for('kadiv'))
@@ -588,7 +588,6 @@ def nilai(id):
     periode = request.args.get('periode', request.form.get('periode', 'Q1'))
     tahun = int(request.args.get('tahun', request.form.get('tahun', datetime.now().year)))
     
-    # Ambil data penilaian existing buat periode ini
     nilai = Penilaian.query.filter_by(
         id_karyawan=karyawan.id, 
         periode=periode, 
@@ -609,15 +608,13 @@ def nilai(id):
             )
             db.session.add(nilai)
         
-        # UPDATE KPI: Kadiv cuma bisa ubah kpi3-kpi35. kpi1&kpi2 skip kalo role kadiv
+        # Kadiv skip kpi1 & kpi2 biar ga nimpa data HRD
         for i in range(1, 36):
             key = f'kpi{i}'
-            # Kalo Kadiv, skip kpi1 & kpi2 biar ga nimpa data HRD
             if current_user.role.lower() in ['kadiv', 'kepala divisi'] and key in ['kpi1', 'kpi2']:
                 continue
             setattr(nilai, key, int(request.form.get(key, 0)))
         
-        # HITUNG NILAI & GRADE SELALU, DRAFT ATAU FINAL
         total = 0
         bobot_map = {
             **{f'kpi{i}': 4.00 for i in range(1, 6)},
@@ -636,7 +633,6 @@ def nilai(id):
         nilai.updated_at = datetime.utcnow()
         nilai.id_penilai = current_user.id
         
-        # Cek kalo ada tombol "Simpan Final" 
         if request.form.get('action') == 'final':
             nilai.status = 'final'
             flash(f'Penilaian {karyawan.nama} difinalisasi. Nilai: {nilai.nilai_akhir} - Grade {nilai.grade}', 'success')
@@ -646,7 +642,6 @@ def nilai(id):
         
         db.session.commit()
         
-        # Balik ke dashboard sesuai role
         if current_user.role.lower() == 'hrd':
             return redirect(url_for('hrd'))
         else:
@@ -656,7 +651,8 @@ def nilai(id):
                          karyawan=karyawan, 
                          nilai=nilai,
                          periode=periode,
-                         tahun=tahun)
+                         tahun=tahun,
+                         boleh_nilai=boleh_nilai)
     
 @app.route('/submit_nilai', methods=['POST'])
 @login_required
