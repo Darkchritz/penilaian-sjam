@@ -61,7 +61,7 @@
                 <input type="hidden" name="periode" value="{{ periode }}">
                 <input type="hidden" name="tahun" value="{{ tahun }}">
 
-                <!-- KEDISIPLINAN 20% -->
+                                <!-- KEDISIPLINAN 20% -->
                 <div class="bg-white rounded-xl shadow-sm border p-6">
                     <h3 class="text-lg font-bold text-indigo-700 mb-4">KEDISIPLINAN (20%)</h3>
                     {% set kpi_list = [
@@ -72,7 +72,7 @@
                         ('kpi5', 'Disiplin dalam Menjaga Kebersihan dan Kerapian Tempat Kerja', '4.00%')
                     ] %}
                     {% for key, title, bobot in kpi_list %}
-                        {% set val = nilai[key] if nilai else None %}
+                        {% set val = nilai[key] if nilai else 0 %}
                         <div class="mb-5 pb-5 border-b last:border-0">
                             <p class="font-semibold text-gray-800 mb-1">{{ loop.index }}. {{ title }}</p>
                             <p class="text-xs text-gray-500 mb-3">Bobot: {{ bobot }}</p>
@@ -83,7 +83,7 @@
                                     <input type="radio" name="{{ key }}" value="{{ n }}"
                                            {% if key not in ['kpi1','kpi2'] %}required{% endif %}
                                            {% if val == n %}checked{% endif %}
-                                           {% if nilai and nilai.status == 'final' or key in ['kpi1','kpi2'] %}disabled{% endif %}
+                                           {% if current_user.role.lower() == 'kadiv' and key in ['kpi1','kpi2'] %}disabled{% endif %}
                                            class="peer hidden">
                                     <div class="text-center py-2 px-1 rounded-lg border-2 cursor-pointer transition
                                                 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600
@@ -95,6 +95,9 @@
                                 </label>
                                 {% endfor %}
                             </div>
+                            {% if key in ['kpi1','kpi2'] and val is not none %}
+                            <input type="hidden" name="{{ key }}" value="{{ val }}">
+                            {% endif %}
                         </div>
                     {% endfor %}
                 </div>
