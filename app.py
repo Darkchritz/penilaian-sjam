@@ -660,26 +660,27 @@ def submit_nilai():
     for i in range(1, 36):
         setattr(p, f'kpi{i}', int(request.form.get(f'kpi{i}', 0)))
     
+    # HITUNG NILAI & GRADE SELALU, BUKAN CUMA PAS FINAL
+    total = 0
+    bobot_map = {
+        **{f'kpi{i}': 4.00 for i in range(1, 6)},
+        **{f'kpi{i}': 4.00 for i in range(6, 11)},
+        **{f'kpi{i}': 3.00 for i in range(11, 16)},
+        **{f'kpi{i}': 2.00 for i in range(16, 21)},
+        **{f'kpi{i}': 3.00 for i in range(21, 26)},
+        **{f'kpi{i}': 2.00 for i in range(26, 31)},
+        **{f'kpi{i}': 2.00 for i in range(31, 36)},
+    }
+    for kpi, bobot in bobot_map.items():
+        nilai_kpi = getattr(p, kpi, 0) or 0
+        total += (nilai_kpi / 5) * bobot
+    p.nilai_akhir = round(total, 2)
+    p.grade = hitung_grade(p.nilai_akhir)  # TAMBAH INI
+    
     # Set status + id_penilai
     p.status = action
     p.id_penilai = current_user.id  # UPDATE JUGA KALO UDAH ADA
-    
-    if action == 'final':
-        # Hitung nilai_akhir
-        total = 0
-        bobot_map = {
-            **{f'kpi{i}': 4.00 for i in range(1, 6)},
-            **{f'kpi{i}': 4.00 for i in range(6, 11)},
-            **{f'kpi{i}': 3.00 for i in range(11, 16)},
-            **{f'kpi{i}': 2.00 for i in range(16, 21)},
-            **{f'kpi{i}': 3.00 for i in range(21, 26)},
-            **{f'kpi{i}': 2.00 for i in range(26, 31)},
-            **{f'kpi{i}': 2.00 for i in range(31, 36)},
-        }
-        for kpi, bobot in bobot_map.items():
-            nilai_kpi = getattr(p, kpi, 0) or 0
-            total += (nilai_kpi / 5) * bobot
-        p.nilai_akhir = round(total, 2)
+    p.updated_at = datetime.utcnow()  # TAMBAH INI
     
     db.session.commit()
     flash(f'Penilaian {periode} berhasil disimpan!', 'success')
