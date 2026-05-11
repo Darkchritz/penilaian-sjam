@@ -561,13 +561,15 @@ def nilai(id):
         return redirect(url_for('index'))
     
     karyawan = Karyawan.query.get_or_404(id)
+    
+    # Cek akses khusus Kadiv
+    boleh_nilai = True
     if current_user.role.lower().strip() in ['kadiv', 'kepala divisi']:
-        # PENGECEKAN AKSES BARU - GANTI BLOK INI AJA
         list_pusat = ['HO', 'PUSAT MD', 'SJAM HO', 'PUSAT / MD']
         is_pusat = current_user.cabang.strip().upper() in list_pusat
         
         boleh_nilai = False
-        if current_user.id != karyawan.id:  # Ga bisa nilai diri sendiri
+        if current_user.id != karyawan.id:  # Bukan diri sendiri
             if is_pusat:
                 # Kadiv HO: harus 1 divisi + karyawan di HO
                 if current_user.divisi == karyawan.divisi and karyawan.cabang.strip().upper() in list_pusat:
@@ -577,11 +579,10 @@ def nilai(id):
                 if current_user.cabang == karyawan.cabang:
                     boleh_nilai = True
 
-        # Kalo GET cuma buat liat, boleh. Kalo POST buat edit, baru cek akses
+        # BLOK HANYA PAS POST. GET BOLEH BUKA SEMUA BUAT LIAT.
         if request.method == 'POST' and not boleh_nilai:
             flash(f'Anda tidak memiliki akses untuk menilai {karyawan.nama}', 'danger')
             return redirect(url_for('kadiv'))
-        # END BLOK PENGGANTI
     
     periode = request.args.get('periode', request.form.get('periode', 'Q1'))
     tahun = int(request.args.get('tahun', request.form.get('tahun', datetime.now().year)))
@@ -852,12 +853,13 @@ def input_disiplin():
     # GET: query karyawan + search
     query = Karyawan.query
     if search:
-        query = query.filter(
-            db.or_(
-                Karyawan.nama.ilike(f'%{search}%'),
-                Karyawan.npk.ilike(f'%{search}%')
-            )
+    from sqlalchemy import cast, String
+    query = query.filter(
+        db.or_(
+            Karyawan.nama.ilike(f'%{search}%'),
+            cast(Karyawan.npk, String).ilike(f'%{search}%')
         )
+    )
     karyawan_list = query.order_by(Karyawan.divisi, Karyawan.nama).all()
     
     nilai_map = {}
