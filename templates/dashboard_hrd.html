@@ -13,27 +13,32 @@
     showTambah: false, 
     showEdit: false, 
     showHapus: false, 
-    showReset: false, 
+    showReset: false,
+    showConfirmReset: false,
     editData: {}, 
     hapusData: {}, 
-    resetData: {}, 
+    resetData: {},
+    resetPeriode: '',
     openDropdown: null,
-    resetPenilaian(periode) {
+    pilihReset(periode) {
+        this.resetPeriode = periode;
+        this.showReset = false;
+        this.showConfirmReset = true;
+    },
+    executeReset() {
         const tahun = new Date().getFullYear();
-        if (confirm(`Yakin reset penilaian ${this.resetData.nama} periode ${periode} ${tahun}?`)) {
-            fetch(`/admin/reset_penilaian/${this.resetData.id}/${periode}/${tahun}`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'}
-            }).then(r => r.json()).then(res => {
-                alert(res.message);
-                if (res.status === 'success') {
-                    this.showReset = false;
-                    location.reload();
-                }
-            }).catch(err => {
-                alert('Error: ' + err);
-            });
-        }
+        fetch(`/admin/reset_penilaian/${this.resetData.id}/${this.resetPeriode}/${tahun}`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'}
+        }).then(r => r.json()).then(res => {
+            alert(res.message);
+            if (res.status === 'success') {
+                this.showConfirmReset = false;
+                location.reload();
+            }
+        }).catch(err => {
+            alert('Error: ' + err);
+        });
     }
 }">
     <nav class="bg-white/80 backdrop-blur-md shadow-sm border-b sticky top-0 z-10">
@@ -289,7 +294,7 @@
         </div>
     </div>
 
-    <!-- Modal Reset Penilaian -->
+        <!-- Modal Reset Penilaian - Pilih Periode -->
     <div x-show="showReset" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display: none;">
         <div @click="showReset = false" class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
         <div class="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
@@ -303,12 +308,33 @@
                     Penilaian final akan dihapus dan Kadiv bisa nilai ulang.
                 </p>
                 <div class="grid grid-cols-2 gap-3">
-                    <button @click="resetPenilaian('Q1')" class="px-4 py-3 rounded-xl border-2 border-orange-300 text-orange-700 font-medium hover:bg-orange-50">Reset Q1</button>
-                    <button @click="resetPenilaian('Q2')" class="px-4 py-3 rounded-xl border-2 border-orange-300 text-orange-700 font-medium hover:bg-orange-50">Reset Q2</button>
-                    <button @click="resetPenilaian('Q3')" class="px-4 py-3 rounded-xl border-2 border-orange-300 text-orange-700 font-medium hover:bg-orange-50">Reset Q3</button>
-                    <button @click="resetPenilaian('Q4')" class="px-4 py-3 rounded-xl border-2 border-orange-300 text-orange-700 font-medium hover:bg-orange-50">Reset Q4</button>
+                    <button @click="pilihReset('Q1')" class="px-4 py-3 rounded-xl border-2 border-orange-300 text-orange-700 font-medium hover:bg-orange-50">Reset Q1</button>
+                    <button @click="pilihReset('Q2')" class="px-4 py-3 rounded-xl border-2 border-orange-300 text-orange-700 font-medium hover:bg-orange-50">Reset Q2</button>
+                    <button @click="pilihReset('Q3')" class="px-4 py-3 rounded-xl border-2 border-orange-300 text-orange-700 font-medium hover:bg-orange-50">Reset Q3</button>
+                    <button @click="pilihReset('Q4')" class="px-4 py-3 rounded-xl border-2 border-orange-300 text-orange-700 font-medium hover:bg-orange-50">Reset Q4</button>
                 </div>
                 <button type="button" @click="showReset = false" class="w-full mt-4 px-4 py-3 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50">Batal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Konfirmasi Reset - BARU -->
+    <div x-show="showConfirmReset" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display: none;">
+        <div @click="showConfirmReset = false" class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <div class="text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                    <i class="bi bi-exclamation-triangle text-red-600 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">Konfirmasi Reset</h3>
+                <p class="text-sm text-gray-500 mb-6">
+                    Yakin reset penilaian <span class="font-semibold text-gray-900" x-text="resetData.nama"></span> periode <span class="font-semibold" x-text="resetPeriode"></span>?<br>
+                    Data tidak bisa dikembalikan.
+                </p>
+                <div class="flex gap-3">
+                    <button type="button" @click="showConfirmReset = false; showReset = true" class="flex-1 px-4 py-3 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50">Batal</button>
+                    <button type="button" @click="executeReset()" class="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-xl font-semibold">Ya, Reset</button>
+                </div>
             </div>
         </div>
     </div>
