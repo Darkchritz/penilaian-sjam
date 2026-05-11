@@ -29,8 +29,8 @@ class Penilaian(db.Model):
     tanggal_update = db.Column(db.DateTime, default=datetime.now)
     
     # KEDISIPLINAN
-    kehadiran = db.Column(db.Integer, default=2) # KPI1 - diisi HRD
-    kepatuhan_aturan = db.Column(db.Integer, default=2) # KPI2 - diisi HRD
+    kehadiran = db.Column(db.Integer, nullable=True) # KPI1 - hapus default=2
+    kepatuhan_aturan = db.Column(db.Integer, nullable=True) # KPI2 - hapus default=2
     konsistensi = db.Column(db.Integer, nullable=True) # KPI3
     kepatuhan_seragam = db.Column(db.Integer, nullable=True) # KPI4
     disiplin_kebersihan = db.Column(db.Integer, nullable=True) # KPI5
