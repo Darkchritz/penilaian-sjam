@@ -251,6 +251,26 @@ def hrd():
                          sort_by=sort_by,
                          order=order)
 
+@app.route('/admin/reset_penilaian/<int:id_karyawan>/<periode>/<int:tahun>', methods=['POST'])
+@login_required
+def admin_reset_penilaian(id_karyawan, periode, tahun):
+    if current_user.role.lower() != 'hrd':
+        return jsonify({'status': 'error', 'message': 'Akses ditolak'}), 403
+    
+    p = Penilaian.query.filter_by(id_karyawan=id_karyawan, periode=periode, tahun=tahun).first()
+    if not p:
+        return jsonify({'status': 'error', 'message': 'Penilaian tidak ditemukan'}), 404
+    
+    if p.status != 'final':
+        return jsonify({'status': 'error', 'message': 'Penilaian belum final, tidak perlu reset'}), 400
+    
+    karyawan = Karyawan.query.get(id_karyawan)
+    db.session.delete(p)
+    db.session.commit()
+    
+    flash(f'Penilaian {karyawan.nama} periode {periode} {tahun} berhasil direset. Kadiv bisa nilai ulang.', 'success')
+    return jsonify({'status': 'success', 'message': 'Reset berhasil'})
+
 @app.route('/hrd/kelola_akses_kadiv', methods=['GET', 'POST'])
 @login_required
 def kelola_akses_kadiv():
