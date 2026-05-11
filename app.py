@@ -870,6 +870,28 @@ def input_disiplin():
                            periode=periode, 
                            tahun=tahun,
                            search=search)
+
+@app.route('/hrd/download_template_disiplin')
+@login_required
+def download_template_disiplin():
+    if current_user.role.lower() != 'hrd':
+        return redirect(url_for('index'))
+    
+    # Bikin template kosong
+    data = {'NPK': ['2018032349', '12345678'], 'KPI1': [5, 4], 'KPI2': [5, 4]}
+    df = pd.DataFrame(data)
+    
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Template')
+    output.seek(0)
+    
+    return send_file(
+        output,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        as_attachment=True,
+        download_name='template_kedisiplinan.xlsx'
+    )
     
 @app.route('/tambah-karyawan', methods=['GET', 'POST'])
 @login_required
