@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Input Kedisiplinan | SJAM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap'); body { font-family: 'Poppins', sans-serif; }</style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+    <nav class="bg-white/80 backdrop-blur-md shadow-sm border-b sticky top-0 z-10">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-2">
+                    <i class="bi bi-calendar-check text-2xl text-indigo-600"></i>
+                    <h1 class="text-xl font-bold text-indigo-600">Input Kedisiplinan HRD</h1>
+                </div>
+                <a href="{{ url_for('hrd') }}" class="text-gray-600 hover:text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-100 transition">
+                    <i class="bi bi-arrow-left"></i> Dashboard HRD
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto p-4 sm:p-6">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
+            <form method="GET" class="mb-6 flex gap-3">
+                <select name="periode" class="border rounded-lg px-3 py-2">
+                    {% for p in ['Q1','Q2','Q3','Q4'] %}
+                    <option value="{{ p }}" {% if p == periode %}selected{% endif %}>{{ p }}</option>
+                    {% endfor %}
+                </select>
+                <input type="number" name="tahun" value="{{ tahun }}" class="border rounded-lg px-3 py-2 w-28">
+                <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg">Filter</button>
+            </form>
+
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 flex items-start gap-3">
+                <i class="bi bi-info-circle text-blue-600 text-xl"></i>
+                <div>
+                    <p class="text-sm text-blue-800 font-semibold">Input KPI1 & KPI2 untuk periode {{ periode }} - {{ tahun }}</p>
+                    <p class="text-sm text-blue-800">Nilai 0-5. 0=Buruk, 5=Sangat Baik. Data ini akan muncul di form Kadiv.</p>
+                </div>
+            </div>
+
+            <form method="POST">
+                <input type="hidden" name="periode" value="{{ periode }}">
+                <input type="hidden" name="tahun" value="{{ tahun }}">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left">NPK</th>
+                                <th class="px-4 py-3 text-left">Nama</th>
+                                <th class="px-4 py-3 text-left">Divisi</th>
+                                <th class="px-4 py-3 text-center">Kehadiran & Waktu<br><span class="text-xs font-normal">KPI1</span></th>
+                                <th class="px-4 py-3 text-center">Kepatuhan Aturan<br><span class="text-xs font-normal">KPI2</span></th>
+                                <th class="px-4 py-3 text-center">Grade Saat Ini</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for k in karyawan_list %}
+                            {% set n = nilai_map.get(k.id) %}
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="px-4 py-3">{{ k.npk }}</td>
+                                <td class="px-4 py-3 font-medium">{{ k.nama }}</td>
+                                <td class="px-4 py-3 text-gray-600">{{ k.divisi }}</td>
+                                <td class="px-4 py-3">
+                                    <select name="kpi1_{{ k.id }}" class="border rounded px-2 py-1 w-20 text-center">
+                                        {% for i in range(6) %}
+                                        <option value="{{ i }}" {% if n and n.kpi1 == i %}selected{% endif %}>{{ i }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <select name="kpi2_{{ k.id }}" class="border rounded px-2 py-1 w-20 text-center">
+                                        {% for i in range(6) %}
+                                        <option value="{{ i }}" {% if n and n.kpi2 == i %}selected{% endif %}>{{ i }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td class="px-4 py-3 text-center font-bold">
+                                    {{ n.grade if n and n.grade else '-' }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-6 flex justify-end">
+                    <button type="submit" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-bold transition shadow-lg">
+                        <i class="bi bi-save"></i> Simpan Semua
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+</body>
+</html>
