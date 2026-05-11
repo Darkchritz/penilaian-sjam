@@ -576,7 +576,8 @@ def nilai(id):
                 if current_user.cabang == karyawan.cabang:
                     boleh_nilai = True
 
-        if not boleh_nilai:
+        # Kalo GET cuma buat liat, boleh. Kalo POST buat edit, baru cek akses
+        if request.method == 'POST' and not boleh_nilai:
             flash(f'Anda tidak memiliki akses untuk menilai {karyawan.nama}', 'danger')
             return redirect(url_for('kadiv'))
         # END BLOK PENGGANTI
