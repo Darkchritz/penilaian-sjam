@@ -769,8 +769,8 @@ def input_disiplin():
         flash(f'Data Kedisiplinan {periode} {tahun} berhasil disimpan!', 'success')
         return redirect(url_for('input_disiplin', periode=periode, tahun=tahun))
     
-    # GET: ambil semua karyawan + nilai existing
-    karyawan_list = Karyawan.query.filter_by(status='aktif').order_by(Karyawan.divisi, Karyawan.nama).all()
+    # GET: ambil semua karyawan TANPA filter status
+    karyawan_list = Karyawan.query.order_by(Karyawan.divisi, Karyawan.nama).all()
     nilai_map = {}
     for n in Penilaian.query.filter_by(periode=periode, tahun=tahun).all():
         nilai_map[n.id_karyawan] = n
