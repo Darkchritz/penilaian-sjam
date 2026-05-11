@@ -5,6 +5,7 @@ import pandas as pd
 from werkzeug.utils import secure_filename
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import cast, String
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
@@ -853,7 +854,6 @@ def input_disiplin():
     # GET: query karyawan + search
     query = Karyawan.query
     if search:
-    from sqlalchemy import cast, String
     query = query.filter(
         db.or_(
             Karyawan.nama.ilike(f'%{search}%'),
