@@ -851,15 +851,18 @@ def input_disiplin():
             flash(f'Data Kedisiplinan {periode} {tahun} berhasil disimpan!', 'success')
             return redirect(url_for('input_disiplin', periode=periode, tahun=tahun, search=search))
     
-    # GET: query karyawan + search
+        # GET: query karyawan + search
+    search = request.args.get('search', '')
     query = Karyawan.query
+
     if search:
-    query = query.filter(
-        db.or_(
-            Karyawan.nama.ilike(f'%{search}%'),
-            cast(Karyawan.npk, String).ilike(f'%{search}%')
+        query = query.filter(
+            db.or_(
+                Karyawan.nama.ilike(f'%{search}%'),
+                cast(Karyawan.npk, String).ilike(f'%{search}%')
+            )
         )
-    )
+
     karyawan_list = query.order_by(Karyawan.divisi, Karyawan.nama).all()
     
     nilai_map = {}
