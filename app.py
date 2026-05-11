@@ -2,6 +2,7 @@ import os
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, send_file
 import io
 import pandas as pd
+from werkzeug.utils import secure_filename
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
@@ -719,59 +720,146 @@ def input_disiplin():
     
     periode = request.args.get('periode', 'Q1')
     tahun = request.args.get('tahun', datetime.now().year, type=int)
+    search = request.args.get('search', '').strip()
     
     if request.method == 'POST':
-        periode = request.form['periode']
-        tahun = int(request.form['tahun'])
+        # HANDLE UPLOAD EXCEL
+        if 'file' in request.files:
+            file = request.files['file']
+            if file.filename == '':
+                flash('File belum dipilih', 'danger')
+                return redirect(url_for('input_disiplin', periode=periode, tahun=tahun))
+            
+            try:
+                df = pd.read_excel(file)
+                # Validasi kolom wajib: NPK, KPI1, KPI2
+                if not all(col in df.columns for col in ['NPK', 'KPI1', 'KPI2']):
+                    flash('Format Excel salah. Wajib ada kolom: NPK, KPI1, KPI2', 'danger')
+                    return redirect(url_for('input_disiplin', periode=periode, tahun=tahun))
+                
+                sukses = 0
+                gagal = 0
+                for _, row in df.iterrows():
+                    try:
+                        npk = str(row['NPK']).strip()
+                        kpi1 = int(row['KPI1'])
+                        kpi2 = int(row['KPI2'])
+                        
+                        if not (0 <= kpi1 <= 5 and 0 <= kpi2 <= 5):
+                            gagal += 1
+                            continue
+                        
+                        karyawan = Karyawan.query.filter_by(npk=npk).first()
+                        if not karyawan:
+                            gagal += 1
+                            continue
+                        
+                        p = Penilaian.query.filter_by(id_karyawan=karyawan.id, periode=periode, tahun=tahun).first()
+                        if not p:
+                            p = Penilaian(
+                                id_karyawan=karyawan.id,
+                                id_penilai=current_user.id,
+                                periode=periode,
+                                tahun=tahun,
+                                status='draft'
+                            )
+                            db.session.add(p)
+                        
+                        p.kpi1 = kpi1
+                        p.kpi2 = kpi2
+                        
+                        # Hitung ulang grade
+                        total = 0
+                        bobot_map = {
+                            **{f'kpi{i}': 4.00 for i in range(1, 6)},
+                            **{f'kpi{i}': 4.00 for i in range(6, 11)},
+                            **{f'kpi{i}': 3.00 for i in range(11, 16)},
+                            **{f'kpi{i}': 2.00 for i in range(16, 21)},
+                            **{f'kpi{i}': 3.00 for i in range(21, 26)},
+                            **{f'kpi{i}': 2.00 for i in range(26, 31)},
+                            **{f'kpi{i}': 2.00 for i in range(31, 36)},
+                        }
+                        for kpi, bobot in bobot_map.items():
+                            nilai_kpi = getattr(p, kpi, 0) or 0
+                            total += (nilai_kpi / 5) * bobot
+                        p.nilai_akhir = round(total, 2)
+                        p.grade = hitung_grade(p.nilai_akhir)
+                        p.id_penilai = current_user.id
+                        p.updated_at = datetime.utcnow()
+                        sukses += 1
+                    except:
+                        gagal += 1
+                        continue
+                
+                db.session.commit()
+                flash(f'Upload selesai. Sukses: {sukses}, Gagal: {gagal}', 'success' if gagal == 0 else 'warning')
+                return redirect(url_for('input_disiplin', periode=periode, tahun=tahun))
+            except Exception as e:
+                flash(f'Gagal baca Excel: {str(e)}', 'danger')
+                return redirect(url_for('input_disiplin', periode=periode, tahun=tahun))
         
-        for key, value in request.form.items():
-            if key.startswith('kpi1_') or key.startswith('kpi2_'):
-                _, id_karyawan = key.split('_')
-                id_karyawan = int(id_karyawan)
-                
-                p = Penilaian.query.filter_by(id_karyawan=id_karyawan, periode=periode, tahun=tahun).first()
-                if not p:
-                    karyawan = Karyawan.query.get(id_karyawan)
-                    if not karyawan: continue
-                    p = Penilaian(
-                        id_karyawan=id_karyawan,
-                        id_penilai=current_user.id,
-                        periode=periode,
-                        tahun=tahun,
-                        status='draft'
-                    )
-                    db.session.add(p)
-                
-                if key.startswith('kpi1_'):
-                    p.kpi1 = int(value or 0)
-                else:
-                    p.kpi2 = int(value or 0)
-                
-                # Update grade setiap ada perubahan
-                total = 0
-                bobot_map = {
-                    **{f'kpi{i}': 4.00 for i in range(1, 6)},
-                    **{f'kpi{i}': 4.00 for i in range(6, 11)},
-                    **{f'kpi{i}': 3.00 for i in range(11, 16)},
-                    **{f'kpi{i}': 2.00 for i in range(16, 21)},
-                    **{f'kpi{i}': 3.00 for i in range(21, 26)},
-                    **{f'kpi{i}': 2.00 for i in range(26, 31)},
-                    **{f'kpi{i}': 2.00 for i in range(31, 36)},
-                }
-                for kpi, bobot in bobot_map.items():
-                    nilai_kpi = getattr(p, kpi, 0) or 0
-                    total += (nilai_kpi / 5) * bobot
-                p.nilai_akhir = round(total, 2)
-                p.grade = hitung_grade(p.nilai_akhir)
-                p.id_penilai = current_user.id
-                p.updated_at = datetime.utcnow()
-        
-        db.session.commit()
-        flash(f'Data Kedisiplinan {periode} {tahun} berhasil disimpan!', 'success')
-        return redirect(url_for('input_disiplin', periode=periode, tahun=tahun))
+        # HANDLE INPUT MANUAL
+        else:
+            periode = request.form['periode']
+            tahun = int(request.form['tahun'])
+            
+            for key, value in request.form.items():
+                if key.startswith('kpi1_') or key.startswith('kpi2_'):
+                    _, id_karyawan = key.split('_')
+                    id_karyawan = int(id_karyawan)
+                    
+                    p = Penilaian.query.filter_by(id_karyawan=id_karyawan, periode=periode, tahun=tahun).first()
+                    if not p:
+                        karyawan = Karyawan.query.get(id_karyawan)
+                        if not karyawan: continue
+                        p = Penilaian(
+                            id_karyawan=id_karyawan,
+                            id_penilai=current_user.id,
+                            periode=periode,
+                            tahun=tahun,
+                            status='draft'
+                        )
+                        db.session.add(p)
+                    
+                    if key.startswith('kpi1_'):
+                        p.kpi1 = int(value or 0)
+                    else:
+                        p.kpi2 = int(value or 0)
+                    
+                    # Update grade setiap ada perubahan
+                    total = 0
+                    bobot_map = {
+                        **{f'kpi{i}': 4.00 for i in range(1, 6)},
+                        **{f'kpi{i}': 4.00 for i in range(6, 11)},
+                        **{f'kpi{i}': 3.00 for i in range(11, 16)},
+                        **{f'kpi{i}': 2.00 for i in range(16, 21)},
+                        **{f'kpi{i}': 3.00 for i in range(21, 26)},
+                        **{f'kpi{i}': 2.00 for i in range(26, 31)},
+                        **{f'kpi{i}': 2.00 for i in range(31, 36)},
+                    }
+                    for kpi, bobot in bobot_map.items():
+                        nilai_kpi = getattr(p, kpi, 0) or 0
+                        total += (nilai_kpi / 5) * bobot
+                    p.nilai_akhir = round(total, 2)
+                    p.grade = hitung_grade(p.nilai_akhir)
+                    p.id_penilai = current_user.id
+                    p.updated_at = datetime.utcnow()
+            
+            db.session.commit()
+            flash(f'Data Kedisiplinan {periode} {tahun} berhasil disimpan!', 'success')
+            return redirect(url_for('input_disiplin', periode=periode, tahun=tahun, search=search))
     
-    # GET: ambil semua karyawan TANPA filter status
-    karyawan_list = Karyawan.query.order_by(Karyawan.divisi, Karyawan.nama).all()
+    # GET: query karyawan + search
+    query = Karyawan.query
+    if search:
+        query = query.filter(
+            db.or_(
+                Karyawan.nama.ilike(f'%{search}%'),
+                Karyawan.npk.ilike(f'%{search}%')
+            )
+        )
+    karyawan_list = query.order_by(Karyawan.divisi, Karyawan.nama).all()
+    
     nilai_map = {}
     for n in Penilaian.query.filter_by(periode=periode, tahun=tahun).all():
         nilai_map[n.id_karyawan] = n
@@ -780,8 +868,9 @@ def input_disiplin():
                            karyawan_list=karyawan_list, 
                            nilai_map=nilai_map,
                            periode=periode, 
-                           tahun=tahun)
-
+                           tahun=tahun,
+                           search=search)
+    
 @app.route('/tambah-karyawan', methods=['GET', 'POST'])
 @login_required
 def tambah_karyawan():
