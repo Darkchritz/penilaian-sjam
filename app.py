@@ -209,8 +209,6 @@ def hrd():
     user = current_user
     page = int(request.args.get('page', 1))
     per_page = 20
-    tahun_ini = datetime.now().year
-    periode_aktif = request.args.get('periode', 'Q1')
     search = request.args.get('search', '').strip()
     sort_by = request.args.get('sort', 'npk')
     order = request.args.get('order', 'asc')
@@ -243,31 +241,12 @@ def hrd():
     total_pages = pagination.pages
     total_karyawan = pagination.total
 
-    # FIX: Hapus filter cabang + role, HRD bisa nilai semua di divisi HRD
-    karyawan_hrd = Karyawan.query.filter(
-        Karyawan.divisi == user.divisi,
-        Karyawan.npk!= user.npk
-    ).order_by(Karyawan.role.desc(), Karyawan.nama).all()
-
-    penilaian_q1 = Penilaian.query.filter_by(tahun=tahun_ini, periode=periode_aktif).all()
-    penilaian_dict = {p.id_karyawan: p for p in penilaian_q1}
-
-    sudah_dinilai_id = [p.id_karyawan for p in penilaian_q1]
-    belum_dinilai = [k for k in karyawan_hrd if k.id not in sudah_dinilai_id]
-
     return render_template('dashboard_hrd.html',
                          user=user,
                          karyawan=semua_karyawan,
-                         karyawan_hrd=karyawan_hrd,
-                         karyawan_untuk_dinilai=karyawan_hrd,
-                         belum_dinilai=belum_dinilai,
                          page=page,
                          total_pages=total_pages,
                          total_karyawan=total_karyawan,
-                         penilaian_dict=penilaian_dict,
-                         status_penilaian={p.id_karyawan: p.status for p in penilaian_q1},
-                         periode_aktif=periode_aktif,
-                         tahun_ini=tahun_ini,
                          search=search,
                          sort_by=sort_by,
                          order=order)
