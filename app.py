@@ -694,6 +694,77 @@ def submit_nilai():
         return redirect(url_for('hrd'))
     return redirect(url_for('kadiv'))
 
+@app.route('/hrd/input_disiplin', methods=['GET', 'POST'])
+@login_required
+def input_disiplin():
+    if current_user.role.lower() != 'hrd':
+        return redirect(url_for('kadiv'))
+    
+    periode = request.args.get('periode', 'Q1')
+    tahun = request.args.get('tahun', datetime.now().year, type=int)
+    
+    if request.method == 'POST':
+        periode = request.form['periode']
+        tahun = int(request.form['tahun'])
+        
+        for key, value in request.form.items():
+            if key.startswith('kpi1_') or key.startswith('kpi2_'):
+                _, id_karyawan = key.split('_')
+                id_karyawan = int(id_karyawan)
+                
+                p = Penilaian.query.filter_by(id_karyawan=id_karyawan, periode=periode, tahun=tahun).first()
+                if not p:
+                    karyawan = Karyawan.query.get(id_karyawan)
+                    if not karyawan: continue
+                    p = Penilaian(
+                        id_karyawan=id_karyawan,
+                        id_penilai=current_user.id,
+                        periode=periode,
+                        tahun=tahun,
+                        status='draft'
+                    )
+                    db.session.add(p)
+                
+                if key.startswith('kpi1_'):
+                    p.kpi1 = int(value or 0)
+                else:
+                    p.kpi2 = int(value or 0)
+                
+                # Update grade setiap ada perubahan
+                total = 0
+                bobot_map = {
+                    **{f'kpi{i}': 4.00 for i in range(1, 6)},
+                    **{f'kpi{i}': 4.00 for i in range(6, 11)},
+                    **{f'kpi{i}': 3.00 for i in range(11, 16)},
+                    **{f'kpi{i}': 2.00 for i in range(16, 21)},
+                    **{f'kpi{i}': 3.00 for i in range(21, 26)},
+                    **{f'kpi{i}': 2.00 for i in range(26, 31)},
+                    **{f'kpi{i}': 2.00 for i in range(31, 36)},
+                }
+                for kpi, bobot in bobot_map.items():
+                    nilai_kpi = getattr(p, kpi, 0) or 0
+                    total += (nilai_kpi / 5) * bobot
+                p.nilai_akhir = round(total, 2)
+                p.grade = hitung_grade(p.nilai_akhir)
+                p.id_penilai = current_user.id
+                p.updated_at = datetime.utcnow()
+        
+        db.session.commit()
+        flash(f'Data Kedisiplinan {periode} {tahun} berhasil disimpan!', 'success')
+        return redirect(url_for('input_disiplin', periode=periode, tahun=tahun))
+    
+    # GET: ambil semua karyawan + nilai existing
+    karyawan_list = Karyawan.query.filter_by(status='aktif').order_by(Karyawan.divisi, Karyawan.nama).all()
+    nilai_map = {}
+    for n in Penilaian.query.filter_by(periode=periode, tahun=tahun).all():
+        nilai_map[n.id_karyawan] = n
+    
+    return render_template('hrd_input_disiplin.html', 
+                           karyawan_list=karyawan_list, 
+                           nilai_map=nilai_map,
+                           periode=periode, 
+                           tahun=tahun)
+
 @app.route('/tambah-karyawan', methods=['GET', 'POST'])
 @login_required
 def tambah_karyawan():
