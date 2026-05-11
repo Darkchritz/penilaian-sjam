@@ -650,17 +650,22 @@ def submit_nilai():
     if not p:
         p = Penilaian(
             id_karyawan=id_karyawan,
-            id_penilai=current_user.id,  # INI WAJIB ADA
+            id_penilai=current_user.id,
             periode=periode,
-            tahun=tahun
+            tahun=tahun,
+            status='draft'
         )
         db.session.add(p)
     
-    # Update semua KPI
+    # UPDATE KPI: Kadiv cuma bisa ubah kpi3-kpi35. kpi1&kpi2 skip kalo role kadiv
     for i in range(1, 36):
-        setattr(p, f'kpi{i}', int(request.form.get(f'kpi{i}', 0)))
+        key = f'kpi{i}'
+        # Kalo Kadiv, skip kpi1 & kpi2 biar ga nimpa data HRD
+        if current_user.role.lower() == 'kadiv' and key in ['kpi1', 'kpi2']:
+            continue
+        setattr(p, key, int(request.form.get(key, 0)))
     
-    # HITUNG NILAI & GRADE SELALU, BUKAN CUMA PAS FINAL
+    # HITUNG NILAI & GRADE SELALU, DRAFT ATAU FINAL
     total = 0
     bobot_map = {
         **{f'kpi{i}': 4.00 for i in range(1, 6)},
@@ -675,15 +680,18 @@ def submit_nilai():
         nilai_kpi = getattr(p, kpi, 0) or 0
         total += (nilai_kpi / 5) * bobot
     p.nilai_akhir = round(total, 2)
-    p.grade = hitung_grade(p.nilai_akhir)  # TAMBAH INI
+    p.grade = hitung_grade(p.nilai_akhir)
     
-    # Set status + id_penilai
+    # Set status + id_penilai terakhir yang edit
     p.status = action
-    p.id_penilai = current_user.id  # UPDATE JUGA KALO UDAH ADA
-    p.updated_at = datetime.utcnow()  # TAMBAH INI
+    p.id_penilai = current_user.id
+    p.updated_at = datetime.utcnow()
     
     db.session.commit()
     flash(f'Penilaian {periode} berhasil disimpan!', 'success')
+    
+    if current_user.role.lower() == 'hrd':
+        return redirect(url_for('hrd'))
     return redirect(url_for('kadiv'))
 
 @app.route('/tambah-karyawan', methods=['GET', 'POST'])
