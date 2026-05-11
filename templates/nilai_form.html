@@ -72,31 +72,30 @@
         ('kpi5', 'Disiplin dalam Menjaga Kebersihan dan Kerapian Tempat Kerja', '4.00%')
     ] %}
     {% for key, title, bobot in kpi_list %}
-        {% set val = nilai[key] if nilai else 0 %}
-        <div class="mb-5 pb-5 border-b last:border-0">
-            <p class="font-semibold text-gray-800 mb-1">{{ loop.index }}. {{ title }}</p>
-            <p class="text-xs text-gray-500 mb-3">Bobot: {{ bobot }}</p>
-            <div class="flex gap-2">
-                {% set labels = ['Tidak Ada', 'Sangat Buruk', 'Buruk', 'Cukup / Sedang-Sedang', 'Baik', 'Sangat Baik'] %}
-                {% for n in range(6) %}
-                <label class="flex-1">
-                    <input type="radio" name="{{ key }}" value="{{ n }}" required
-                           {% if val == n %}checked{% endif %}
-                           {% if nilai and nilai.status == 'final' %}disabled{% endif %}
-                           class="peer hidden">
-                    <div class="text-center py-2 px-1 rounded-lg border-2 cursor-pointer transition
-                                peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600
-                                border-gray-200 hover:border-indigo-400
-                                disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
-                        <div class="font-bold text-lg">{{ n }}</div>
-                        <div class="text-xs leading-tight mt-0.5">{{ labels[n] }}</div>
-                    </div>
-                </label>
-                {% endfor %}
-            </div>
+    {% set val = nilai[key] if nilai else None %}
+    <div class="mb-5 pb-5 border-b last:border-0">
+        <p class="font-semibold text-gray-800 mb-1">{{ loop.index }}. {{ title }}</p>
+        <p class="text-xs text-gray-500 mb-3">Bobot: {{ bobot }}</p>
+        <div class="flex gap-2">
+            {% set labels = ['Tidak Ada', 'Sangat Buruk', 'Buruk', 'Cukup / Sedang-Sedang', 'Baik', 'Sangat Baik'] %}
+            {% for n in range(6) %}
+            <label class="flex-1">
+                <input type="radio" name="{{ key }}" value="{{ n }}" required
+                       {% if val == n %}checked{% endif %}
+                       {% if nilai and nilai.status == 'final' %}disabled{% endif %}
+                       class="peer hidden">
+                <div class="text-center py-2 px-1 rounded-lg border-2 cursor-pointer transition
+                            peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600
+                            border-gray-200 hover:border-indigo-400
+                            disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
+                    <div class="font-bold text-lg">{{ n }}</div>
+                    <div class="text-xs leading-tight mt-0.5">{{ labels[n] }}</div>
+                </div>
+            </label>
+            {% endfor %}
         </div>
-    {% endfor %}
-</div>
+    </div>
+{% endfor %}
 
                 <!-- PRODUKTIVITAS KERJA 20% -->
                 <div class="bg-white rounded-xl shadow-sm border p-6">
