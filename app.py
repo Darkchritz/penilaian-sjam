@@ -657,7 +657,7 @@ def nilai(id):
 @app.route('/submit_nilai', methods=['POST'])
 @login_required
 def submit_nilai():
-    id_karyawan = int(request.form['id'])
+    id_karyawan = int(request.form['npk'])
     periode = request.form['periode']
     tahun = int(request.form['tahun'])
     action = request.form.get('action', 'draft')
