@@ -657,40 +657,50 @@ def nilai(id):
 @app.route('/submit_nilai', methods=['POST'])
 @login_required
 def submit_nilai():
-    id_karyawan = int(request.form['npk'])
+    npk_karyawan = request.form['npk']  # ganti dari id_karyawan = int(request.form['npk'])
     periode = request.form['periode']
     tahun = int(request.form['tahun'])
     action = request.form.get('action', 'draft')
     
-    p = Penilaian.query.filter_by(id_karyawan=id_karyawan, periode=periode, tahun=tahun).first()
+    p = Penilaian.query.filter_by(npk=npk_karyawan, periode=periode, tahun=tahun).first()
     if not p:
         p = Penilaian(
-            id_karyawan=id_karyawan,
-            id_penilai=current_user.id,
+            npk=npk_karyawan,
+            penilai_npk=current_user.npk,  # ganti dari id_penilai=current_user.id
             periode=periode,
             tahun=tahun,
             status='draft'
         )
         db.session.add(p)
     
-    # UPDATE KPI: Kadiv cuma bisa ubah kpi3-kpi35. kpi1&kpi2 skip kalo role kadiv
-    for i in range(1, 36):
-        key = f'kpi{i}'
-        # Kalo Kadiv, skip kpi1 & kpi2 biar ga nimpa data HRD
-        if current_user.role.lower() == 'kadiv' and key in ['kpi1', 'kpi2']:
+    # UPDATE KPI: Kadiv cuma bisa ubah KPI3-35. KPI1&KPI2 skip kalo role kadiv
+    kpi_keys = [
+        'kehadiran', 'kepatuhan_aturan', 'konsistensi', 'kepatuhan_seragam', 'disiplin_kebersihan',
+        'efisiensi', 'prioritas', 'inovasi', 'multitasking', 'peningkatan_kinerja',
+        'terampil', 'keputusan', 'inisiatif', 'penyelesaian_masalah', 'responsif',
+        'menanggapi_positif', 'koordinasi', 'sikap_positif', 'tidak_komplain', 'profesional',
+        'tanggung_jawab_kerja', 'menerima_kesalahan', 'inventaris', 'tanpa_pengawasan', 'mengelola_prioritas',
+        'belajar_cepat', 'strategi_kerja', 'tantangan_baru', 'ubah_cara_kerja', 'solusi_alternatif',
+        'keramahan', 'kejelasan', 'responsif_kom', 'lapor_pelanggaran', 'keterbukaan'
+    ]
+    
+    for key in kpi_keys:
+        # Kalo Kadiv, skip kehadiran & kepatuhan_aturan biar ga nimpa data HRD
+        if current_user.role.lower() in ['kadiv', 'kepala divisi'] and key in ['kehadiran', 'kepatuhan_aturan']:
             continue
-        setattr(p, key, int(request.form.get(key, 0)))
+        val = request.form.get(key)
+        setattr(p, key, int(val) if val not in [None, ''] else None)
     
     # HITUNG NILAI & GRADE SELALU, DRAFT ATAU FINAL
     total = 0
     bobot_map = {
-        **{f'kpi{i}': 4.00 for i in range(1, 6)},
-        **{f'kpi{i}': 4.00 for i in range(6, 11)},
-        **{f'kpi{i}': 3.00 for i in range(11, 16)},
-        **{f'kpi{i}': 2.00 for i in range(16, 21)},
-        **{f'kpi{i}': 3.00 for i in range(21, 26)},
-        **{f'kpi{i}': 2.00 for i in range(26, 31)},
-        **{f'kpi{i}': 2.00 for i in range(31, 36)},
+        'kehadiran': 4.00, 'kepatuhan_aturan': 4.00, 'konsistensi': 4.00, 'kepatuhan_seragam': 4.00, 'disiplin_kebersihan': 4.00,
+        'efisiensi': 4.00, 'prioritas': 4.00, 'inovasi': 4.00, 'multitasking': 4.00, 'peningkatan_kinerja': 4.00,
+        'terampil': 3.00, 'keputusan': 3.00, 'inisiatif': 3.00, 'penyelesaian_masalah': 3.00, 'responsif': 3.00,
+        'menanggapi_positif': 2.00, 'koordinasi': 2.00, 'sikap_positif': 2.00, 'tidak_komplain': 2.00, 'profesional': 2.00,
+        'tanggung_jawab_kerja': 3.00, 'menerima_kesalahan': 3.00, 'inventaris': 3.00, 'tanpa_pengawasan': 3.00, 'mengelola_prioritas': 3.00,
+        'belajar_cepat': 2.00, 'strategi_kerja': 2.00, 'tantangan_baru': 2.00, 'ubah_cara_kerja': 2.00, 'solusi_alternatif': 2.00,
+        'keramahan': 2.00, 'kejelasan': 2.00, 'responsif_kom': 2.00, 'lapor_pelanggaran': 2.00, 'keterbukaan': 2.00,
     }
     for kpi, bobot in bobot_map.items():
         nilai_kpi = getattr(p, kpi, 0) or 0
@@ -698,9 +708,9 @@ def submit_nilai():
     p.nilai_akhir = round(total, 2)
     p.grade = hitung_grade(p.nilai_akhir)
     
-    # Set status + id_penilai terakhir yang edit
+    # Set status + penilai_npk terakhir yang edit
     p.status = action
-    p.id_penilai = current_user.id
+    p.penilai_npk = current_user.npk  # ganti dari id_penilai = current_user.id
     p.updated_at = datetime.utcnow()
     
     db.session.commit()
