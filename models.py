@@ -17,6 +17,12 @@ class Karyawan(UserMixin, db.Model):
     def get_id(self):
         return self.npk
 
+class Config(db.Model):
+    __tablename__ = 'config'
+    id = db.Column(db.Integer, primary_key=True)
+    key = db.Column(db.String(50), unique=True, nullable=False)
+    value = db.Column(db.String(255), nullable=False)
+    
 class Penilaian(db.Model):
     __tablename__ = 'penilaian'
     
