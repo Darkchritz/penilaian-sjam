@@ -97,9 +97,36 @@
     
     <main class="max-w-6xl mx-auto p-4 sm:p-6">
     <div class="text-center mb-8">
-        <h2 class="text-3xl font-bold text-gray-800 mb-2">Dashboard HRD</h2>
-        <p class="text-gray-500">{{ user.nama }} - {{ user.divisi }}</p>
+    <h2 class="text-3xl font-bold text-gray-800 mb-2">Dashboard HRD</h2>
+    <p class="text-gray-500 mb-4">{{ user.nama }} - {{ user.divisi }}</p>
+    
+    <!-- Dropdown Ganti Tahun -->
+    <div class="inline-flex items-center gap-3 bg-white px-4 py-2 rounded-xl shadow-sm border" 
+         x-data="{ 
+            tahun: {{ tahun_aktif }},
+            gantiTahun(t) {
+                fetch(`/admin/set_tahun_aktif/${t}`, {method: 'POST'})
+                .then(r => r.json())
+                .then(res => {
+                    this.tahun = t;
+                    this.toastMsg = res.message;
+                    this.toastType = res.status === 'success' ? 'success' : 'error';
+                    this.showToast = true;
+                    setTimeout(() => { this.showToast = false }, 2000);
+                    if (res.status === 'success') setTimeout(() => location.reload(), 1000);
+                });
+            }
+         }">
+        <i class="bi bi-calendar-event text-indigo-600"></i>
+        <span class="text-sm font-medium text-gray-700">Tahun Aktif:</span>
+        <select x-model="tahun" @change="gantiTahun(tahun)" 
+                class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm font-semibold text-indigo-700 focus:ring-2 focus:ring-indigo-500">
+            {% for t in range(2024, 2031) %}
+            <option value="{{ t }}">{{ t }}</option>
+            {% endfor %}
+        </select>
     </div>
+</div>
 
     <!-- Action Buttons -->
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6">
