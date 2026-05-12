@@ -506,12 +506,11 @@ def kadiv():
 
 @app.route('/nilai/<npk>')
 @login_required
-def nilai(npk):
+def nilai_form(npk):  # ganti nama fungsi dari 'nilai' jadi 'nilai_form'
     karyawan = Karyawan.query.filter_by(npk=npk).first_or_404()
     tahun = request.args.get('tahun', datetime.now().year, type=int)
     periode = request.args.get('periode', 'Q1')
     
-    # Ambil data penilaian yang udah ada biar form keisi
     nilai = Penilaian.query.filter_by(npk=npk, tahun=tahun, periode=periode).first()
     
     return render_template('nilai_form.html', 
