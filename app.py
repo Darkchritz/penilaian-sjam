@@ -657,16 +657,20 @@ def nilai(id):
 @app.route('/submit_nilai', methods=['POST'])
 @login_required
 def submit_nilai():
-    npk_karyawan = request.form['npk']  # ganti dari id_karyawan = int(request.form['npk'])
-    periode = request.form['periode']
-    tahun = int(request.form['tahun'])
+    npk_karyawan = request.form.get('npk')  # ganti dari request.form['npk']
+    periode = request.form.get('periode')
+    tahun = int(request.form.get('tahun', 0))
     action = request.form.get('action', 'draft')
+    
+    if not npk_karyawan:  # tambah ini biar ketauan kalo npk kosong
+        flash('NPK tidak ditemukan', 'danger')
+        return redirect(url_for('kadiv'))
     
     p = Penilaian.query.filter_by(npk=npk_karyawan, periode=periode, tahun=tahun).first()
     if not p:
         p = Penilaian(
             npk=npk_karyawan,
-            penilai_npk=current_user.npk,  # ganti dari id_penilai=current_user.id
+            penilai_npk=current_user.npk,
             periode=periode,
             tahun=tahun,
             status='draft'
@@ -710,7 +714,7 @@ def submit_nilai():
     
     # Set status + penilai_npk terakhir yang edit
     p.status = action
-    p.penilai_npk = current_user.npk  # ganti dari id_penilai = current_user.id
+    p.penilai_npk = current_user.npk
     p.updated_at = datetime.utcnow()
     
     db.session.commit()
