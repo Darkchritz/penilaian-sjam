@@ -297,6 +297,22 @@ def admin_reset_penilaian(npk, periode, tahun):
             'message': f'Gagal reset: {str(e)}'
         }), 500
 
+@app.route('/admin/set_tahun_aktif/<int:tahun>', methods=['POST'])
+@login_required
+def set_tahun_aktif(tahun):
+    if current_user.role.lower() != 'hrd':
+        return jsonify({'status': 'error', 'message': 'Akses ditolak'}), 403
+    
+    config = Config.query.filter_by(key='tahun_aktif').first()
+    if config:
+        config.value = str(tahun)
+    else:
+        config = Config(key='tahun_aktif', value=str(tahun))
+        db.session.add(config)
+    
+    db.session.commit()
+    return jsonify({'status': 'success', 'message': f'Tahun aktif diganti ke {tahun}'})
+    
 @app.route('/hrd/kelola_akses_kadiv', methods=['GET', 'POST'])
 @login_required
 def kelola_akses_kadiv():
