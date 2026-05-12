@@ -440,7 +440,7 @@ def kadiv():
     per_page = 8  # 8 orang per halaman
     
     print(f"=== DEBUG KADIV ===")
-    print(f"Login sebagai: {current_user.nama} | ID: {current_user.id} | Role: {current_user.role} | Divisi: {current_user.divisi} | Cabang: {current_user.cabang} | Periode: {periode}")
+    print(f"Login sebagai: {current_user.nama} | NPK: {current_user.npk} | Role: {current_user.role} | Divisi: {current_user.divisi} | Cabang: {current_user.cabang} | Periode: {periode}")
     
     if current_user.role.lower().strip() == 'super kadiv':
         base_query = Karyawan.query.filter(Karyawan.role == 'karyawan')
@@ -456,34 +456,34 @@ def kadiv():
             base_query = Karyawan.query.filter(
                 Karyawan.divisi == current_user.divisi,
                 Karyawan.cabang.in_(list_pusat),
-                Karyawan.id != current_user.id
+                Karyawan.npk != current_user.npk  # ganti dari id
             )
             print(f"Kadiv HO: Total bawahan 1 divisi = {base_query.count()}")
         else:
             # KADIV CABANG: HAPUS FILTER DIVISI, KUNCI CABANG AJA
             base_query = Karyawan.query.filter(
                 Karyawan.cabang == current_user.cabang,
-                Karyawan.id != current_user.id
+                Karyawan.npk != current_user.npk  # ganti dari id
             )
             print(f"Kadiv Cabang: Total bawahan semua divisi = {base_query.count()} orang")
 
-    # UBAH 1: Hapus id_penilai=current_user.id biar cek semua kadiv yg udah final
-    subquery_final = Penilaian.query.with_entities(Penilaian.id_karyawan).filter_by(
+    # UBAH: id_karyawan -> npk
+    subquery_final = Penilaian.query.with_entities(Penilaian.npk).filter_by(
         periode=periode,
         tahun=tahun_ini,
         status='final'
     ).distinct()
     
-    belum_query = base_query.filter(~Karyawan.id.in_(subquery_final))
-    sudah_query = base_query.filter(Karyawan.id.in_(subquery_final))
+    belum_query = base_query.filter(~Karyawan.npk.in_(subquery_final))  # ganti dari id
+    sudah_query = base_query.filter(Karyawan.npk.in_(subquery_final))  # ganti dari id
 
     belum_paginate = belum_query.paginate(page=page_belum, per_page=per_page, error_out=False)
     sudah_paginate = sudah_query.paginate(page=page_sudah, per_page=per_page, error_out=False)
 
-    # UBAH 2: Hapus id_penilai=current_user.id + tambah nama penilai
+    # UBAH: id_karyawan -> npk, id_penilai -> penilai_npk
     for k in sudah_paginate.items:
         nilai = Penilaian.query.filter_by(
-            id_karyawan=k.id,
+            npk=k.npk,  # ganti dari id_karyawan=k.id
             periode=periode,
             tahun=tahun_ini,
             status='final'
@@ -492,8 +492,8 @@ def kadiv():
         k.grade = nilai.grade if nilai else '-'
         k.penilaian_id = nilai.id if nilai else None
         k.penilaian_status = nilai.status if nilai else None
-        # FIX: ganti baris ini karena model Penilaian ga ada relationship 'penilai'
-        penilai = Karyawan.query.get(nilai.id_penilai) if nilai else None
+        # FIX: ganti id_penilai -> penilai_npk
+        penilai = Karyawan.query.filter_by(npk=nilai.penilai_npk).first() if nilai else None  # ganti dari get(nilai.id_penilai)
         k.dinilai_oleh = penilai.nama if penilai else '-'
 
     print(f"Total belum_dinilai: {belum_paginate.total} | sudah_dinilai: {sudah_paginate.total}")
