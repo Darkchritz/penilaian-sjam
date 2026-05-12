@@ -256,25 +256,26 @@ def hrd():
                          sort_by=sort_by,
                          order=order)
 
-@app.route('/admin/reset_penilaian/<int:npk>/<periode>/<int:tahun>', methods=['POST'])
+@app.route('/admin/reset_penilaian/<npk>/<periode>/<int:tahun>', methods=['POST'])
 @login_required
 def admin_reset_penilaian(npk, periode, tahun):
     if current_user.role.lower()!= 'hrd':
         return jsonify({'status': 'error', 'message': 'Akses ditolak'}), 403
 
-    p = Penilaian.query.filter_by(npk=npk, periode=periode, tahun=tahun).first()
+    p = Penilaian.query.filter(
+        Penilaian.npk == str(npk),
+        Penilaian.periode.ilike(periode), 
+        Penilaian.tahun == tahun,
+        Penilaian.status == 'final'
+    ).first()
+    
     if not p:
-        return jsonify({'status': 'error', 'message': 'Penilaian tidak ditemukan'}), 404
+        return jsonify({'status': 'error', 'message': f'Penilaian NPK {npk} {periode} {tahun} final tidak ditemukan'}), 404
 
-    if p.status!= 'final':
-        return jsonify({'status': 'error', 'message': 'Penilaian belum final, tidak perlu reset'}), 400
-
-    karyawan = Karyawan.query.filter_by(npk=npk).first()
+    karyawan = Karyawan.query.filter_by(npk=str(npk)).first()
     db.session.delete(p)
     db.session.commit()
-
-    flash(f'Penilaian {karyawan.nama} periode {periode} {tahun} berhasil direset. Kadiv bisa nilai ulang.', 'success')
-    return jsonify({'status': 'success', 'message': 'Reset berhasil'})
+    return jsonify({'status': 'success', 'message': f'Penilaian {karyawan.nama} periode {periode} {tahun} berhasil direset'})
 
 @app.route('/hrd/kelola_akses_kadiv', methods=['GET', 'POST'])
 @login_required
