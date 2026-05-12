@@ -474,8 +474,14 @@ def kadiv():
         status='final'
     ).distinct()
     
-    belum_query = base_query.filter(~Karyawan.npk.in_(subquery_final))  # ganti dari id
-    sudah_query = base_query.filter(Karyawan.npk.in_(subquery_final))  # ganti dari id
+    belum_query = base_query.filter(
+    Karyawan.npk.isnot(None),
+    ~Karyawan.npk.in_(subquery_final)
+)
+    sudah_query = base_query.filter(
+    Karyawan.npk.isnot(None),
+    Karyawan.npk.in_(subquery_final)
+)
 
     belum_paginate = belum_query.paginate(page=page_belum, per_page=per_page, error_out=False)
     sudah_paginate = sudah_query.paginate(page=page_sudah, per_page=per_page, error_out=False)
