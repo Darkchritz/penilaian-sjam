@@ -53,59 +53,61 @@ class Karyawan(UserMixin, db.Model):
 
 class Penilaian(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    id_penilai = db.Column(db.Integer, db.ForeignKey('karyawan.id'), nullable=False)
-    id_karyawan = db.Column(db.Integer, db.ForeignKey('karyawan.id'), nullable=False)
-    periode = db.Column(db.String(2), nullable=False)  # Q1, Q2, Q3, Q4
+    penilai_npk = db.Column(db.String(20), db.ForeignKey('karyawan.npk'), nullable=False) # ganti dari id_penilai
+    npk = db.Column(db.String(20), db.ForeignKey('karyawan.npk'), nullable=False) # ganti dari id_karyawan
+    periode = db.Column(db.String(2), nullable=False) # Q1, Q2, Q3, Q4
     tahun = db.Column(db.Integer, nullable=False)
-    status = db.Column(db.String(10), default='draft')  # draft / final
-    
+    status = db.Column(db.String(10), default='draft') # draft / final
+
     # 35 KPI sesuai Excel - semua skala 0-5
-    kpi1 = db.Column(db.Integer, default=0)   # KEDISIPLINAN
-    kpi2 = db.Column(db.Integer, default=0)
-    kpi3 = db.Column(db.Integer, default=0)
-    kpi4 = db.Column(db.Integer, default=0)
-    kpi5 = db.Column(db.Integer, default=0)
-    
-    kpi6 = db.Column(db.Integer, default=0)   # PRODUKTIVITAS
-    kpi7 = db.Column(db.Integer, default=0)
-    kpi8 = db.Column(db.Integer, default=0)
-    kpi9 = db.Column(db.Integer, default=0)
-    kpi10 = db.Column(db.Integer, default=0)
-    
-    kpi11 = db.Column(db.Integer, default=0)  # KEHANDALAN
-    kpi12 = db.Column(db.Integer, default=0)
-    kpi13 = db.Column(db.Integer, default=0)
-    kpi14 = db.Column(db.Integer, default=0)
-    kpi15 = db.Column(db.Integer, default=0)
-    
-    kpi16 = db.Column(db.Integer, default=0)  # KERJASAMA
-    kpi17 = db.Column(db.Integer, default=0)
-    kpi18 = db.Column(db.Integer, default=0)
-    kpi19 = db.Column(db.Integer, default=0)
-    kpi20 = db.Column(db.Integer, default=0)
-    
-    kpi21 = db.Column(db.Integer, default=0)  # TANGGUNG JAWAB
-    kpi22 = db.Column(db.Integer, default=0)
-    kpi23 = db.Column(db.Integer, default=0)
-    kpi24 = db.Column(db.Integer, default=0)
-    kpi25 = db.Column(db.Integer, default=0)
-    
-    kpi26 = db.Column(db.Integer, default=0)  # ADAPTASI
-    kpi27 = db.Column(db.Integer, default=0)
-    kpi28 = db.Column(db.Integer, default=0)
-    kpi29 = db.Column(db.Integer, default=0)
-    kpi30 = db.Column(db.Integer, default=0)
-    
-    kpi31 = db.Column(db.Integer, default=0)  # KOMUNIKASI
-    kpi32 = db.Column(db.Integer, default=0)
-    kpi33 = db.Column(db.Integer, default=0)
-    kpi34 = db.Column(db.Integer, default=0)
-    kpi35 = db.Column(db.Integer, default=0)
-    
-    nilai_akhir = db.Column(db.Float, default=0)  # 0-100
+    kehadiran = db.Column(db.Integer, default=0) # KEDISIPLINAN - kpi1
+    kepatuhan_aturan = db.Column(db.Integer, default=0) # kpi2
+    konsistensi = db.Column(db.Integer, default=0) # kpi3
+    kepatuhan_seragam = db.Column(db.Integer, default=0) # kpi4
+    disiplin_kebersihan = db.Column(db.Integer, default=0)# kpi5
+
+    efisiensi = db.Column(db.Integer, default=0) # PRODUKTIVITAS - kpi6
+    prioritas = db.Column(db.Integer, default=0) # kpi7
+    inovasi = db.Column(db.Integer, default=0) # kpi8
+    multitasking = db.Column(db.Integer, default=0) # kpi9
+    peningkatan_kinerja = db.Column(db.Integer, default=0)# kpi10
+
+    terampil = db.Column(db.Integer, default=0) # KEHANDALAN - kpi11
+    keputusan = db.Column(db.Integer, default=0) # kpi12
+    inisiatif = db.Column(db.Integer, default=0) # kpi13
+    penyelesaian_masalah = db.Column(db.Integer, default=0)# kpi14
+    responsif = db.Column(db.Integer, default=0) # kpi15
+
+    menanggapi_positif = db.Column(db.Integer, default=0) # KERJASAMA - kpi16
+    koordinasi = db.Column(db.Integer, default=0) # kpi17
+    sikap_positif = db.Column(db.Integer, default=0) # kpi18
+    tidak_komplain = db.Column(db.Integer, default=0) # kpi19
+    profesional = db.Column(db.Integer, default=0) # kpi20
+
+    tanggung_jawab_kerja = db.Column(db.Integer, default=0)# TANGGUNG JAWAB - kpi21
+    menerima_kesalahan = db.Column(db.Integer, default=0) # kpi22
+    inventaris = db.Column(db.Integer, default=0) # kpi23
+    tanpa_pengawasan = db.Column(db.Integer, default=0) # kpi24
+    mengelola_prioritas = db.Column(db.Integer, default=0)# kpi25
+
+    belajar_cepat = db.Column(db.Integer, default=0) # ADAPTASI - kpi26
+    strategi_kerja = db.Column(db.Integer, default=0) # kpi27
+    tantangan_baru = db.Column(db.Integer, default=0) # kpi28
+    ubah_cara_kerja = db.Column(db.Integer, default=0) # kpi29
+    solusi_alternatif = db.Column(db.Integer, default=0) # kpi30
+
+    keramahan = db.Column(db.Integer, default=0) # KOMUNIKASI - kpi31
+    kejelasan = db.Column(db.Integer, default=0) # kpi32
+    responsif_kom = db.Column(db.Integer, default=0) # kpi33
+    lapor_pelanggaran = db.Column(db.Integer, default=0) # kpi34
+    keterbukaan = db.Column(db.Integer, default=0) # kpi35
+
+    nilai_akhir = db.Column(db.Float, default=0) # 0-100
     grade = db.Column(db.String(2))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    karyawan = db.relationship('Karyawan', foreign_keys=[npk]) # tambah ini biar relasi jalan
 
 class AksesPenilaian(db.Model):
     __tablename__ = 'akses_penilaian'
