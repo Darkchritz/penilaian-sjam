@@ -249,7 +249,7 @@
                                 <i class="bi bi-pencil-square text-lg"></i>
                             </button>
                             <button type="button"
-                                    x-on:click='showReset = true; resetData = {"npk": {{ k.npk|tojson }}, "nama": {{ k.nama|tojson }}, "tahun": 2026 }'
+                                    x-on:click='showReset = true; resetData = {"npk": {{ k.npk|tojson }}, "nama": {{ k.nama|tojson }}, "tahun": {{ tahun_aktif }} }'
                                     class="text-orange-600 hover:text-orange-800 transition" title="Reset Penilaian">
                                 <i class="bi bi-arrow-counterclockwise text-lg"></i>
                             </button>
