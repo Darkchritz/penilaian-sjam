@@ -57,7 +57,7 @@
             {% endif %}
 
             <form method="POST" action="{{ url_for('submit_nilai') }}" class="space-y-6">
-                <input type="hidden" name="id" value="{{ karyawan.npk }}">
+                <input type="hidden" name="npk" value="{{ karyawan.npk }}">
                 <input type="hidden" name="periode" value="{{ periode }}">
                 <input type="hidden" name="tahun" value="{{ tahun }}">
 
