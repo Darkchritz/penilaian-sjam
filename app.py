@@ -53,8 +53,8 @@ class Karyawan(UserMixin, db.Model):
 
 class Penilaian(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    penilai_npk = db.Column(db.String(20), db.ForeignKey('karyawan.npk'), nullable=False) # ganti dari id_penilai
-    npk = db.Column(db.String(20), db.ForeignKey('karyawan.npk'), nullable=False) # ganti dari id_karyawan
+    penilai_npk = db.Column(db.Integer, db.ForeignKey('karyawan.npk'), nullable=False) # ganti dari String(20)
+    npk = db.Column(db.Integer, db.ForeignKey('karyawan.npk'), nullable=False) # ganti dari String(20)
     periode = db.Column(db.String(2), nullable=False) # Q1, Q2, Q3, Q4
     tahun = db.Column(db.Integer, nullable=False)
     status = db.Column(db.String(10), default='draft') # draft / final
@@ -107,7 +107,8 @@ class Penilaian(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    karyawan = db.relationship('Karyawan', foreign_keys=[npk]) # tambah ini biar relasi jalan
+    karyawan = db.relationship('Karyawan', foreign_keys=[npk], backref='penilaian_diterima')
+    penilai = db.relationship('Karyawan', foreign_keys=[penilai_npk], backref='penilaian_diberikan')
 
 class AksesPenilaian(db.Model):
     __tablename__ = 'akses_penilaian'
