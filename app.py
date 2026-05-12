@@ -217,6 +217,9 @@ def hrd():
     search = request.args.get('search', '').strip()
     sort_by = request.args.get('sort', 'npk')
     order = request.args.get('order', 'asc')
+    
+    # Tambahin ini: tahun aktif penilaian
+    tahun_aktif = 2026  # Ganti sesuai tahun yang lagi dipake. Nanti bisa dibikin dinamis dari DB
 
     query_karyawan = Karyawan.query.filter(Karyawan.npk!= user.npk)
 
@@ -254,7 +257,8 @@ def hrd():
                          total_karyawan=total_karyawan,
                          search=search,
                          sort_by=sort_by,
-                         order=order)
+                         order=order,
+                         tahun_aktif=tahun_aktif)  # <-- Tambahin ini
 
 @app.route('/admin/reset_penilaian/<npk>/<periode>/<int:tahun>', methods=['POST'])
 @login_required
