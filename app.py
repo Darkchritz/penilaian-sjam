@@ -263,31 +263,39 @@ def hrd():
 @app.route('/admin/reset_penilaian/<npk>/<periode>/<int:tahun>', methods=['POST'])
 @login_required
 def admin_reset_penilaian(npk, periode, tahun):
-    if current_user.role.lower()!= 'hrd':
+    if current_user.role.lower() != 'hrd':
         return jsonify({'status': 'error', 'message': 'Akses ditolak'}), 403
 
-    # Debug: print semua penilaian NPK itu
-    semua = Penilaian.query.filter_by(npk=str(npk), tahun=tahun).all()
-    print(f"DEBUG: NPK {npk} tahun {tahun} ada {len(semua)} data: {[(p.periode, p.status) for p in semua]}")
-
+    # Cari data penilaian final
     p = Penilaian.query.filter(
-        Penilaian.npk == str(npk),
-        Penilaian.periode.ilike(periode.strip()), 
-        Penilaian.tahun == tahun
-        # P.status == 'final'  <- komen dulu biar ketahuan datanya ada apa ngga
+        Penilaian.npk == str(npk),                    # aman buat string/int
+        Penilaian.periode.ilike(periode.strip()),     # case-insensitive Q1/q1
+        Penilaian.tahun == tahun,
+        Penilaian.status.ilike('final')               # status final, case-insensitive
     ).first()
     
     if not p:
-        return jsonify({'status': 'error', 'message': f'Data NPK {npk} {periode} {tahun} tidak ada sama sekali'}), 404
-
-    if p.status.lower().strip() != 'final':
-        return jsonify({'status': 'error', 'message': f'Status masih {p.status}, belum final'}), 400
+        return jsonify({
+            'status': 'error', 
+            'message': f'Penilaian NPK {npk} periode {periode} {tahun} dengan status final tidak ditemukan'
+        }), 404
 
     karyawan = Karyawan.query.filter_by(npk=str(npk)).first()
     nama = karyawan.nama if karyawan else npk
-    db.session.delete(p)
-    db.session.commit()
-    return jsonify({'status': 'success', 'message': f'Penilaian {nama} periode {periode} {tahun} berhasil direset'})
+    
+    try:
+        db.session.delete(p)
+        db.session.commit()
+        return jsonify({
+            'status': 'success', 
+            'message': f'Penilaian {nama} periode {periode} {tahun} berhasil direset'
+        })
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'status': 'error', 
+            'message': f'Gagal reset: {str(e)}'
+        }), 500
 
 @app.route('/hrd/kelola_akses_kadiv', methods=['GET', 'POST'])
 @login_required
