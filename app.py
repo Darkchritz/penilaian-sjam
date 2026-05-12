@@ -17,7 +17,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 from datetime import timedelta
-app.config['REMEMBER_COOKIE_DURATION'] = timedelta(days=0)  # matiin auto-login
+app.config['REMEMBER_COOKIE_DURATION'] = timedelta(days=0) # matiin auto-login
 app.config['SESSION_PERMANENT'] = False
 
 def hitung_grade(nilai):
@@ -30,7 +30,7 @@ def hitung_grade(nilai):
     elif nilai <= 80: return 'B'
     elif nilai <= 85: return 'B+'
     elif nilai <= 90: return 'A'
-    else: return 'A+'  # 91-100
+    else: return 'A+' # 91-100
 
 db = SQLAlchemy(app)
 
@@ -120,7 +120,7 @@ class AksesPenilaian(db.Model):
     assigned_by = db.Column(db.Integer, db.ForeignKey('karyawan.id'), nullable=False)
     tanggal_assign = db.Column(db.DateTime, default=datetime.utcnow)
     is_active = db.Column(db.Boolean, default=True)
-    
+
     kadiv = db.relationship('Karyawan', foreign_keys=[id_kadiv], backref='akses_diberikan')
     admin_hrd = db.relationship('Karyawan', foreign_keys=[assigned_by])
     karyawan_target = db.relationship('Karyawan', foreign_keys=[id_karyawan_target])
@@ -153,34 +153,34 @@ def index():
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
-        
+
     if request.method == 'POST':
         try:
             npk_input = request.form['npk']
             password_input = request.form['password']
-            remember = True if request.form.get('remember') else False  # tambah ini
-            
+            remember = True if request.form.get('remember') else False # tambah ini
+
             print(f"DEBUG NPK DARI FORM: '{npk_input}'") # cek ada spasi ga
-            
+
             user = Karyawan.query.filter_by(npk=npk_input.strip()).first()
-            
+
             print(f"DEBUG USER KETEMU: {user}") # kalau None berarti query gagal
-            
+
             if user:
                 print(f"DEBUG HASH DI DB: {user.password}")
                 cek = check_password_hash(user.password, password_input)
                 print(f"DEBUG HASIL CHECK_PASSWORD: {cek}")
-                
+
                 if cek:
-                    login_user(user, remember=remember)  # tambah remember=remember
+                    login_user(user, remember=remember) # tambah remember=remember
                     return redirect(url_for('index'))
-            
+
             flash('NPK atau Password salah', 'danger')
         except Exception as e:
             print(f"ERROR LOGIN: {e}")
             flash('Terjadi error di server', 'danger')
     return render_template('login.html')
-    
+
 @app.route('/register', methods=['GET','POST'])
 def register():
     if request.method == 'POST':
@@ -259,20 +259,20 @@ def hrd():
 @app.route('/admin/reset_penilaian/<int:npk>/<periode>/<int:tahun>', methods=['POST'])
 @login_required
 def admin_reset_penilaian(npk, periode, tahun):
-    if current_user.role.lower() != 'hrd':
+    if current_user.role.lower()!= 'hrd':
         return jsonify({'status': 'error', 'message': 'Akses ditolak'}), 403
-    
+
     p = Penilaian.query.filter_by(npk=npk, periode=periode, tahun=tahun).first()
     if not p:
         return jsonify({'status': 'error', 'message': 'Penilaian tidak ditemukan'}), 404
-    
-    if p.status != 'final':
+
+    if p.status!= 'final':
         return jsonify({'status': 'error', 'message': 'Penilaian belum final, tidak perlu reset'}), 400
-    
+
     karyawan = Karyawan.query.filter_by(npk=npk).first()
     db.session.delete(p)
     db.session.commit()
-    
+
     flash(f'Penilaian {karyawan.nama} periode {periode} {tahun} berhasil direset. Kadiv bisa nilai ulang.', 'success')
     return jsonify({'status': 'success', 'message': 'Reset berhasil'})
 
@@ -358,15 +358,15 @@ def kelola_akses_kadiv():
                            list_cabang=list_cabang,
                            list_karyawan=list_karyawan,
                            akses_per_kadiv=akses_per_kadiv)
-    
+
 @app.route('/api/karyawan')
 @login_required
 def api_karyawan():
     divisi = request.args.get('divisi')
     cabang = request.args.get('cabang')
-    if current_user.role.lower() != 'hrd':
+    if current_user.role.lower()!= 'hrd':
         return jsonify([])
-    
+
     karyawan = Karyawan.query.filter_by(divisi=divisi, cabang=cabang, role='karyawan').all()
     return jsonify([{'id': k.id, 'nama': k.nama, 'npk': k.npk} for k in karyawan])
 
@@ -375,23 +375,23 @@ def api_karyawan():
 def tambah_akses_kadiv():
     if current_user.role.lower()!= 'hrd':
         return jsonify({'status': 'error', 'message': 'Akses ditolak'}), 403
-    
+
     id_kadiv = request.form.get('id_kadiv')
     divisi_target = request.form.get('divisi_target')
     cabang_target = request.form.get('cabang_target')
     id_karyawan = request.form.get('id_karyawan_target')
-    
+
     existing = AksesPenilaian.query.filter_by(
-        id_kadiv=id_kadiv, 
-        divisi_target=divisi_target, 
+        id_kadiv=id_kadiv,
+        divisi_target=divisi_target,
         cabang_target=cabang_target,
         id_karyawan_target=id_karyawan_target,
         is_active=True
     ).first()
-    
+
     if existing:
         return jsonify({'status': 'error', 'message': 'Akses sudah ada'}), 400
-    
+
     akses_baru = AksesPenilaian(
         id_kadiv=id_kadiv,
         divisi_target=divisi_target,
@@ -401,7 +401,7 @@ def tambah_akses_kadiv():
     )
     db.session.add(akses_baru)
     db.session.commit()
-    
+
     return jsonify({'status': 'success', 'message': 'Akses berhasil ditambahkan'})
 
 @app.route('/hrd/hapus_akses_kadiv', methods=['POST'])
@@ -409,23 +409,23 @@ def tambah_akses_kadiv():
 def hapus_akses_kadiv():
     if current_user.role.lower()!= 'hrd':
         return jsonify({'status': 'error', 'message': 'Akses ditolak'}), 403
-    
+
     id_kadiv = request.form.get('id_kadiv')
     divisi_target = request.form.get('divisi_target')
     cabang_target = request.form.get('cabang_target')
-    
+
     akses = AksesPenilaian.query.filter_by(
-        id_kadiv=id_kadiv, 
-        divisi_target=divisi_target, 
+        id_kadiv=id_kadiv,
+        divisi_target=divisi_target,
         cabang_target=cabang_target,
         is_active=True
     ).first()
-    
+
     if akses:
         akses.is_active = False
         db.session.commit()
         return jsonify({'status': 'success', 'message': 'Akses berhasil dihapus'})
-    
+
     return jsonify({'status': 'error', 'message': 'Akses tidak ditemukan'}), 404
 
 @app.route('/kadiv')
@@ -438,11 +438,11 @@ def kadiv():
     periode = request.args.get('periode', 'Q1')
     page_belum = request.args.get('page_belum', 1, type=int)
     page_sudah = request.args.get('page_sudah', 1, type=int)
-    per_page = 8  # 8 orang per halaman
-    
+    per_page = 8 # 8 orang per halaman
+
     print(f"=== DEBUG KADIV ===")
     print(f"Login sebagai: {current_user.nama} | NPK: {current_user.npk} | Role: {current_user.role} | Divisi: {current_user.divisi} | Cabang: {current_user.cabang} | Periode: {periode}")
-    
+
     if current_user.role.lower().strip() == 'super kadiv':
         base_query = Karyawan.query.filter(Karyawan.role == 'karyawan')
         print(f"Super Kadiv: Total karyawan = {base_query.count()}")
@@ -457,14 +457,14 @@ def kadiv():
             base_query = Karyawan.query.filter(
                 Karyawan.divisi == current_user.divisi,
                 Karyawan.cabang.in_(list_pusat),
-                Karyawan.npk != current_user.npk  # ganti dari id
+                Karyawan.npk!= current_user.npk # ganti dari id
             )
             print(f"Kadiv HO: Total bawahan 1 divisi = {base_query.count()}")
         else:
             # KADIV CABANG: HAPUS FILTER DIVISI, KUNCI CABANG AJA
             base_query = Karyawan.query.filter(
                 Karyawan.cabang == current_user.cabang,
-                Karyawan.npk != current_user.npk  # ganti dari id
+                Karyawan.npk!= current_user.npk # ganti dari id
             )
             print(f"Kadiv Cabang: Total bawahan semua divisi = {base_query.count()} orang")
 
@@ -474,7 +474,7 @@ def kadiv():
         tahun=tahun_ini,
         status='final'
     ).distinct()
-    
+
     belum_query = base_query.filter(
     Karyawan.npk.isnot(None),
     ~Karyawan.npk.in_(subquery_final)
@@ -490,7 +490,7 @@ def kadiv():
     # UBAH: id_karyawan -> npk, id_penilai -> penilai_npk
     for k in sudah_paginate.items:
         nilai = Penilaian.query.filter_by(
-            npk=k.npk,  # ganti dari id_karyawan=k.id
+            npk=k.npk, # ganti dari id_karyawan=k.id
             periode=periode,
             tahun=tahun_ini,
             status='final'
@@ -500,7 +500,7 @@ def kadiv():
         k.penilaian_id = nilai.id if nilai else None
         k.penilaian_status = nilai.status if nilai else None
         # FIX: ganti id_penilai -> penilai_npk
-        penilai = Karyawan.query.filter_by(npk=nilai.penilai_npk).first() if nilai else None  # ganti dari get(nilai.id_penilai)
+        penilai = Karyawan.query.filter_by(npk=nilai.penilai_npk).first() if nilai else None # ganti dari get(nilai.id_penilai)
         k.dinilai_oleh = penilai.nama if penilai else '-'
 
     print(f"Total belum_dinilai: {belum_paginate.total} | sudah_dinilai: {sudah_paginate.total}")
@@ -515,29 +515,29 @@ def kadiv():
 
 @app.route('/nilai/<npk>')
 @login_required
-def nilai_form(npk):  # ganti nama fungsi dari 'nilai' jadi 'nilai_form'
+def nilai_form(npk): # ganti nama fungsi dari 'nilai' jadi 'nilai_form'
     karyawan = Karyawan.query.filter_by(npk=npk).first_or_404()
     tahun = request.args.get('tahun', datetime.now().year, type=int)
     periode = request.args.get('periode', 'Q1')
-    
+
     nilai = Penilaian.query.filter_by(npk=npk, tahun=tahun, periode=periode).first()
-    
-    return render_template('nilai_form.html', 
-                           karyawan=karyawan, 
-                           tahun=tahun, 
-                           periode=periode, 
+
+    return render_template('nilai_form.html',
+                           karyawan=karyawan,
+                           tahun=tahun,
+                           periode=periode,
                            nilai=nilai)
 
 @app.route('/lihat_penilaian/<int:id>')
 @login_required
 def lihat_penilaian(id):
     p = Penilaian.query.get_or_404(id)
-    if p.id_penilai!= current_user.id and current_user.role.lower()!= 'hrd':
+    if p.penilai_npk!= current_user.npk and current_user.role.lower()!= 'hrd':
         return "Akses ditolak", 403
-    k = Karyawan.query.get(p.id_karyawan)
-    return render_template('nilai_form.html', 
-                         nilai=p, 
-                         karyawan=k, 
+    k = Karyawan.query.filter_by(npk=p.npk).first()
+    return render_template('nilai_form.html',
+                         nilai=p,
+                         karyawan=k,
                          readonly=True,
                          periode=p.periode,
                          tahun=p.tahun)
@@ -545,18 +545,18 @@ def lihat_penilaian(id):
 @app.route('/dashboard_karyawan')
 @login_required
 def dashboard_karyawan():
-    if current_user.role.lower() != 'karyawan':
+    if current_user.role.lower()!= 'karyawan':
         return redirect(url_for('index'))
-    
+
     user = current_user
     tahun_ini = datetime.now().year
-    
+
     # Ambil semua penilaian Q1-Q4 tahun ini
-    hasil_q1 = Penilaian.query.filter_by(id_karyawan=user.npk, status='final', tahun=tahun_ini, periode='Q1').first()
-    hasil_q2 = Penilaian.query.filter_by(id_karyawan=user.npk, status='final', tahun=tahun_ini, periode='Q2').first()
-    hasil_q3 = Penilaian.query.filter_by(id_karyawan=user.npk, status='final', tahun=tahun_ini, periode='Q3').first()
-    hasil_q4 = Penilaian.query.filter_by(id_karyawan=user.npk, status='final', tahun=tahun_ini, periode='Q4').first()
-    
+    hasil_q1 = Penilaian.query.filter_by(npk=user.npk, status='final', tahun=tahun_ini, periode='Q1').first()
+    hasil_q2 = Penilaian.query.filter_by(npk=user.npk, status='final', tahun=tahun_ini, periode='Q2').first()
+    hasil_q3 = Penilaian.query.filter_by(npk=user.npk, status='final', tahun=tahun_ini, periode='Q3').first()
+    hasil_q4 = Penilaian.query.filter_by(npk=user.npk, status='final', tahun=tahun_ini, periode='Q4').first()
+
     # Hitung total grade tahunan
     hasil_list = [h for h in [hasil_q1, hasil_q2, hasil_q3, hasil_q4] if h]
     if hasil_list:
@@ -566,14 +566,14 @@ def dashboard_karyawan():
     else:
         nilai_total = None
         grade_total = None
-    
-    return render_template('dashboard_karyawan.html', 
-                         user=user, 
+
+    return render_template('dashboard_karyawan.html',
+                         user=user,
                          hasil_q1=hasil_q1,
                          hasil_q2=hasil_q2,
                          hasil_q3=hasil_q3,
                          hasil_q4=hasil_q4,
-                         hasil_list=hasil_list,  # <-- TAMBAH INI
+                         hasil_list=hasil_list, # <-- TAMBAH INI
                          nilai_total=nilai_total,
                          grade_total=grade_total,
                          tahun=tahun_ini)
@@ -584,15 +584,15 @@ def nilai(id):
     if current_user.role.lower() not in ['kadiv', 'kepala divisi', 'hrd', 'super kadiv']:
         flash('Akses ditolak', 'danger')
         return redirect(url_for('index'))
-    
+
     karyawan = Karyawan.query.get_or_404(id)
-    
+
     # Default: boleh liat semua. Cek akses cuma buat POST
     boleh_nilai = True
     if current_user.role.lower().strip() in ['kadiv', 'kepala divisi']:
         list_pusat = ['HO', 'PUSAT MD', 'SJAM HO', 'PUSAT / MD']
         is_pusat = current_user.cabang.strip().upper() in list_pusat
-        
+
         # Kadiv ga bisa nilai diri sendiri
         if current_user.id == karyawan.id:
             boleh_nilai = False
@@ -608,13 +608,13 @@ def nilai(id):
         if request.method == 'POST' and not boleh_nilai:
             flash(f'Anda tidak memiliki akses untuk menilai {karyawan.nama}', 'danger')
             return redirect(url_for('kadiv'))
-    
+
     periode = request.args.get('periode', request.form.get('periode', 'Q1'))
     tahun = int(request.args.get('tahun', request.form.get('tahun', datetime.now().year)))
-    
+
     nilai = Penilaian.query.filter_by(
-        id_karyawan=karyawan.npk, 
-        periode=periode, 
+        npk=karyawan.npk,
+        periode=periode,
         tahun=tahun
     ).first()
 
@@ -622,23 +622,23 @@ def nilai(id):
         if nilai and nilai.status == 'final':
             flash('Penilaian sudah final, tidak bisa diubah', 'error')
             return redirect(url_for('nilai', id=id, periode=periode, tahun=tahun))
-        
+
         if not nilai:
             nilai = Penilaian(
-                id_karyawan=karyawan.id,
-                id_penilai=current_user.id,
+                npk=karyawan.npk,
+                penilai_npk=current_user.npk,
                 periode=periode,
                 tahun=tahun
             )
             db.session.add(nilai)
-        
+
         # Kadiv skip kpi1 & kpi2 biar ga nimpa data HRD
         for i in range(1, 36):
             key = f'kpi{i}'
             if current_user.role.lower() in ['kadiv', 'kepala divisi'] and key in ['kpi1', 'kpi2']:
                 continue
             setattr(nilai, key, int(request.form.get(key, 0)))
-        
+
         total = 0
         bobot_map = {
             **{f'kpi{i}': 4.00 for i in range(1, 6)},
@@ -655,41 +655,41 @@ def nilai(id):
         nilai.nilai_akhir = round(total, 2)
         nilai.grade = hitung_grade(nilai.nilai_akhir)
         nilai.updated_at = datetime.utcnow()
-        nilai.id_penilai = current_user.id
-        
+        nilai.penilai_npk = current_user.npk
+
         if request.form.get('action') == 'final':
             nilai.status = 'final'
             flash(f'Penilaian {karyawan.nama} difinalisasi. Nilai: {nilai.nilai_akhir} - Grade {nilai.grade}', 'success')
         else:
             nilai.status = 'draft'
             flash(f'Draft penilaian {karyawan.nama} disimpan', 'success')
-        
+
         db.session.commit()
-        
+
         if current_user.role.lower() == 'hrd':
             return redirect(url_for('hrd'))
         else:
             return redirect(url_for('kadiv'))
 
-    return render_template('nilai_form.html', 
-                         karyawan=karyawan, 
+    return render_template('nilai_form.html',
+                         karyawan=karyawan,
                          nilai=nilai,
                          periode=periode,
                          tahun=tahun,
                          boleh_nilai=boleh_nilai)
-    
+
 @app.route('/submit_nilai', methods=['POST'])
 @login_required
 def submit_nilai():
-    npk_karyawan = request.form.get('npk')  # ganti dari request.form['npk']
+    npk_karyawan = request.form.get('npk') # ganti dari request.form['npk']
     periode = request.form.get('periode')
     tahun = int(request.form.get('tahun', 0))
     action = request.form.get('action', 'draft')
-    
-    if not npk_karyawan:  # tambah ini biar ketauan kalo npk kosong
+
+    if not npk_karyawan: # tambah ini biar ketauan kalo npk kosong
         flash('NPK tidak ditemukan', 'danger')
         return redirect(url_for('kadiv'))
-    
+
     p = Penilaian.query.filter_by(npk=npk_karyawan, periode=periode, tahun=tahun).first()
     if not p:
         p = Penilaian(
@@ -700,7 +700,7 @@ def submit_nilai():
             status='draft'
         )
         db.session.add(p)
-    
+
     # UPDATE KPI: Kadiv cuma bisa ubah KPI3-35. KPI1&KPI2 skip kalo role kadiv
     kpi_keys = [
         'kehadiran', 'kepatuhan_aturan', 'konsistensi', 'kepatuhan_seragam', 'disiplin_kebersihan',
@@ -711,14 +711,14 @@ def submit_nilai():
         'belajar_cepat', 'strategi_kerja', 'tantangan_baru', 'ubah_cara_kerja', 'solusi_alternatif',
         'keramahan', 'kejelasan', 'responsif_kom', 'lapor_pelanggaran', 'keterbukaan'
     ]
-    
+
     for key in kpi_keys:
         # Kalo Kadiv, skip kehadiran & kepatuhan_aturan biar ga nimpa data HRD
         if current_user.role.lower() in ['kadiv', 'kepala divisi'] and key in ['kehadiran', 'kepatuhan_aturan']:
             continue
         val = request.form.get(key)
         setattr(p, key, int(val) if val not in [None, ''] else None)
-    
+
     # HITUNG NILAI & GRADE SELALU, DRAFT ATAU FINAL
     total = 0
     bobot_map = {
@@ -735,15 +735,15 @@ def submit_nilai():
         total += (nilai_kpi / 5) * bobot
     p.nilai_akhir = round(total, 2)
     p.grade = hitung_grade(p.nilai_akhir)
-    
+
     # Set status + penilai_npk terakhir yang edit
     p.status = action
     p.penilai_npk = current_user.npk
     p.updated_at = datetime.utcnow()
-    
+
     db.session.commit()
     flash(f'Penilaian {periode} berhasil disimpan!', 'success')
-    
+
     if current_user.role.lower() == 'hrd':
         return redirect(url_for('hrd'))
     return redirect(url_for('kadiv'))
@@ -751,13 +751,13 @@ def submit_nilai():
 @app.route('/hrd/input_disiplin', methods=['GET', 'POST'])
 @login_required
 def input_disiplin():
-    if current_user.role.lower() != 'hrd':
+    if current_user.role.lower()!= 'hrd':
         return redirect(url_for('kadiv'))
-    
+
     periode = request.args.get('periode', 'Q1')
     tahun = request.args.get('tahun', datetime.now().year, type=int)
     search = request.args.get('search', '').strip()
-    
+
     if request.method == 'POST':
         # HANDLE UPLOAD EXCEL
         if 'file' in request.files:
@@ -765,14 +765,14 @@ def input_disiplin():
             if file.filename == '':
                 flash('File belum dipilih', 'danger')
                 return redirect(url_for('input_disiplin', periode=periode, tahun=tahun))
-            
+
             try:
                 df = pd.read_excel(file)
                 # Validasi kolom wajib: NPK, KPI1, KPI2
                 if not all(col in df.columns for col in ['NPK', 'KPI1', 'KPI2']):
                     flash('Format Excel salah. Wajib ada kolom: NPK, KPI1, KPI2', 'danger')
                     return redirect(url_for('input_disiplin', periode=periode, tahun=tahun))
-                
+
                 sukses = 0
                 gagal = 0
                 for _, row in df.iterrows():
@@ -780,30 +780,30 @@ def input_disiplin():
                         npk = str(row['NPK']).strip()
                         kpi1 = int(row['KPI1'])
                         kpi2 = int(row['KPI2'])
-                        
+
                         if not (0 <= kpi1 <= 5 and 0 <= kpi2 <= 5):
                             gagal += 1
                             continue
-                        
+
                         karyawan = Karyawan.query.filter_by(npk=npk).first()
                         if not karyawan:
                             gagal += 1
                             continue
-                        
+
                         p = Penilaian.query.filter_by(npk=karyawan.npk, periode=periode, tahun=tahun).first()
                         if not p:
                             p = Penilaian(
                                 npk=karyawan.npk,
-                                penilai_npk=current_user.npk,,
+                                penilai_npk=current_user.npk,
                                 periode=periode,
                                 tahun=tahun,
                                 status='draft'
                             )
                             db.session.add(p)
-                        
+
                         p.kpi1 = kpi1
                         p.kpi2 = kpi2
-                        
+
                         # Hitung ulang grade
                         total = 0
                         bobot_map = {
@@ -820,48 +820,48 @@ def input_disiplin():
                             total += (nilai_kpi / 5) * bobot
                         p.nilai_akhir = round(total, 2)
                         p.grade = hitung_grade(p.nilai_akhir)
-                        p.id_penilai = current_user.id
+                        p.penilai_npk = current_user.npk
                         p.updated_at = datetime.utcnow()
                         sukses += 1
                     except:
                         gagal += 1
                         continue
-                
+
                 db.session.commit()
                 flash(f'Upload selesai. Sukses: {sukses}, Gagal: {gagal}', 'success' if gagal == 0 else 'warning')
                 return redirect(url_for('input_disiplin', periode=periode, tahun=tahun))
             except Exception as e:
                 flash(f'Gagal baca Excel: {str(e)}', 'danger')
                 return redirect(url_for('input_disiplin', periode=periode, tahun=tahun))
-        
+
         # HANDLE INPUT MANUAL
         else:
             periode = request.form['periode']
             tahun = int(request.form['tahun'])
-            
+
             for key, value in request.form.items():
                 if key.startswith('kpi1_') or key.startswith('kpi2_'):
-                    _, id_karyawan = key.split('_')
-                    id_karyawan = int(id_karyawan)
-                    
-                    p = Penilaian.query.filter_by(id_karyawan=id_karyawan, periode=periode, tahun=tahun).first()
+                    _, npk_karyawan = key.split('_')
+                    npk_karyawan = int(npk_karyawan)
+
+                    p = Penilaian.query.filter_by(npk=npk_karyawan, periode=periode, tahun=tahun).first()
                     if not p:
-                        karyawan = Karyawan.query.get(id_karyawan)
+                        karyawan = Karyawan.query.filter_by(npk=npk_karyawan).first()
                         if not karyawan: continue
                         p = Penilaian(
-                            id_karyawan=id_karyawan,
-                            id_penilai=current_user.id,
+                            npk=npk_karyawan,
+                            penilai_npk=current_user.npk,
                             periode=periode,
                             tahun=tahun,
                             status='draft'
                         )
                         db.session.add(p)
-                    
+
                     if key.startswith('kpi1_'):
                         p.kpi1 = int(value or 0)
                     else:
                         p.kpi2 = int(value or 0)
-                    
+
                     # Update grade setiap ada perubahan
                     total = 0
                     bobot_map = {
@@ -878,13 +878,13 @@ def input_disiplin():
                         total += (nilai_kpi / 5) * bobot
                     p.nilai_akhir = round(total, 2)
                     p.grade = hitung_grade(p.nilai_akhir)
-                    p.id_penilai = current_user.id
+                    p.penilai_npk = current_user.npk
                     p.updated_at = datetime.utcnow()
-            
+
             db.session.commit()
             flash(f'Data Kedisiplinan {periode} {tahun} berhasil disimpan!', 'success')
             return redirect(url_for('input_disiplin', periode=periode, tahun=tahun, search=search))
-    
+
         # GET: query karyawan + search
     search = request.args.get('search', '')
     query = Karyawan.query
@@ -898,40 +898,40 @@ def input_disiplin():
         )
 
     karyawan_list = query.order_by(Karyawan.divisi, Karyawan.nama).all()
-    
+
     nilai_map = {}
     for n in Penilaian.query.filter_by(periode=periode, tahun=tahun).all():
-        nilai_map[n.id_karyawan] = n
-    
-    return render_template('hrd_input_disiplin.html', 
-                           karyawan_list=karyawan_list, 
+        nilai_map[n.npk] = n
+
+    return render_template('hrd_input_disiplin.html',
+                           karyawan_list=karyawan_list,
                            nilai_map=nilai_map,
-                           periode=periode, 
+                           periode=periode,
                            tahun=tahun,
                            search=search)
 
 @app.route('/hrd/download_template_disiplin')
 @login_required
 def download_template_disiplin():
-    if current_user.role.lower() != 'hrd':
+    if current_user.role.lower()!= 'hrd':
         return redirect(url_for('index'))
-    
+
     # Bikin template kosong
     data = {'NPK': ['2018032349', '12345678'], 'KPI1': [5, 4], 'KPI2': [5, 4]}
     df = pd.DataFrame(data)
-    
+
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
         df.to_excel(writer, index=False, sheet_name='Template')
     output.seek(0)
-    
+
     return send_file(
         output,
         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         as_attachment=True,
         download_name='template_kedisiplinan.xlsx'
     )
-    
+
 @app.route('/tambah-karyawan', methods=['GET', 'POST'])
 @login_required
 def tambah_karyawan():
@@ -1006,7 +1006,7 @@ def hapus_karyawan(npk):
 
     karyawan = Karyawan.query.filter_by(npk=npk).first()
     if karyawan:
-        Penilaian.query.filter_by(id_karyawan=karyawan.id).delete()
+        Penilaian.query.filter_by(npk=karyawan.npk).delete()
         db.session.delete(karyawan)
         db.session.commit()
         flash('Karyawan & data penilaian dihapus!', 'success')
@@ -1117,13 +1117,13 @@ def upload_karyawan():
 @app.route('/reset-kadiv/<int:npk>')
 @login_required
 def reset_kadiv(npk):
-    if current_user.role.lower() != 'hrd': 
+    if current_user.role.lower()!= 'hrd':
         return "Akses ditolak", 403
-    
+
     user = Karyawan.query.filter_by(npk=npk).first()
     if not user:
         return f"NPK {npk} ga ketemu di DB"
-    
+
     user.password = generate_password_hash('123456', method='pbkdf2:sha256')
     db.session.commit()
     return f"Done. {user.nama} - {user.npk} bisa login pake 123456. Role: {user.role}"
@@ -1132,55 +1132,55 @@ def reset_kadiv(npk):
 @login_required
 def nilai_saya():
     tahun_ini = datetime.now().year
-    
+
     # Ambil semua nilai final buat user yang login
     list_nilai = Penilaian.query.filter_by(
-        id_karyawan=current_user.id,
+        npk=current_user.npk,
         tahun=tahun_ini,
         status='final'
     ).order_by(Penilaian.periode.desc()).all()
 
     # Ambil nama penilai buat ditampilin
     for n in list_nilai:
-        penilai = Karyawan.query.get(n.id_penilai)
+        penilai = Karyawan.query.filter_by(npk=n.penilai_npk).first()
         n.nama_penilai = penilai.nama if penilai else 'N/A'
-        n.jabatan_penilai = penilai.jabatan if penilai else '-'
+        n.jabatan_penilai = penilai.role if penilai else '-'
 
-    return render_template('nilai_saya.html', 
+    return render_template('nilai_saya.html',
                            user=current_user,
                            list_nilai=list_nilai,
                            tahun=tahun_ini)
 
-@app.route('/cek-penilaian/<int:id_karyawan>')
+@app.route('/cek-penilaian/<int:npk>')
 @login_required
-def cek_penilaian(id_karyawan):
-    p = Penilaian.query.filter_by(npk=id_karyawan, periode='Q1', tahun=2026).first()
-    
+def cek_penilaian(npk):
+    p = Penilaian.query.filter_by(npk=npk, periode='Q1', tahun=2026).first()
+
     if not p:
-        return f"Belum ada data penilaian buat id_karyawan={id_karyawan}"
-    
+        return f"Belum ada data penilaian buat npk={npk}"
+
     return f"""
     ID Penilaian: {p.id}<br>
-    id_karyawan: {p.id_karyawan}<br>
-    id_penilai: {p.id_penilai}<br>
-    ID Login lu sekarang: {current_user.id}<br>
+    npk: {p.npk}<br>
+    penilai_npk: {p.penilai_npk}<br>
+    NPK Login lu sekarang: {current_user.npk}<br>
     status: {p.status}<br>
     periode: {p.periode}<br>
     tahun: {p.tahun}<br>
     nilai_akhir: {p.nilai_akhir}<br>
     <br>
     Syarat masuk 'Sudah Dinilai':<br>
-    1. id_penilai == {current_user.id} ? {p.id_penilai == current_user.id}<br>
-    2. status == 'final' ? {p.status == 'final'}<br>
+    1. penilai_npk == {current_user.npk}? {p.penilai_npk == current_user.npk}<br>
+    2. status == 'final'? {p.status == 'final'}<br>
     """
 
 @app.route('/fix-id-penilai')
 @login_required
 def fix_id_penilai():
-    p = Penilaian.query.get(2)  # ID Penilaian dari debug tadi
-    p.id_penilai = current_user.id
+    p = Penilaian.query.get(2) # ID Penilaian dari debug tadi
+    p.penilai_npk = current_user.npk
     db.session.commit()
-    return f"Udah di-fix. id_penilai sekarang = {p.id_penilai}"
+    return f"Udah di-fix. penilai_npk sekarang = {p.penilai_npk}"
 
 @app.route('/logout')
 @login_required
@@ -1200,17 +1200,17 @@ def export_rekap():
 
     # Ambil data penilaian + join karyawan yg dinilai
     data_penilaian = db.session.query(Penilaian, Karyawan)\
-        .join(Karyawan, Penilaian.id_karyawan == Karyawan.id)\
-        .filter(Penilaian.status == 'final', Penilaian.tahun == tahun_ini, Penilaian.periode == periode)\
-        .all()
+       .join(Karyawan, Penilaian.npk == Karyawan.npk)\
+       .filter(Penilaian.status == 'final', Penilaian.tahun == tahun_ini, Penilaian.periode == periode)\
+       .all()
 
     if not data_penilaian:
         flash(f'Data rekap {periode} kosong', 'error')
         return redirect(url_for('hrd'))
 
     hasil = []
-    for p, k in data_penilaian:  # p = Penilaian, k = Karyawan yg dinilai
-        penilai = Karyawan.query.get(p.id_penilai) if p.id_penilai else None
+    for p, k in data_penilaian: # p = Penilaian, k = Karyawan yg dinilai
+        penilai = Karyawan.query.filter_by(npk=p.penilai_npk).first() if p.penilai_npk else None
         hasil.append({
             'NPK': k.npk,
             'Nama': k.nama,
@@ -1222,11 +1222,11 @@ def export_rekap():
             'Nilai Akhir': p.nilai_akhir,
             'Grade': p.grade,
             'Dinilai Oleh': penilai.nama if penilai else '-',
-            'NPK Penilai': penilai.npk if penilai else '-'  # INI YANG KEMARIN KOSONG
+            'NPK Penilai': penilai.npk if penilai else '-' # INI YANG KEMARIN KOSONG
         })
 
     df = pd.DataFrame(hasil)
-    
+
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
         df.to_excel(writer, index=False, sheet_name=f'Rekap {periode}')
@@ -1234,7 +1234,7 @@ def export_rekap():
 
     filename = f"Rekap_Penilaian_{periode}_{tahun_ini}.xlsx"
     return send_file(output, download_name=filename, as_attachment=True, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    
+
 with app.app_context():
     db.create_all()
     if not Karyawan.query.filter_by(npk=123).first():
