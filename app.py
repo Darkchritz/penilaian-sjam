@@ -256,20 +256,20 @@ def hrd():
                          sort_by=sort_by,
                          order=order)
 
-@app.route('/admin/reset_penilaian/<int:id_karyawan>/<periode>/<int:tahun>', methods=['POST'])
+@app.route('/admin/reset_penilaian/<int:npk>/<periode>/<int:tahun>', methods=['POST'])
 @login_required
-def admin_reset_penilaian(id_karyawan, periode, tahun):
+def admin_reset_penilaian(npk, periode, tahun):
     if current_user.role.lower() != 'hrd':
         return jsonify({'status': 'error', 'message': 'Akses ditolak'}), 403
     
-    p = Penilaian.query.filter_by(id_karyawan=id_karyawan, periode=periode, tahun=tahun).first()
+    p = Penilaian.query.filter_by(npk=npk, periode=periode, tahun=tahun).first()
     if not p:
         return jsonify({'status': 'error', 'message': 'Penilaian tidak ditemukan'}), 404
     
     if p.status != 'final':
         return jsonify({'status': 'error', 'message': 'Penilaian belum final, tidak perlu reset'}), 400
     
-    karyawan = Karyawan.query.get(id_karyawan)
+    karyawan = Karyawan.query.filter_by(npk=npk).first()
     db.session.delete(p)
     db.session.commit()
     
@@ -552,10 +552,10 @@ def dashboard_karyawan():
     tahun_ini = datetime.now().year
     
     # Ambil semua penilaian Q1-Q4 tahun ini
-    hasil_q1 = Penilaian.query.filter_by(id_karyawan=user.id, status='final', tahun=tahun_ini, periode='Q1').first()
-    hasil_q2 = Penilaian.query.filter_by(id_karyawan=user.id, status='final', tahun=tahun_ini, periode='Q2').first()
-    hasil_q3 = Penilaian.query.filter_by(id_karyawan=user.id, status='final', tahun=tahun_ini, periode='Q3').first()
-    hasil_q4 = Penilaian.query.filter_by(id_karyawan=user.id, status='final', tahun=tahun_ini, periode='Q4').first()
+    hasil_q1 = Penilaian.query.filter_by(id_karyawan=user.npk, status='final', tahun=tahun_ini, periode='Q1').first()
+    hasil_q2 = Penilaian.query.filter_by(id_karyawan=user.npk, status='final', tahun=tahun_ini, periode='Q2').first()
+    hasil_q3 = Penilaian.query.filter_by(id_karyawan=user.npk, status='final', tahun=tahun_ini, periode='Q3').first()
+    hasil_q4 = Penilaian.query.filter_by(id_karyawan=user.npk, status='final', tahun=tahun_ini, periode='Q4').first()
     
     # Hitung total grade tahunan
     hasil_list = [h for h in [hasil_q1, hasil_q2, hasil_q3, hasil_q4] if h]
@@ -613,7 +613,7 @@ def nilai(id):
     tahun = int(request.args.get('tahun', request.form.get('tahun', datetime.now().year)))
     
     nilai = Penilaian.query.filter_by(
-        id_karyawan=karyawan.id, 
+        id_karyawan=karyawan.npk, 
         periode=periode, 
         tahun=tahun
     ).first()
@@ -790,11 +790,11 @@ def input_disiplin():
                             gagal += 1
                             continue
                         
-                        p = Penilaian.query.filter_by(id_karyawan=karyawan.id, periode=periode, tahun=tahun).first()
+                        p = Penilaian.query.filter_by(npk=karyawan.npk, periode=periode, tahun=tahun).first()
                         if not p:
                             p = Penilaian(
-                                id_karyawan=karyawan.id,
-                                id_penilai=current_user.id,
+                                npk=karyawan.npk,
+                                penilai_npk=current_user.npk,,
                                 periode=periode,
                                 tahun=tahun,
                                 status='draft'
@@ -1154,11 +1154,7 @@ def nilai_saya():
 @app.route('/cek-penilaian/<int:id_karyawan>')
 @login_required
 def cek_penilaian(id_karyawan):
-    p = Penilaian.query.filter_by(
-        id_karyawan=id_karyawan, 
-        periode='Q1', 
-        tahun=2026
-    ).first()
+    p = Penilaian.query.filter_by(npk=id_karyawan, periode='Q1', tahun=2026).first()
     
     if not p:
         return f"Belum ada data penilaian buat id_karyawan={id_karyawan}"
